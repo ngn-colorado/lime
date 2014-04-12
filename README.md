@@ -1,3 +1,8 @@
+LIME
+====
+	Implementing LIME as a proxy server between Openflow controller and switches 
+	to migrate live netwrks and VMs
+
 FlowVisor
 =========
     An OpenFlow controller that acts as a hypervisor/proxy
@@ -23,4 +28,4 @@ Questions
     openflow-discuss@openflowswitch.org
 
 
-# Implementing LIME as a proxy server between Openflow controller and switches
+
