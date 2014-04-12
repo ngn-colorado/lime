@@ -1,0 +1,8 @@
+make
+sudo make fvuser=flowvisor fvgroup=flowvisor install
+
+# to run flowvisor
+sudo -u flowvisor flowvisor 
+
+# to create a general slice for all switches
+fvctl add-flowspace flow1 all 100 any slice1=7
