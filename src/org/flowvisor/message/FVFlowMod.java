@@ -51,6 +51,7 @@ public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 
 	@Override
 	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+		System.out.println("MURAD: recv from controller " + this);
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
 		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
 		translateCookie(fvClassifier, fvSlicer);

@@ -591,7 +591,6 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 						
 						continue;
 					}
-					System.out.println("MURAD: Sending to sliceFromController method " + msg);
 					((Slicable) msg).sliceFromController(fvClassifier, this);
 					
 				} else
