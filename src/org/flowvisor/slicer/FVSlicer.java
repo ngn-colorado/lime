@@ -571,7 +571,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			if (msgs == null)
 				throw new IOException("got null from read()");
 			for (OFMessage msg : msgs) {
-				System.out.println("MURAD: " + msg);
+				
 				FVLog.log(LogLevel.INFO, this, "MURAD: recv from controller: ", msg);
 				this.stats.increment(FVStatsType.SEND, this, msg);
 				if ((msg instanceof SanityCheckable)
@@ -591,6 +591,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 						
 						continue;
 					}
+					System.out.println("MURAD: Sending to sliceFromController method " + msg);
 					((Slicable) msg).sliceFromController(fvClassifier, this);
 					
 				} else
