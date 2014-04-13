@@ -165,8 +165,10 @@ public class FlowVisor {
 			port = FVConfig.getListenPort();
 
 		// init topology discovery, if configured for it
-		if (TopologyController.isConfigured())
+		if (TopologyController.isConfigured()){
+			System.out.println("MURAD: TopologyController is configured");
 			handlers.add(TopologyController.spawn(pollLoop));
+		}
 
 		// init switchAcceptor
 		OFSwitchAcceptor acceptor = new OFSwitchAcceptor(pollLoop, port, 16);

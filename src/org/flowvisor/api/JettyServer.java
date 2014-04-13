@@ -51,16 +51,16 @@ public class JettyServer implements Runnable{
 						+ port);
 		jettyServer = new Server(port);
 		
-		SelectChannelConnector connector = new SelectChannelConnector();
+		/*SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         jettyServer.addConnector(connector);
 		
-        jettyServer.setConnectors(new Connector[]{connector});
+        jettyServer.setConnectors(new Connector[]{connector});*/
 		
 		
         // Murad commented out ssl part
 
-		/*SslSelectChannelConnector sslConnector = new SslSelectChannelConnector();
+		SslSelectChannelConnector sslConnector = new SslSelectChannelConnector();
 		sslConnector.setPort(port);
 		String sslKeyStore = System.getProperty("javax.net.ssl.keyStore");
 		if (sslKeyStore == null) {
@@ -79,7 +79,7 @@ public class JettyServer implements Runnable{
 		jettyServer.addConnector(sslConnector);
 
 
-		jettyServer.setConnectors(new Connector[]{sslConnector});*/
+		jettyServer.setConnectors(new Connector[]{sslConnector});
 
 
 
@@ -93,8 +93,8 @@ public class JettyServer implements Runnable{
 
 		// Set up Security
         // Murad start commented out ssl part
-		//ConstraintSecurityHandler authHandler = createAuthenticationHandler(jettyServer);
-		//authHandler.setHandler(new AuthenticationHandler());
+		ConstraintSecurityHandler authHandler = createAuthenticationHandler(jettyServer);
+		authHandler.setHandler(new AuthenticationHandler());
 		// Murad end commented out ssl part
 		
 		//context.setHandler(authHandler);
