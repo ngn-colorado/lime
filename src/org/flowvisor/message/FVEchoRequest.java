@@ -47,6 +47,7 @@ public class FVEchoRequest extends org.openflow.protocol.OFEchoRequest
 
 	@Override
 	public void topologyController(TopologyConnection topologyConnection) {
+		System.out.println("MURAD: Send to controller an Echo!!!!");
 		topologyConnection.sendMsg(makeReply(), topologyConnection);
 	}
 
