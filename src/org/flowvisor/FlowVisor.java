@@ -169,6 +169,9 @@ public class FlowVisor {
 			System.out.println("MURAD: TopologyController is configured");
 			handlers.add(TopologyController.spawn(pollLoop));
 		}
+		else{
+			System.out.println("MURAD: TopologyController is NOT configured");
+		}
 
 		// init switchAcceptor
 		OFSwitchAcceptor acceptor = new OFSwitchAcceptor(pollLoop, port, 16);
