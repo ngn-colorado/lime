@@ -89,6 +89,7 @@ public class TopologyController extends OFSwitchAcceptor {
 		try {
 			tc = new TopologyController(pollLoop, 0, 16); // 0 == any port
 			int port = tc.getListenPort();
+			System.out.println("MURAD: Spawining TopoContr and : " + port);
 			try {
 				FVConfig.setSliceHost(TopoUser, "localhost");
 				FVConfig.setSlicePort(TopoUser, port);
