@@ -325,7 +325,12 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		if (this.msgStream != null) {
 			System.out.println("MURAD: Send to controller " + hostname); 
 			System.out.println("MURAD: from : " + sliceName);
-			System.out.println("MURAD: and socket: " + sock);
+			try {
+				System.out.println("MURAD: src-addrs: " + sock.getLocalAddress() + "and dst-addrs: " + sock.getRemoteAddress());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			System.out.println("--------");
 			FVLog.log(LogLevel.DEBUG, this, "send to controller: ", msg);
 			try {
