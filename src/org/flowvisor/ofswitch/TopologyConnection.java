@@ -631,8 +631,11 @@ public class TopologyConnection implements FVEventHandler, FVSendMsg {
 	@Override
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
 		if (this.msgStream != null) {
-			System.out.println("MURAD: Send to controller from TopologyConnection with name: " + name);
+			//Murad this seems to be echo reply from Topology Controllers to FVAdmin slice (that represents 'only' this controller slice)
+			System.out.println("MURAD: Send to controller from TopologyConnection ");
+			System.out.println("from: " + name);
 			System.out.println("MURAD: and socket: " + sock);
+			System.out.println("--------");
 			FVLog.log(LogLevel.DEBUG, this, "send to controller: ", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
