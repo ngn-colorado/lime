@@ -4,5 +4,13 @@ sudo make fvuser=flowvisor fvgroup=flowvisor install
 # to run flowvisor
 sudo -u flowvisor flowvisor 
 
-# to create a general slice for all switches
+# add slice
+fvctl add-slice slice1 tcp:128.138.201.93:6633 murad.kaplan@gmail.com
+
+# to create a general flowspace for all switches
 fvctl add-flowspace flow1 all 100 any slice1=7
+
+
+# to load from cong.json (flowvisor has to be running and not connected to the switches yet, then restart it)
+# also, make sure to reinstall flowvisor! because slices and flowspaces seem to be ereased when loading a new config.json file
+fvconfig load /etc/flowvisor/config.json
