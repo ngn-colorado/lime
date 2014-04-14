@@ -626,10 +626,12 @@ public class TopologyConnection implements FVEventHandler, FVSendMsg {
 		}
 	}
 
+	// Murad: This function seemed to be only called from FVEchoRequest to
+	// reply to OF controller echo requests
 	@Override
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
 		if (this.msgStream != null) {
-			System.out.println("MURAD: Send to controller from TopologyController");
+			System.out.println("MURAD: Send to controller from TopologyController with name: " + name);
 			FVLog.log(LogLevel.DEBUG, this, "send to controller: ", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
