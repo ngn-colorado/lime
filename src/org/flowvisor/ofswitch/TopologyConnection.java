@@ -632,15 +632,9 @@ public class TopologyConnection implements FVEventHandler, FVSendMsg {
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
 		if (this.msgStream != null) {
 			//Murad this seems to be echo reply from Topology Controllers to FVAdmin slice (that represents 'only' this controller slice)
-			System.out.println("MURAD: Send to controller from TopologyConnection ");
-			System.out.println("from: " + name);
-			try {
-				System.out.println("MURAD: src-addrs: " + sock.getLocalAddress() + "and dst-addrs: " + sock.getRemoteAddress());
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			System.out.println("--------");
+			//System.out.println("MURAD: Send to controller from TopologyConnection ");
+			//System.out.println("from: " + name);
+			//System.out.println("--------");
 			FVLog.log(LogLevel.DEBUG, this, "send to controller: ", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
