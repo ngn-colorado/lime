@@ -323,8 +323,8 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	@Override
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
 		if (this.msgStream != null) {
-			System.out.println("MURAD: Send to controller " + hostname); 
-			System.out.println("MURAD: from : " + sliceName);
+			//System.out.println("MURAD: Send to controller " + hostname); 
+			//System.out.println("MURAD: from : " + sliceName);
 			try {
 				System.out.println("MURAD: src-addrs: " + sock.getLocalAddress() + "and dst-addrs: " + sock.getRemoteAddress());
 			} catch (IOException e1) {
@@ -581,7 +581,8 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				throw new IOException("got null from read()");
 			for (OFMessage msg : msgs) {
 				
-				//FVLog.log(LogLevel.INFO, this, "MURAD: recv from controller: ", msg);
+				System.out.println("MURAD: recv from controller: " + msg);
+				FVLog.log(LogLevel.INFO, this, "recv from controller: ", msg);
 				this.stats.increment(FVStatsType.SEND, this, msg);
 				if ((msg instanceof SanityCheckable)
 						&& (!((SanityCheckable) msg).isSane())) {
