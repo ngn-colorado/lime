@@ -650,7 +650,7 @@ public class FVClassifier implements FVEventHandler, FVSendMsg, FlowMapChangedLi
 		synchronized (FVConfig.class) {
 			try {
 				if (fm == null || fm.getType() == FlowMap.type.LINEAR)
-					this.switchFlowMap = FlowSpaceUtil.getFlowMap(switchInfo.getDatapathId());
+					this.switchFlowMap = FlowSpaceUtil.getFlowMap(switchInfo.getDatapathId());  //MURAD-config
 				else
 					this.switchFlowMap = fm;
 			} catch (ConfigError e) {
@@ -660,7 +660,7 @@ public class FVClassifier implements FVEventHandler, FVSendMsg, FlowMapChangedLi
 					/*FlowSpaceUtil.getSubFlowMap(this.switchInfo
 					.getDatapathId());*/
 			// this.switchFlowMap = FVConfig.getFlowSpaceFlowMap();
-			newSlices = FlowSpaceUtil.getSlicesByDPID(this.switchFlowMap,
+			newSlices = FlowSpaceUtil.getSlicesByDPID(this.switchFlowMap,  //MURAD-config
 					this.switchInfo.getDatapathId());
 		}
 		StringBuffer strbuf = new StringBuffer();

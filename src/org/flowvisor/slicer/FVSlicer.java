@@ -149,9 +149,9 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		
 		// snag controller info from config
 		try {
-			hostname = FVConfig.getSliceHost(sliceName);
-			port = FVConfig.getSlicePort(sliceName); 
-			lldpOptIn = FVConfig.getLLDPSpam(sliceName);
+			hostname = FVConfig.getSliceHost(sliceName); //MURAD-config
+			port = FVConfig.getSlicePort(sliceName); //MURAD-config
+			lldpOptIn = FVConfig.getLLDPSpam(sliceName); //MURAD-config
 			SliceImpl.addListener(sliceName, this);
 		} catch (ConfigError e) {
 			FVLog.log(LogLevel.CRIT, this, "ignoring slice ", sliceName,
