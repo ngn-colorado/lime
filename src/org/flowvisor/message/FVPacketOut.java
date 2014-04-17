@@ -40,7 +40,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 	@Override
 	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
-
+		
 		// make sure that this slice can access this bufferID
 		if (! fvSlicer.isBufferIDAllowed(this.getBufferId())) {
 			FVLog.log(LogLevel.WARN, fvSlicer,
@@ -55,6 +55,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		if (LLDPUtil.handleLLDPFromController(this, fvClassifier, fvSlicer))
 			return;
 		// look at the original class to see how the matching is happening to use it later
+		System.out.println("MURAD: sending Packet_out to switch: " + fvClassifier.getDPID());
 		fvClassifier.sendMsg(this, fvSlicer);
 	}
 
