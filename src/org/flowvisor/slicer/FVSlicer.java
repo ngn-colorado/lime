@@ -318,6 +318,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	@Override
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
 		if (this.msgStream != null) {
+			System.out.println("MURAD: sending msg-type: " + msg.getType() + " to controller");
 			//System.out.println("MURAD: Send to controller " + hostname); 
 			//System.out.println("MURAD: from : " + sliceName);
 			//System.out.println("--------");
