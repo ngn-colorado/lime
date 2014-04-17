@@ -43,7 +43,9 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 		if (LLDPUtil.handleLLDPFromSwitch(this, fvClassifier))
 			return;
 		// TODO add ARP special case
-		this.lookupByFlowSpace(fvClassifier);
+		FVSlicer fvSlicer = fvClassifier.getSlicerByName("slice1");
+		fvSlicer.sendMsg(this, fvClassifier);
+		//this.lookupByFlowSpace(fvClassifier);
 
 	}
 

@@ -54,60 +54,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		// if it's LLDP, pass off to the LLDP hack
 		if (LLDPUtil.handleLLDPFromController(this, fvClassifier, fvSlicer))
 			return;
-		FVMatch match = new FVMatch();
-		byte[] packet = this.getPacketData();
-		if (packet != null && packet.length > 0) {
-			try {
-				match.loadFromPacket(this.getPacketData(), OFPort.OFPP_ALL
-						.getValue());
-				// TODO : for efficiency, do this lookup on the slice flowspace,
-				// not the switch
-				List<FlowEntry> flowEntries = fvClassifier.getSwitchFlowMap()
-						.matches(fvClassifier.getSwitchInfo().getDatapathId(),
-								match);
-				if ((flowEntries == null) // got no response
-						|| (flowEntries.size() < 1) // nothing matched
-						// has write permissions
-						|| (!flowEntries.get(0).hasPermissions(
-								fvSlicer.getSliceName(), SliceAction.WRITE))
-				// TODO add buffer_id check here
-				) {
-					FVLog
-							.log(LogLevel.WARN, fvSlicer,
-									"EPERM packet not in flowspace: "
-											+ this.toVerboseString());
-					fvSlicer.sendMsg(FVMessageUtil.makeErrorMsg(
-							OFBadActionCode.OFPBAC_EPERM, this), fvSlicer);
-					return;
-				}
-			} catch (java.nio.BufferUnderflowException e) {
-				// packet was too short to match entire header; just ignore
-				FVLog.log(LogLevel.CRIT, fvSlicer,
-						"couldn't parse short packet: "
-								+ HexString.toHexString(this.getPacketData())
-								+ " :: " + e.getStackTrace());
-			}
-		}
-		List<OFAction> actionsList = this.getActions();
-		match.setInputPort(this.getInPort());
-		try {
-			actionsList = FVMessageUtil.approveActions(actionsList, match,
-					fvClassifier, fvSlicer);
-		} catch (ActionDisallowedException e) {
-			FVLog.log(LogLevel.WARN, fvSlicer, "EPERM bad actions: " + this);
-
-			fvSlicer.sendMsg(FVMessageUtil.makeErrorMsg(
-					e.getError(), this), fvSlicer);
-			return;
-		}
-
-		this.setActions(actionsList);
-		// really annoying; should be in the base class
-		short count = FVMessageUtil.countActionsLen(actionsList);
-		this.setActionsLength(count);
-		this.setLength((short) (FVPacketOut.MINIMUM_LENGTH + count + this
-				.getPacketData().length));
-		// if we've gotten this far, everything is kosher
+		// look at the original class to see how the matching is happening to use it later
 		fvClassifier.sendMsg(this, fvSlicer);
 	}
 
