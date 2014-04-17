@@ -570,7 +570,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				throw new IOException("got null from read()");
 			for (OFMessage msg : msgs) {
 				
-				System.out.println("MURAD: recv from controller: " + msg.getType());
+				//System.out.println("MURAD: recv from controller: " + msg.getType());
 				FVLog.log(LogLevel.INFO, this, "recv from controller: ", msg);
 				this.stats.increment(FVStatsType.SEND, this, msg);
 				if ((msg instanceof SanityCheckable)
