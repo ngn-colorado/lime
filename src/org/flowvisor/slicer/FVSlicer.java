@@ -147,18 +147,13 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	public void init() {
 		FVLog.log(LogLevel.DEBUG, this, "initializing new FVSlicer");
 		
-		// snag controller info from config
-		try {
-			hostname = FVConfig.getSliceHost(sliceName); //MURAD-config
-			port = FVConfig.getSlicePort(sliceName); //MURAD-config
-			lldpOptIn = FVConfig.getLLDPSpam(sliceName); //MURAD-config
-			SliceImpl.addListener(sliceName, this);
-		} catch (ConfigError e) {
-			FVLog.log(LogLevel.CRIT, this, "ignoring slice ", sliceName,
-					" malformed slice definition: ", e);
-			this.tearDown();
-			return;
-		}
+		hostname = "128.138.201.93";
+		port = 6633;
+		lldpOptIn = false; // based on slice-info we created
+		//hostname = FVConfig.getSliceHost(sliceName); //MURAD-config
+		//port = FVConfig.getSlicePort(sliceName); //MURAD-config
+		//lldpOptIn = FVConfig.getLLDPSpam(sliceName); //MURAD-config
+		SliceImpl.addListener(sliceName, this);
 		this.updatePortList();
 		this.reconnect();
 		this.keepAlive = new OFKeepAlive(this, this, loop);
