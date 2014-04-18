@@ -325,9 +325,9 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			FVLog.log(LogLevel.DEBUG, this, "send to controller: ", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
-				System.out.println("MURAD: sending msg-type: " + msg.getType() + " to controller");
+				/*System.out.println("MURAD: sending msg-type: " + msg.getType() + " to controller");
 				System.out.println("MURAD: msg-data: " + msg.toString());
-				System.out.println("---------------");
+				System.out.println("---------------");*/
 			} catch (BufferFull e) {
 				FVLog.log(LogLevel.CRIT, this,
 						"buffer full: tearing down: got ", e,
@@ -594,9 +594,9 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 						
 						continue;
 					}
-					System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
+					/*System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
 					System.out.println("MURAD: msg-data: " + msg.toString());
-					System.out.println("+++++++++++");
+					System.out.println("+++++++++++");*/
 					((Slicable) msg).sliceFromController(fvClassifier, this);
 					
 				} else
