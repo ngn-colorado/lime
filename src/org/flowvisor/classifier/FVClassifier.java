@@ -357,10 +357,14 @@ SwitchChangedListener {
 			FVLog.log(LogLevel.DEBUG, this, "giving flood perms to slice: "
 					+ this.floodPermsSlice);
 			// note: watch() is smart and won't double enter this
-			if (doneID)
+			if (doneID){
+				System.out.println("MURAD: doneID!!!!!");
 				SwitchImpl.addListener(dpid, this);
-			else
+			}
+			else{
+				System.out.println("MURAD: NOT doneID!!!!!");
 				FlowvisorImpl.addListener(this);
+			}
 			//FVConfig.watch(this, entry);
 		} catch (ConfigError e) {
 			// do nothing if no entry
