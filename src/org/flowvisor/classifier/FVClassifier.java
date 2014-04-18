@@ -663,8 +663,9 @@ SwitchChangedListener {
 				}
 				System.out.println("MURAD: FlowMap-Rules: " + switchFlowMap.getRules().toString());
 				System.out.println("MURAD: FlowMap-Type: " + switchFlowMap.getType().toString());
-				System.out.println("MURAD: SubFlowMap: " + FlowSpaceUtil.getSubFlowMap(switchInfo.getDatapathId()).toString());
+				System.out.println("MURAD: SubFlowMap: " + FlowSpaceUtil.getSubFlowMap(switchInfo.getDatapathId()).getRules().toString());
 				System.out.println("-------------");
+				
 				
 				
 			} catch (ConfigError e) {
