@@ -52,10 +52,12 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		}
 
 		// if it's LLDP, pass off to the LLDP hack
-		if (LLDPUtil.handleLLDPFromController(this, fvClassifier, fvSlicer))
+		if (LLDPUtil.handleLLDPFromController(this, fvClassifier, fvSlicer)){
+			System.out.println("MURAD: Found LLDP Packet in Packet-Out");
 			return;
+		}
 		// look at the original class to see how the matching is happening to use it later
-		System.out.println("MURAD: sending Packet_out to switch: " + fvClassifier.getDPID());
+		//System.out.println("MURAD: sending Packet_out to switch: " + fvClassifier.getDPID());
 		fvClassifier.sendMsg(this, fvSlicer);
 	}
 
