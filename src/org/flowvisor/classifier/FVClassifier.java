@@ -669,6 +669,13 @@ SwitchChangedListener {
 					System.out.println("-------------");
 				}
 				
+				Set flows = FlowSpaceUtil.getFlowMap(switchInfo.getDatapathId()).getRules();
+				Iterator it = flows.iterator();
+			      while (it.hasNext()) {
+			         // Get element
+			         Object element = it.next();
+			         System.out.println(element.toString());
+			      }
 				
 			} catch (ConfigError e) {
 				//System.out.println("MURAD: Config Error for FlowMap!!!!!");
