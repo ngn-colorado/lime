@@ -655,15 +655,15 @@ SwitchChangedListener {
 		synchronized (FVConfig.class) {
 			try {
 				if (fm == null || fm.getType() == FlowMap.type.LINEAR){
-					System.out.println("MURAD: FlowMap is null!!!!!");
+					//System.out.println("MURAD: FlowMap is null!!!!!");
 					this.switchFlowMap = FlowSpaceUtil.getFlowMap(switchInfo.getDatapathId());  //MURAD-config
 				}
 				else{
-					System.out.println("MURAD: FlowMap NOT null!!!!!");
+					//System.out.println("MURAD: FlowMap NOT null!!!!!");
 					this.switchFlowMap = fm;
 				}
 			} catch (ConfigError e) {
-				System.out.println("MURAD: Config Error for FlowMap!!!!!");
+				//System.out.println("MURAD: Config Error for FlowMap!!!!!");
 				FVLog.log(LogLevel.CRIT, this, "Unable to fetch Flow Space : " + e.getMessage());
 				return;
 			}}

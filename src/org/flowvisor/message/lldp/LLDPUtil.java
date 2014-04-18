@@ -145,6 +145,7 @@ public class LLDPUtil {
 					// the pro is it allows controllers to do stuff their LLDPs
 					// e.g., send them another hop
 					// the con is that we would have to track more BUFFER_IDS
+					System.out.println("MURAD: Sendinf PacketIn LLDP: " + pi.toString());
 					fvSlicer.sendMsg(pi, fvClassifier);
 				}
 				return true;
