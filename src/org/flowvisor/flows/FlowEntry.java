@@ -440,7 +440,7 @@ public class FlowEntry implements Comparable<FlowEntry>, Cloneable,
 		this.ruleMatch = new FVMatch(ruleMatch);
 	}
 		 
-
+	// Murad: are these duplicated methods??
 	public long getDpid() {
 		return dpid;
 	}

@@ -42,6 +42,7 @@ import org.flowvisor.exceptions.BufferFull;
 import org.flowvisor.exceptions.MalformedOFMessage;
 import org.flowvisor.exceptions.UnhandledEvent;
 import org.flowvisor.flows.FlowDB;
+import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.flows.FlowMap;
 import org.flowvisor.flows.FlowSpaceUtil;
 import org.flowvisor.flows.LinearFlowDB;
@@ -673,8 +674,8 @@ SwitchChangedListener {
 				Iterator it = flows.iterator();
 			      while (it.hasNext()) {
 			         // Get element
-			         Object element = it.next();
-			         System.out.println(element.toString());
+			         FlowEntry element = (FlowEntry) it.next();
+			         System.out.println("Murad: Switch: " + element.getDpid());
 			      }
 				
 			} catch (ConfigError e) {
