@@ -358,11 +358,11 @@ SwitchChangedListener {
 					+ this.floodPermsSlice);
 			// note: watch() is smart and won't double enter this
 			if (doneID){
-				System.out.println("MURAD: doneID!!!!!");
+				//System.out.println("MURAD: doneID!!!!!");
 				SwitchImpl.addListener(dpid, this);
 			}
 			else{
-				System.out.println("MURAD: NOT doneID!!!!!");
+				//System.out.println("MURAD: NOT doneID!!!!!");
 				FlowvisorImpl.addListener(this);
 			}
 			//FVConfig.watch(this, entry);
@@ -654,11 +654,16 @@ SwitchChangedListener {
 		Set<String> newSlices;
 		synchronized (FVConfig.class) {
 			try {
-				if (fm == null || fm.getType() == FlowMap.type.LINEAR)
+				if (fm == null || fm.getType() == FlowMap.type.LINEAR){
+					System.out.println("MURAD: FlowMap is null!!!!!");
 					this.switchFlowMap = FlowSpaceUtil.getFlowMap(switchInfo.getDatapathId());  //MURAD-config
-				else
+				}
+				else{
+					System.out.println("MURAD: FlowMap NOT null!!!!!");
 					this.switchFlowMap = fm;
+				}
 			} catch (ConfigError e) {
+				System.out.println("MURAD: Config Error for FlowMap!!!!!");
 				FVLog.log(LogLevel.CRIT, this, "Unable to fetch Flow Space : " + e.getMessage());
 				return;
 			}}
