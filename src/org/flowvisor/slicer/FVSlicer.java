@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -182,7 +183,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	}
 
 	private void updatePortList() {
-		ArrayList<Short> addedPorts = new ArrayList<Short>();
+		Set<Short> addedPorts = new HashSet<Short>();
 		ArrayList<Short> removedPorts = new ArrayList<Short>();
 		/*synchronized (FVConfig.class) {
 			// update our local copy
@@ -218,13 +219,26 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			}
 		}
 		//updatePortStatus(addedPorts, removedPorts);*/
-		addedPorts = (ArrayList<Short>) fvClassifier.getAcrivePorts();
+		addedPorts = this.fvClassifier.getAcrivePorts();
 		updatePortStatus(addedPorts, removedPorts);
 		
 	}
 
+	private void updatePortStatus(Set<Short> addedPorts,
+			ArrayList<Short> removedPorts) {
+		for (Short port : addedPorts) {
+			OFPhysicalPort phyPort = findPhyPort(port);
+			if (phyPort != null)
+				sendPortStatusUpdate(phyPort, true);
+		}
+		for (Short port : removedPorts) {
+			OFPhysicalPort phyPort = findPhyPort(port);
+			if (phyPort != null)
+				sendPortStatusUpdate(phyPort, false);
+		}
+	}
 	
-	private void updatePortStatus(ArrayList<Short> addedPorts,
+	private void updatePortStatus2(ArrayList<Short> addedPorts,
 			ArrayList<Short> removedPorts) {
 		for (Short port : addedPorts) {
 			OFPhysicalPort phyPort = findPhyPort(port);
