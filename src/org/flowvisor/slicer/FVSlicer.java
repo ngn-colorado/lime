@@ -225,19 +225,6 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		
 	}
 
-	private void updatePortStatus2(Set<Short> addedPorts,
-			ArrayList<Short> removedPorts) {
-		for (Short port : addedPorts) {
-			OFPhysicalPort phyPort = findPhyPort(port);
-			if (phyPort != null)
-				sendPortStatusUpdate(phyPort, true);
-		}
-		for (Short port : removedPorts) {
-			OFPhysicalPort phyPort = findPhyPort(port);
-			if (phyPort != null)
-				sendPortStatusUpdate(phyPort, false);
-		}
-	}
 	
 	private void updatePortStatus(ArrayList<Short> addedPorts,
 			ArrayList<Short> removedPorts) {
@@ -259,7 +246,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		portStatus.setReason(added ? (byte) OFPortReason.OFPPR_ADD.ordinal() : 
 			(byte) OFPortReason.OFPPR_DELETE.ordinal());
 		FVLog.log(LogLevel.INFO, this, (added ? "added " : "removed ") + "port " + phyPort.getPortNumber());
-		System.out.println("MURAD: updating port " + phyPort.getPortNumber());
+		//System.out.println("MURAD: updating port " + phyPort.getPortNumber());
 		sendMsg(portStatus, this);
 	}
 

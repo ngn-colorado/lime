@@ -660,12 +660,14 @@ SwitchChangedListener {
 				else{
 					//System.out.println("MURAD: FlowMap NOT null!!!!!");
 					this.switchFlowMap = fm;
+				}				
+				if(FlowSpaceUtil.getSubFlowMap(switchInfo.getDatapathId()).getRules().size()>0){
+					FVSlicer newSlicer = new FVSlicer(this.loop, this, "slice1");  //TODO "slice1" should be configurable 
+					slicerMap.put("slice1", newSlicer); // create new slicer in
+					newSlicer.init();
+					System.out.println("MURAD: Creating slicer for switch: " + switchName);
+					System.out.println("-------------");
 				}
-				System.out.println("MURAD: FlowMap-Rules: " + switchFlowMap.getRules().toString());
-				System.out.println("MURAD: FlowMap-Type: " + switchFlowMap.getType().toString());
-				System.out.println("MURAD: SubFlowMap: " + FlowSpaceUtil.getSubFlowMap(switchInfo.getDatapathId()).getRules().toString());
-				System.out.println("-------------");
-				
 				
 				
 			} catch (ConfigError e) {
@@ -673,9 +675,8 @@ SwitchChangedListener {
 				FVLog.log(LogLevel.CRIT, this, "Unable to fetch Flow Space : " + e.getMessage());
 				return;
 			}}
-		FVSlicer newSlicer = new FVSlicer(this.loop, this, "slice1");  //TODO "slice1" should be configurable 
-		slicerMap.put("slice1", newSlicer); // create new slicer in
-		newSlicer.init();
+		
+		
 	}
 
 

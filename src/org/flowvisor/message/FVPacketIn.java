@@ -47,7 +47,10 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 		// TODO add ARP special case
 		FVSlicer fvSlicer = fvClassifier.getSlicerByName("slice1");
 		//System.out.println("MURAD: sending Packet_in: " + this.toString() + " to controller");
-		fvSlicer.sendMsg(this, fvClassifier);
+		if(fvSlicer != null){
+			fvSlicer.sendMsg(this, fvClassifier);
+		}
+		
 		//this.lookupByFlowSpace(fvClassifier);
 
 	}
