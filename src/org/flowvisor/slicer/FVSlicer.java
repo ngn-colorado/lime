@@ -154,7 +154,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		//port = FVConfig.getSlicePort(sliceName); //MURAD-config
 		//lldpOptIn = FVConfig.getLLDPSpam(sliceName); //MURAD-config
 		SliceImpl.addListener(sliceName, this);
-		this.updatePortList();
+		//this.updatePortList();  //MURAD
 		this.reconnect();
 		this.keepAlive = new OFKeepAlive(this, this, loop);
 		this.keepAlive.scheduleNextCheck();
