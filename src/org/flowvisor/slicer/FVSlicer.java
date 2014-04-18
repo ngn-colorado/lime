@@ -188,9 +188,11 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			// update our local copy
 			this.localFlowSpace = getLocalFlowSpace();
 		}
-		Set<Short> ports = FlowSpaceUtil.getPortsBySlice(this.fvClassifier
+		//Murad commented out Set
+		/*Set<Short> ports = FlowSpaceUtil.getPortsBySlice(this.fvClassifier
 				.getSwitchInfo().getDatapathId(), this.sliceName,
-				this.localFlowSpace);
+				this.localFlowSpace);*/
+		Set<Short> ports = this.fvClassifier.getAcrivePorts();
 		if (ports.contains(OFPort.OFPP_ALL.getValue())) {
 			// this switch has access to ALL PORTS; feed them in from the
 			// features request
@@ -219,7 +221,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		}
 		updatePortStatus(addedPorts, removedPorts);
 		//addedPorts = this.fvClassifier.getAcrivePorts();
-		updatePortStatus(addedPorts, removedPorts);
+		//updatePortStatus(addedPorts, removedPorts);
 		
 	}
 
