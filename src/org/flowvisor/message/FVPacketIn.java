@@ -41,7 +41,7 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 	public void classifyFromSwitch(FVClassifier fvClassifier) {
 		// handle LLDP as a special (hackish) case
 		if (LLDPUtil.handleLLDPFromSwitch(this, fvClassifier)){
-			System.out.println("MURAD: Found LLDP Packet in Packet-In");
+			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
 		// TODO add ARP special case
