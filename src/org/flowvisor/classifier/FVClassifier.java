@@ -1166,5 +1166,9 @@ SwitchChangedListener {
 				it.remove();
 		}		
 	}
+	
+	public Set<Short> getAcrivePorts(){
+		return activePorts;
+	}
 
 }

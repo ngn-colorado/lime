@@ -184,7 +184,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	private void updatePortList() {
 		ArrayList<Short> addedPorts = new ArrayList<Short>();
 		ArrayList<Short> removedPorts = new ArrayList<Short>();
-		synchronized (FVConfig.class) {
+		/*synchronized (FVConfig.class) {
 			// update our local copy
 			this.localFlowSpace = getLocalFlowSpace();
 		}
@@ -217,9 +217,13 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				removedPorts.add(port);
 			}
 		}
+		//updatePortStatus(addedPorts, removedPorts);*/
+		addedPorts = (ArrayList<Short>) fvClassifier.getAcrivePorts();
 		updatePortStatus(addedPorts, removedPorts);
+		
 	}
 
+	
 	private void updatePortStatus(ArrayList<Short> addedPorts,
 			ArrayList<Short> removedPorts) {
 		for (Short port : addedPorts) {
