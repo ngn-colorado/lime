@@ -661,7 +661,11 @@ SwitchChangedListener {
 					//System.out.println("MURAD: FlowMap NOT null!!!!!");
 					this.switchFlowMap = fm;
 				}
-				System.out.println("MURAD: FlowMap: " + switchFlowMap.getRules().toString());
+				System.out.println("MURAD: FlowMap-Rules: " + switchFlowMap.getRules().toString());
+				System.out.println("MURAD: FlowMap-Type: " + switchFlowMap.getType().toString());
+				System.out.println("-------------");
+				
+				
 			} catch (ConfigError e) {
 				//System.out.println("MURAD: Config Error for FlowMap!!!!!");
 				FVLog.log(LogLevel.CRIT, this, "Unable to fetch Flow Space : " + e.getMessage());
