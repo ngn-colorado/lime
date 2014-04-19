@@ -9,6 +9,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
+import org.flowvisor.LimeContainer;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.events.FVEvent;
 import org.flowvisor.events.FVEventHandler;
@@ -135,10 +136,12 @@ public class OFSwitchAcceptor implements FVEventHandler {
 						"ssc.accept() returned null !?! FIXME!");
 				return;
 			}
+			
 			FVLog.log(LogLevel.INFO, this, "got new connection: " + sock);
 			FVClassifier fvc = new FVClassifier(pollLoop, sock);
 			fvc.setSlicerLimits(this.slicerLimits);
 			fvc.init();
+			LimeContainer.addTestCounter();
 		} catch (IOException e) // ignore IOExceptions -- is this the right
 		// thing to do?
 		{

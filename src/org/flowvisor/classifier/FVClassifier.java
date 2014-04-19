@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.flowvisor.LimeContainer;
 import org.flowvisor.api.FlowTableCallback;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.config.ConfigError;
@@ -623,6 +624,7 @@ SwitchChangedListener {
 			 * OFStatisticsRequest stats = new OFStatisticsRequest();
 			 * stats.setStatisticType(OFStatisticsType.DESC);
 			 */
+			System.out.println("MURAD: testCounter: " + LimeContainer.getTestCounter());
 			switchName = "dpid=" + FlowSpaceUtil.dpidToString(this.getDPID());
 			FVLog.log(LogLevel.INFO, this, "identified switch as " + switchName
 					+ " on " + this.sock);
@@ -632,6 +634,11 @@ SwitchChangedListener {
 			// TODO create switch entry in db.
 			doneID = true;
 			updateFloodPerms();
+			System.out.println("MURAD: for switch: " + getDPID());
+			LimeContainer.addTestCounter();
+			System.out.println("----------------");
+			
+			
 			break;
 		default:
 			FVLog.log(LogLevel.WARN, this, "Got unknown message type " + m
