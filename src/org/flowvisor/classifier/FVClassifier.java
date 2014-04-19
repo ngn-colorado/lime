@@ -104,6 +104,7 @@ SwitchChangedListener {
 	SocketChannel sock;
 	String switchName;
 	boolean doneID;
+	private boolean isCloned = false;
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
 	ConcurrentHashMap<String, FVSlicer> slicerMap;
@@ -624,7 +625,6 @@ SwitchChangedListener {
 			 * OFStatisticsRequest stats = new OFStatisticsRequest();
 			 * stats.setStatisticType(OFStatisticsType.DESC);
 			 */
-			System.out.println("MURAD: testCounter: " + LimeContainer.getTestCounter());
 			switchName = "dpid=" + FlowSpaceUtil.dpidToString(this.getDPID());
 			FVLog.log(LogLevel.INFO, this, "identified switch as " + switchName
 					+ " on " + this.sock);
@@ -634,11 +634,7 @@ SwitchChangedListener {
 			// TODO create switch entry in db.
 			doneID = true;
 			updateFloodPerms();
-			System.out.println("MURAD: for switch: " + getDPID());
-			LimeContainer.addTestCounter();
-			System.out.println("----------------");
-			
-			
+			LimeContainer.addToAllNetworkSwitch(this.getDPID(), this.switchInfo);			
 			break;
 		default:
 			FVLog.log(LogLevel.WARN, this, "Got unknown message type " + m
@@ -671,8 +667,9 @@ SwitchChangedListener {
 				}				
 				if(FlowSpaceUtil.getSubFlowMap(switchInfo.getDatapathId()).getRules().size()>0){
 					FVSlicer newSlicer = new FVSlicer(this.loop, this, "slice1");  //TODO "slice1" should be configurable 
-					slicerMap.put("slice1", newSlicer); // create new slicer in
+					slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
 					newSlicer.init();
+					LimeContainer.addSlicer(getDPID(), newSlicer);
 					System.out.println("MURAD: Creating slicer for switch: " + switchName);
 					System.out.println("-------------");
 				}
@@ -1188,5 +1185,16 @@ SwitchChangedListener {
 	public Set<Short> getAcrivePorts(){
 		return activePorts;
 	}
-
+	
+	public boolean isBeenCloned(){
+		return isCloned;
+	}
+	
+	public void startClone(){
+		isCloned = true;
+	}
+	
+	public void stopClone(){
+		isCloned = false;
+	}
 }

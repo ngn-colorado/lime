@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.xmlrpc.webserver.WebServer;
 import org.flowvisor.api.APIServer;
@@ -22,6 +23,8 @@ import org.flowvisor.config.SwitchImpl;
 import org.flowvisor.events.FVEventHandler;
 import org.flowvisor.events.FVEventLoop;
 import org.flowvisor.exceptions.UnhandledEvent;
+import org.flowvisor.flows.FlowEntry;
+import org.flowvisor.flows.FlowSpaceUtil;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.log.StderrLogger;
@@ -173,6 +176,15 @@ public class FlowVisor {
 			System.out.println("MURAD: TopologyController is NOT configured");
 		}
 
+		// get switches from configured slices
+		Set flows = FlowSpaceUtil.getSliceFlowSpace(LimeContainer.MainSlice).getRules();
+		Iterator it = flows.iterator();
+	      while (it.hasNext()) {
+	         // Get element
+	         FlowEntry element = (FlowEntry) it.next();
+	         System.out.println("Murad: Switch: " + element.getDpid());
+	      }
+	      
 		// init switchAcceptor
 		OFSwitchAcceptor acceptor = new OFSwitchAcceptor(pollLoop, port, 16);
 		acceptor.setSlicerLimits(sliceLimits);
@@ -216,7 +228,7 @@ public class FlowVisor {
 	public static void main(String args[]) throws Throwable {
 	
 		ThreadLogger threadLogger = new ThreadLogger();
-		Thread.setDefaultUncaughtExceptionHandler(threadLogger);
+		Thread.setDefaultUncaughtExceptionHandler(threadLogger);		
 		long lastRestart = System.currentTimeMillis();
 		FVConfigurationController.init(new ConfDBHandler());
 		while (true) {
@@ -234,6 +246,7 @@ public class FlowVisor {
 				
 				
 				fv.run(); 
+				
 			}  catch (NullPointerException e) {
 				System.err.println("Startup failed : " + e.getMessage());
 				System.exit(1);

@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.sql.rowset.spi.SyncResolver;
-
 import org.flowvisor.message.FVFeaturesReply;
 import org.flowvisor.slicer.FVSlicer;
+import org.openflow.protocol.OFFeaturesReply;
 
 /**
  * Keep track of created instances of switches and their info
@@ -17,17 +16,18 @@ import org.flowvisor.slicer.FVSlicer;
 public class LimeContainer {
 	
 	private static int testCounter = 0;
+	public static final String MainSlice = " muradSlice"; 
 	// list of all switches
-	private static HashMap<String, FVFeaturesReply> allNetworkSwitches = new HashMap<>();
+	private static HashMap<Long, OFFeaturesReply> allNetworkSwitches = new HashMap<>();
 	
-	// list of only showing switches to OF controller
-	private static Set<String> seenSwitches = new HashSet<>();
+	// list of original showing switches to OF controller to always use them to map to the controller
+	private static Set<Long>originalSeenSwitches = new HashSet<>();   // by their IDs
 	
-	// list of all classifiers created
-	private static HashMap<String, FVFeaturesReply> allClassifiers = new HashMap<>();
+	// This hash includes original and cloned switches
+	private static HashMap<Long, OFFeaturesReply> currentActiveSwitches = new HashMap<>();  // by their IDs
 	
 	// list of all slicers created
-	private static HashMap<String, FVSlicer> allSlicers = new HashMap<>();
+	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId, FVSlicer>
 	
 	public static synchronized int getTestCounter(){
 		return testCounter;
@@ -36,23 +36,40 @@ public class LimeContainer {
 	public static synchronized void addTestCounter(){
 		testCounter++;
 	}
-	public static HashMap<String, FVFeaturesReply> getAllNetworkSwitcher(){
+	
+	public static HashMap<Long, OFFeaturesReply> getAllNetworkSwitcher(){
 		return allNetworkSwitches;
 	}
 	
-	public static void addNetworkSwitch(String swId, FVFeaturesReply swInfo){
+	public static synchronized void addToAllNetworkSwitch(long swId, OFFeaturesReply swInfo){
+		allNetworkSwitches.put(swId, swInfo);
+	}
+	
+	/**
+	 * Get the switch that OF controller can see
+	 * @return
+	 */
+	public static synchronized Set<Long> getOriginalSeenSwitches(){
+		return originalSeenSwitches;
+	}
+	
+	public static synchronized void insertOriginalSeenSwitches(Long swId){
+		originalSeenSwitches.add(swId);
+	}
+	
+	public static synchronized HashMap<Long, OFFeaturesReply>  getCurrentActiveSwitches(){
+		return currentActiveSwitches;
+	}
+	
+	public static synchronized void addToCurrentActiveSwitches(long swId, OFFeaturesReply swInfo){
+		currentActiveSwitches.put(swId, swInfo);
+	}
+	
+	public static synchronized void addSlicer(long sName, FVSlicer fvSlicer){
+		allSlicers.put(sName, fvSlicer);
 		
 	}
-	
-	public static Set<String> getSeenSwitches(){
-		return seenSwitches;
-	}
-	
-	public static HashMap<String, FVFeaturesReply> getAllClassifiers(){
-		return allClassifiers;
-	}
-	
-	public static HashMap<String, FVSlicer> getAllSlicers(){
+	public static synchronized HashMap<Long, FVSlicer> getAllSlicers(){
 		return allSlicers;
 		
 	}
