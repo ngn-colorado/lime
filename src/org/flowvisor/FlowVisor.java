@@ -179,6 +179,7 @@ public class FlowVisor {
 		// get switches from configured slices
 		Set flows = FlowSpaceUtil.getSliceFlowSpace(LimeContainer.MainSlice).getRules();
 		Iterator it = flows.iterator();
+		System.out.println("Murad: In Flowvisor");
 	      while (it.hasNext()) {
 	         // Get element
 	         FlowEntry element = (FlowEntry) it.next();
