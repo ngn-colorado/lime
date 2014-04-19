@@ -141,7 +141,6 @@ public class OFSwitchAcceptor implements FVEventHandler {
 			FVClassifier fvc = new FVClassifier(pollLoop, sock);
 			fvc.setSlicerLimits(this.slicerLimits);
 			fvc.init();
-			LimeContainer.addTestCounter();
 		} catch (IOException e) // ignore IOExceptions -- is this the right
 		// thing to do?
 		{
