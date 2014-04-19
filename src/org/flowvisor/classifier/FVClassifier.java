@@ -104,8 +104,10 @@ SwitchChangedListener {
 	SocketChannel sock;
 	String switchName;
 	boolean doneID;
+	//MURAD variables
 	private boolean isCloned = false;
-	private boolean isActive = false; 
+	private boolean isActive = false;
+	private long duplicateSwitch = 0;  // Assuming no switch will have 0 as an ID
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
 	ConcurrentHashMap<String, FVSlicer> slicerMap;
@@ -632,9 +634,9 @@ SwitchChangedListener {
 			FlowSpaceImpl.addListener(this); // register for FS updates
 			SwitchImpl.addListener(this.getDPID(), this);
 			System.out.println("MURAD: -------------");
-			LimeContainer.addWorkingSwitch(this.getDPID());
+			LimeContainer.addWorkingSwitch(this.getDPID(), this);
 			this.connectToControllers(null); // connect to controllers
-			// TODO create switch entry in db.
+			// TODO create switch entry in db.  //MURAD
 			doneID = true;
 			updateFloodPerms();
 			break;
@@ -666,10 +668,10 @@ SwitchChangedListener {
 					//System.out.println("MURAD: FlowMap NOT null!!!!!");
 					this.switchFlowMap = fm;
 				}	
-							
+				// MURAD added below if statement 			
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 					makeActive();
-					FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  //TODO "slice1" should be configurable 
+					FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  
 					slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
 					newSlicer.init();
 					LimeContainer.addSlicer(getDPID(), newSlicer);
@@ -681,8 +683,6 @@ SwitchChangedListener {
 				FVLog.log(LogLevel.CRIT, this, "Unable to fetch Flow Space : " + e.getMessage());
 				return;
 			}}
-		
-		
 	}
 
 
@@ -1176,6 +1176,8 @@ SwitchChangedListener {
 		}		
 	}
 	
+	
+	//MURAD methods bellow
 	public Set<Short> getAcrivePorts(){
 		return activePorts;
 	}
@@ -1199,5 +1201,13 @@ SwitchChangedListener {
 	public void makeActive(){
 		System.out.println("MURAD: Added switch " + getDPID() + " as an active switch");
 		isActive = true;
+	}
+	
+	public long getduplicateSwitch(){
+		return duplicateSwitch;
+	}
+	
+	public void setduplicateSwitch(long swId){
+		duplicateSwitch = swId;
 	}
 }

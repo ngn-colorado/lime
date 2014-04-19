@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.slicer.FVSlicer;
-import org.openflow.protocol.OFFeaturesReply;
 
 /**
  * Keep track of created instances of switches and their info
@@ -24,8 +24,8 @@ public class LimeContainer {
 	private static int testCounter = 0;
 	public static final String MainSlice = "slice1"; 
 
-	// list of all switches
-	private static Set<Long> allWorkingSwitches = new HashSet<>();
+	// all switches in the network and connecting LIME 
+	private static HashMap<Long, FVClassifier> allWorkingSwitches = new HashMap<>();
 
 	// list of original showing switches to OF controller to always use them to map to the controller
 	private static Set<Long>originalSeenSwitches = new HashSet<>();   // by their IDs
@@ -39,13 +39,13 @@ public class LimeContainer {
 	// list of all slicers created
 	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
 
-	public static Set<Long> getAllWorkingSwitcher(){
+	public static HashMap<Long, FVClassifier> getAllWorkingSwitcher(){
 		return allWorkingSwitches;
 	}
 
-	public static synchronized void addWorkingSwitch(long swId){
-		System.out.println("Added working switch " + swId);
-		allWorkingSwitches.add(swId);
+	public static synchronized void addWorkingSwitch(long swId, FVClassifier swClassifier){
+		System.out.println("MURAD: Added working switch " + swId);
+		allWorkingSwitches.put(swId, swClassifier);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class LimeContainer {
 
 	public static synchronized void insertActiveToOriginalSwitchMap(long swActive, long swOriginal){
 		if(!originalSeenSwitches.contains(swOriginal)){
-			System.out.println("ERROR!!!!!!!!!!!! Can't add Active Switch. Original Switch is not found");  // TODO through exception
+			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Active Switch. Original Switch is not found");  // TODO through exception
 		}
 		else{
 			activeToOriginalSwitchMap.put(swActive, swOriginal);

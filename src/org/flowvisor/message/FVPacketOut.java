@@ -58,7 +58,17 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		}
 		// look at the original class to see how the matching is happening to use it later
 		//System.out.println("MURAD: sending Packet_out to switch: " + fvClassifier.getDPID());
-		fvClassifier.sendMsg(this, fvSlicer);
+		
+		//MURAD added bellow
+		if(fvClassifier.isBeenCloned()){
+			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to active switch
+			
+			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to cloned switch
+		}
+		else{
+			fvClassifier.sendMsg(this, fvSlicer);
+		}
+		
 	}
 
 	// convenience function that Derickso doesn't want in main openflow.jar

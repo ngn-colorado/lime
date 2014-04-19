@@ -29,11 +29,11 @@ import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.util.U16;
 
 public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
-		Classifiable, Slicable, Cloneable {
-	
+Classifiable, Slicable, Cloneable {
+
 	private HashMap<String,FVFlowMod> sliceModMap = new HashMap<String,FVFlowMod>();;
 	private FVMatch mat;
-	
+
 	private HashMap<Integer,Integer> priorityMap = new HashMap<Integer,Integer>();
 	@Override
 	public void classifyFromSwitch(FVClassifier fvClassifier) {
@@ -55,9 +55,18 @@ public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
 		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
 		translateCookie(fvClassifier, fvSlicer);
-		fvClassifier.sendMsg(this, fvSlicer);
+
+		//MURAD added bellow
+		if(fvClassifier.isBeenCloned()){
+			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to active switch
+
+			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to cloned switch
+		}
+		else{
+			fvClassifier.sendMsg(this, fvSlicer);
+		}
 	}
-	
+
 
 	private Integer getNewPriority(int oldPriority, Integer intersectPrio, FVSlicer fvSlicer){
 		if(oldPriority > 65535){
@@ -66,8 +75,8 @@ public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 		FVLog.log(LogLevel.DEBUG,null,"FVFlowMod oldPriority:",oldPriority);
 
 		HashMap<Integer,ArrayList<Integer>> prioRangeMap 
-			= fvSlicer.getFlowSpace().getPriorityRangeMap();
-		
+		= fvSlicer.getFlowSpace().getPriorityRangeMap();
+
 		Integer rangeStart=0;
 		Integer rangeEnd=0;
 		Integer range;
@@ -95,7 +104,7 @@ public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 			priorityMap.put(oldPriority, newPriority);
 		}
 		FVLog.log(LogLevel.DEBUG,null,"FVFlowMod priorityMap:",priorityMap);
-		
+
 		return newPriority;
 	}
 
@@ -120,22 +129,22 @@ public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 		newFlowMod.setActions(neoActions);
 		newFlowMod.setLengthU(FVFlowMod.MINIMUM_LENGTH + length);
 	}
-	
-	
+
+
 	private void translateCookie(FVClassifier fvClassifier, FVSlicer fvSlicer) {
 		CookieTranslator cookieTrans = fvClassifier.getCookieTranslator();
 		long newCookie = cookieTrans.translate(this.cookie, fvSlicer);
 		this.setCookie(newCookie);
 		FVLog.log(LogLevel.DEBUG,null,"translateCookie newCookie:",newCookie);
 	}
-	
-	
+
+
 
 	public FVFlowMod setMatch(FVMatch match) {
 		this.match = match;
 		return this;
 	}
-	
+
 	@Override
 	public OFMatch getMatch() {
 		return this.match;
@@ -146,16 +155,16 @@ public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 	 *
 	 * @see java.lang.Object#toString()
 	 */
-	
-    @Override
-    public String toString() {
-        return "FVFlowMod [ actions="
-                + FVMessageUtil.actionsToString(this.getActions()) + ", command=" + command
-                + ", cookie=" + cookie + ", flags=" + flags + ", hardTimeout="
-                + hardTimeout + ", idleTimeout=" + idleTimeout + ", match="
-                + match + ", outPort=" + outPort + ", priority=" + priority
-                + ", length=" + length + ", type=" + type + ", version="
-                + version + "]";
-    }
+
+	@Override
+	public String toString() {
+		return "FVFlowMod [ actions="
+				+ FVMessageUtil.actionsToString(this.getActions()) + ", command=" + command
+				+ ", cookie=" + cookie + ", flags=" + flags + ", hardTimeout="
+				+ hardTimeout + ", idleTimeout=" + idleTimeout + ", match="
+				+ match + ", outPort=" + outPort + ", priority=" + priority
+				+ ", length=" + length + ", type=" + type + ", version="
+				+ version + "]";
+	}
 
 }
