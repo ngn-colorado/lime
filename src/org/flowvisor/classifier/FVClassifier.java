@@ -661,7 +661,6 @@ SwitchChangedListener {
 	 */
 	private void connectToControllers(FlowMap fm) {
 		//Murad commented out newSlices
-		Set<String> newSlices;
 		synchronized (FVConfig.class) {
 			try {
 				if (fm == null || fm.getType() == FlowMap.type.LINEAR){
@@ -670,23 +669,16 @@ SwitchChangedListener {
 				else{
 					//System.out.println("MURAD: FlowMap NOT null!!!!!");
 					this.switchFlowMap = fm;
-				}				
-				if(FlowSpaceUtil.getSubFlowMap(switchInfo.getDatapathId()).getRules().size()>0){
-					FVSlicer newSlicer = new FVSlicer(this.loop, this, "slice1");  //TODO "slice1" should be configurable 
+				}	
+							
+				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
+					FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  //TODO "slice1" should be configurable 
 					slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
 					newSlicer.init();
 					LimeContainer.addSlicer(getDPID(), newSlicer);
 					System.out.println("MURAD: Creating slicer for switch: " + switchName);
 					System.out.println("-------------");
 				}
-				
-				Set flows = FlowSpaceUtil.getFlowMap(switchInfo.getDatapathId()).getRules();
-				Iterator it = flows.iterator();
-			      while (it.hasNext()) {
-			         // Get element
-			         FlowEntry element = (FlowEntry) it.next();
-			         //System.out.println("Murad: Switch: " + element.getDpid());
-			      }
 				
 			} catch (ConfigError e) {
 				//System.out.println("MURAD: Config Error for FlowMap!!!!!");

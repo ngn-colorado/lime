@@ -22,7 +22,7 @@ import org.openflow.protocol.OFFeaturesReply;
 public class LimeContainer {
 
 	private static int testCounter = 0;
-	public static final String MainSlice = "LIMESlice"; 
+	public static final String MainSlice = "slice1"; 
 
 	// list of all switches
 	private static Set<Long> allWorkingSwitches = new HashSet<>();
@@ -37,7 +37,7 @@ public class LimeContainer {
 	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
 
 	// list of all slicers created
-	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId, FVSlicer>
+	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
 
 	public static Set<Long> getAllWorkingSwitcher(){
 		return allWorkingSwitches;
