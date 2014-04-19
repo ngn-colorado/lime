@@ -182,7 +182,7 @@ public class FlowVisor {
 	      while (it.hasNext()) {
 	         // Get element
 	         FlowEntry element = (FlowEntry) it.next();
-	         System.out.println("Murad: Switch: " + element.getDpid());
+	         System.out.println("Murad: In Flowvisor, Switch: " + element.getDpid());
 	      }
 	      
 		// init switchAcceptor
