@@ -631,11 +631,11 @@ SwitchChangedListener {
 					+ " on " + this.sock);
 			FlowSpaceImpl.addListener(this); // register for FS updates
 			SwitchImpl.addListener(this.getDPID(), this);
+			LimeContainer.addWorkingSwitch(this.getDPID());
 			this.connectToControllers(null); // connect to controllers
 			// TODO create switch entry in db.
 			doneID = true;
 			updateFloodPerms();
-			LimeContainer.addWorkingSwitch(this.getDPID());
 			if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(this.getDPID())){
 				makeActive();
 				
