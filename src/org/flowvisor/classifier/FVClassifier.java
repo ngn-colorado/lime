@@ -637,7 +637,8 @@ SwitchChangedListener {
 			updateFloodPerms();
 			LimeContainer.addWorkingSwitch(this.getDPID());
 			if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(this.getDPID())){
-				this.isActive = true;
+				makeActive();
+				
 			}
 			
 			break;
@@ -684,7 +685,7 @@ SwitchChangedListener {
 			      while (it.hasNext()) {
 			         // Get element
 			         FlowEntry element = (FlowEntry) it.next();
-			         System.out.println("Murad: Switch: " + element.getDpid());
+			         //System.out.println("Murad: Switch: " + element.getDpid());
 			      }
 				
 			} catch (ConfigError e) {
@@ -1208,6 +1209,7 @@ SwitchChangedListener {
 	}
 	
 	public void makeActive(){
+		System.out.println("MURAD: Added switch " + getDPID() + " as an active switch");
 		isActive = true;
 	}
 }

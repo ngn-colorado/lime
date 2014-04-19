@@ -44,6 +44,7 @@ public class LimeContainer {
 	}
 
 	public static synchronized void addWorkingSwitch(long swId){
+		System.out.println("Added working switch " + swId);
 		allWorkingSwitches.add(swId);
 	}
 
