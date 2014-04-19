@@ -631,16 +631,12 @@ SwitchChangedListener {
 					+ " on " + this.sock);
 			FlowSpaceImpl.addListener(this); // register for FS updates
 			SwitchImpl.addListener(this.getDPID(), this);
+			System.out.println("MURAD: -------------");
 			LimeContainer.addWorkingSwitch(this.getDPID());
 			this.connectToControllers(null); // connect to controllers
 			// TODO create switch entry in db.
 			doneID = true;
 			updateFloodPerms();
-			if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(this.getDPID())){
-				makeActive();
-				
-			}
-			
 			break;
 		default:
 			FVLog.log(LogLevel.WARN, this, "Got unknown message type " + m
@@ -672,12 +668,12 @@ SwitchChangedListener {
 				}	
 							
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
+					makeActive();
 					FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  //TODO "slice1" should be configurable 
 					slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
 					newSlicer.init();
 					LimeContainer.addSlicer(getDPID(), newSlicer);
 					System.out.println("MURAD: Creating slicer for switch: " + switchName);
-					System.out.println("-------------");
 				}
 				
 			} catch (ConfigError e) {
