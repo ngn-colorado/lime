@@ -105,6 +105,7 @@ SwitchChangedListener {
 	String switchName;
 	boolean doneID;
 	private boolean isCloned = false;
+	private boolean isActive = false; 
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
 	ConcurrentHashMap<String, FVSlicer> slicerMap;
@@ -634,7 +635,11 @@ SwitchChangedListener {
 			// TODO create switch entry in db.
 			doneID = true;
 			updateFloodPerms();
-			LimeContainer.addToAllNetworkSwitch(this.getDPID(), this.switchInfo);			
+			LimeContainer.addWorkingSwitch(this.getDPID());
+			if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(this.getDPID())){
+				this.isActive = true;
+			}
+			
 			break;
 		default:
 			FVLog.log(LogLevel.WARN, this, "Got unknown message type " + m
@@ -1196,5 +1201,13 @@ SwitchChangedListener {
 	
 	public void stopClone(){
 		isCloned = false;
+	}
+	
+	public boolean isActive(){
+		return isActive;
+	}
+	
+	public void makeActive(){
+		isActive = true;
 	}
 }

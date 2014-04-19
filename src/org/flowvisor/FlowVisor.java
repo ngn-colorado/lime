@@ -179,11 +179,12 @@ public class FlowVisor {
 		// get switches from configured slices
 		Set flows = FlowSpaceUtil.getFlowMap(1).getRules();
 		Iterator it = flows.iterator();
-		System.out.println("Murad: In Flowvisor" + flows.toString());
 	      while (it.hasNext()) {
 	         // Get element
 	         FlowEntry element = (FlowEntry) it.next();
-	         System.out.println("Murad: In Flowvisor, Switch: " + element.getDpid());
+	         System.out.println("Murad: Original Seen Switch: " + element.getDpid());
+	         LimeContainer.insertOriginalSeenSwitches(element.getDpid());
+	         LimeContainer.insertActiveToOriginalSwitchMap(element.getDpid(), element.getDpid());
 	      }
 	      
 		// init switchAcceptor
