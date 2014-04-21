@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.minidev.json.JSONObject;
+
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.slicer.FVSlicer;
 
@@ -19,6 +21,7 @@ import org.flowvisor.slicer.FVSlicer;
  * @author Murad Kaplan
  *
  */
+
 public class LimeContainer {
 
 	private static int testCounter = 0;
@@ -78,8 +81,12 @@ public class LimeContainer {
 
 	}
 	public static synchronized HashMap<Long, FVSlicer> getAllSlicers(){
+		
 		return allSlicers;
-
+	}
+	
+	static synchronized void insertActiveToCloneSwitchMap(JSONObject map){
+		
 	}
 
 
