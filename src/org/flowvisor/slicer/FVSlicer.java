@@ -229,6 +229,9 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	private void updatePortStatus(ArrayList<Short> addedPorts,
 			ArrayList<Short> removedPorts) {
 		for (Short port : addedPorts) {
+			if(port == 40){
+				System.out.println("MURAD: GHOST port found!!!!!");
+			}
 			OFPhysicalPort phyPort = findPhyPort(port);
 			if (phyPort != null)
 				sendPortStatusUpdate(phyPort, true);
