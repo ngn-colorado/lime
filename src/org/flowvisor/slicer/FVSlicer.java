@@ -203,6 +203,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				ports.add(phyPort.getPortNumber());
 		}
 		for (Short port : ports) {
+			System.out.println("MURAD: Ports before adding: " + port);
 			if (!allowedPorts.keySet().contains(port)) {
 				FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);
 				allowedPorts.put(port, Boolean.TRUE);
@@ -213,7 +214,6 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				.hasNext();) {
 			Short port = it.next();
 			if (!ports.contains(port)) {
-				System.out.println("MURAD: Ports before adding: " + port);
 				FVLog.log(LogLevel.DEBUG, this, "removing access to port ",
 						port);
 				it.remove();
