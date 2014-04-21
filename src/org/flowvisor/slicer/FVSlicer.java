@@ -92,10 +92,10 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	Map<Short, Boolean> allowedPorts; // ports in this slice and whether they
 	boolean reconnectEventScheduled = false;
 	LinkedHashMap<Integer, Integer> allowedBufferIDs; // LRU cached list of
-														// buffer-IDs
+	// buffer-IDs
 	// that this slice can address
 	final private int MAX_ALLOWED_BUFFER_IDS = 256; // max cache size
-	
+
 	private Integer fmlimit = -1;
 
 	protected FVSlicer() {}
@@ -117,8 +117,8 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		this.allowedBufferIDs = new LRULinkedHashMap<Integer, Integer>(10,
 				MAX_ALLOWED_BUFFER_IDS);
 		this.stats = SendRecvDropStats.createSharedStats(sliceName);
-		
-		
+
+
 		FlowvisorImpl.addListener(this);//FVConfig.watch(this, FVConfig.FLOW_TRACKING);
 		try {
 			setFlowTracking(FlowvisorImpl.getProxy().gettrack_flows());
@@ -146,7 +146,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 
 	public void init() {
 		FVLog.log(LogLevel.DEBUG, this, "initializing new FVSlicer");
-		
+
 		hostname = "128.138.201.93";
 		port = 6633;
 		lldpOptIn = false; // based on slice-info we created
@@ -213,6 +213,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				.hasNext();) {
 			Short port = it.next();
 			if (!ports.contains(port)) {
+				System.out.println("MURAD: Ports before adding: " + port);
 				FVLog.log(LogLevel.DEBUG, this, "removing access to port ",
 						port);
 				it.remove();
@@ -222,10 +223,10 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		updatePortStatus(addedPorts, removedPorts);
 		//addedPorts = this.fvClassifier.getAcrivePorts();
 		//updatePortStatus(addedPorts, removedPorts);
-		
+
 	}
 
-	
+
 	private void updatePortStatus(ArrayList<Short> addedPorts,
 			ArrayList<Short> removedPorts) {
 		for (Short port : addedPorts) {
@@ -328,7 +329,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	@Override
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
 		if (this.msgStream != null) {
-			
+
 			//System.out.println("MURAD: Send to controller " + hostname); 
 			//System.out.println("MURAD: from : " + sliceName);
 			//System.out.println("--------");
@@ -395,7 +396,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		return new StringBuilder("slicer_").append(this.sliceName).append("_")
 				.append(fvClassifier.getSwitchName()).toString();
 	}
-	
+
 
 
 	/*
@@ -417,7 +418,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	public void tearDown() {
 		closeDown(true);
 	}
-	
+
 	public int getConnectCount() {
 		return connectCount;
 	}
@@ -448,7 +449,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		SliceImpl.removeListener(sliceName, this);
 		FlowvisorImpl.removeListener(this);
 	}
-	
+
 	private HashMap<String, Object> getStatusInfo() {
 		HashMap<String, Object> info = new HashMap<String, Object>();
 		info.put("connection-status", this.isConnected());
@@ -583,7 +584,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			if (msgs == null)
 				throw new IOException("got null from read()");
 			for (OFMessage msg : msgs) {
-				
+
 				//System.out.println("MURAD: recv from controller: " + msg.getType());
 				FVLog.log(LogLevel.INFO, this, "recv from controller: ", msg);
 				this.stats.increment(FVStatsType.SEND, this, msg);
@@ -601,14 +602,14 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 								"dropping msg because slice", this.getSliceName(), " is rate limited: ",
 								msg);
 						this.sendMsg(FVMessageUtil.makeErrorMsg(OFBadRequestCode.OFPBRC_EPERM, msg), this);
-						
+
 						continue;
 					}
 					/*System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
 					System.out.println("MURAD: msg-data: " + msg.toString());
 					System.out.println("+++++++++++");*/
 					((Slicable) msg).sliceFromController(fvClassifier, this);
-					
+
 				} else
 					FVLog.log(LogLevel.CRIT, this,
 							"dropping msg that doesn't implement classify: ",
@@ -622,7 +623,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			e2.printStackTrace();
 			FVLog.log(LogLevel.ALERT, this,
 					"got unknown error; tearing down and reconnecting: " , e2);
-			
+
 			reconnect();
 		}
 		// no need to setup for next select; done in eventloop
@@ -708,7 +709,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	public boolean hasFloodPerms() {
 		return floodPerms;
 	}
-	
+
 	/**
 	 * @return whether the slice is opted in for lldp messages that aren't 
 	 * from it's slice
@@ -762,7 +763,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	}
 
 
-	
+
 	/*
 	 * Aweful temporary fix to support linear flowmap copying....
 	 * this sux, can't stress it enough. 
@@ -772,7 +773,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	 * 
 	 * Called by FVClassifier when he updates his flowspace.
 	 */
-	
+
 	public void updateFlowSpace() {
 		updatePortList();
 		/*
@@ -787,7 +788,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 
 	@Override
 	public void setFlowTracking(Boolean in) {
-		
+
 		if (in) {
 			this.flowRewriteDB = new LinearFlowRewriteDB(this,
 					this.sliceName, fvClassifier.getDPID());
@@ -795,10 +796,10 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			this.flowRewriteDB = new NoopFlowRewriteDB(this,
 					this.sliceName, fvClassifier.getDPID());
 		}
-		
-		
+
+
 	}
-	
+
 	@Override
 	public void setControllerHost(String in) {
 		this.hostname = in;
@@ -826,19 +827,19 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	@Override                                      
 	public void setFlowModLimit(Integer in) {
 		this.fmlimit = in;
-		
+
 	}
 
 	public void incrementFlowRules(){
 		fvClassifier.incrementFlowMod(sliceName);
 		fvClassifier.getSlicerLimits().incrementSliceFMCounter(sliceName);
 	}
-		
+
 	public void decrementFlowRules(){
 		fvClassifier.decrementFlowMod(sliceName);
 		fvClassifier.getSlicerLimits().decrementSliceFMCounter(sliceName);
 	}
-	
+
 	public boolean permitFlowMod() {
 		if (fmlimit == -1)
 			return true && fvClassifier.permitFlowMod(sliceName);
