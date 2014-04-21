@@ -249,7 +249,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		portStatus.setReason(added ? (byte) OFPortReason.OFPPR_ADD.ordinal() : 
 			(byte) OFPortReason.OFPPR_DELETE.ordinal());
 		FVLog.log(LogLevel.INFO, this, (added ? "added " : "removed ") + "port " + phyPort.getPortNumber());
-		//System.out.println("MURAD: updating port " + phyPort.getPortNumber());
+		System.out.println("MURAD: updating port " + phyPort.getPortNumber());
 		sendMsg(portStatus, this);
 	}
 
