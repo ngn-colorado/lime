@@ -669,7 +669,6 @@ SwitchChangedListener {
 					this.switchFlowMap = fm;
 				}	
 				// MURAD added below if statement 	
-				System.out.println("MURAD: Missy sw ID: " + getDPID());
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 					makeActive();
 					FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  
