@@ -56,6 +56,7 @@ public class LimeContainer {
 	
 	static void addOriginalSwitch(long swID, Hashtable<Integer, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
+		System.out.println("OrigSwTableSize: " + originalSwitchContainer.size());
 	}
 	
 	
