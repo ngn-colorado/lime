@@ -205,7 +205,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		}
 		for (Short port : ports) {
 			System.out.println("MURAD: Ports before adding: " + port);
-			if(LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID()).getPortTable().contains(port)){ //TODO null pointer exception might happen here
+			if(LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID()).getPortTable().containsKey(port)){ //TODO null pointer exception might happen here
 				if (!allowedPorts.keySet().contains(port)) {
 					FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);
 					allowedPorts.put(port, Boolean.TRUE);
@@ -213,6 +213,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				}
 			}
 		}
+		
 		for (Iterator<Short> it = allowedPorts.keySet().iterator(); it
 				.hasNext();) {
 			Short port = it.next();

@@ -1,27 +1,27 @@
 package org.flowvisor;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import org.flowvisor.PortInfo.PortType;
 
 public class LimeSwitch {
 
-	private Hashtable<Integer, PortInfo> portTable;
+	private HashMap<Integer, PortInfo> portTable;
 	
     public LimeSwitch(){
-    	this.portTable 	= new Hashtable<>();
+    	this.portTable 	= new HashMap<>();
     }
     
-    public LimeSwitch(Hashtable<Integer, PortInfo> portTable){
+    public LimeSwitch(HashMap<Integer, PortInfo> portTable){
     	this.portTable = portTable;
     }
     
     
-    public Hashtable<Integer, PortInfo> getPortTable(){
+    public HashMap<Integer, PortInfo> getPortTable(){
     	return portTable;
     }
     
-    public void insertPortTable(Hashtable<Integer, PortInfo> pTable){
+    public void insertPortTable(HashMap<Integer, PortInfo> pTable){
     	this.portTable = pTable;
     }
     

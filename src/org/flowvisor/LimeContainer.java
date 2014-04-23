@@ -1,8 +1,6 @@
 package org.flowvisor;
 
 import java.util.HashMap;
-import java.util.Hashtable;
-
 
 import net.minidev.json.JSONObject;
 
@@ -31,12 +29,12 @@ public class LimeContainer {
 	private static HashMap<Long, FVClassifier> allWorkingSwitches = new HashMap<>();
 	
 	// list of original showing switches to OF controller to always use them to map to the controller
-	private static Hashtable<Long, LimeSwitch> originalSwitchContainer = new Hashtable<>();
+	private static HashMap<Long, LimeSwitch> originalSwitchContainer = new HashMap<>();
 
-	private static Hashtable<Long, Long> activeToOriginalSwitchMap = new Hashtable<>();
+	private static HashMap<Long, Long> activeToOriginalSwitchMap = new HashMap<>();
 
 
-	private static Hashtable<Long, Long> activeToCloneSwitchMap = new Hashtable<>();
+	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
 
 	// list of all slicers created
 	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
@@ -49,11 +47,11 @@ public class LimeContainer {
 	 * Get the original switch that OF controller can see
 	 * @return
 	 */
-	public static Hashtable<Long, LimeSwitch>  getOriginalSwitchContainer(){
+	public static HashMap<Long, LimeSwitch>  getOriginalSwitchContainer(){
 		return originalSwitchContainer;
 	}
 	
-	static void addOriginalSwitch(long swID, Hashtable<Integer, PortInfo> portTable){
+	static void addOriginalSwitch(long swID, HashMap<Integer, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 	
@@ -63,7 +61,7 @@ public class LimeContainer {
 		allWorkingSwitches.put(swId, swClassifier);
 	}	
 
-	public static synchronized Hashtable<Long,Long> getActiveToOriginalSwitchMap(){
+	public static synchronized HashMap<Long,Long> getActiveToOriginalSwitchMap(){
 		return activeToOriginalSwitchMap;
 	}
 

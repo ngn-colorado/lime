@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -182,7 +182,7 @@ public class FlowVisor {
 
 
 		for(long j=2; j<5; j++){
-			Hashtable<Integer, PortInfo> portTable = new Hashtable<>();
+			HashMap<Integer, PortInfo> portTable = new HashMap<>();
 			for(int i= 1; i<4; i++){
 				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
 				portTable.put(i, pInfo);
