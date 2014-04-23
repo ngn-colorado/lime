@@ -56,7 +56,7 @@ public class LimeContainer {
 	
 	static void addOriginalSwitch(long swID, Hashtable<Integer, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
-		System.out.println("OrigSwTableSize: " + originalSwitchContainer.size());
+		
 		if(!originalSwitchContainer.contains(swID)){
 			System.out.println("MURAD: table contains " + swID + " found");
 		}
@@ -73,7 +73,8 @@ public class LimeContainer {
 	}
 
 	public static synchronized void insertActiveToOriginalSwitchMap(long swActive, long swOriginal){
-		if(!originalSwitchContainer.contains(swOriginal)){
+		System.out.println("Inside insert method, OrigSwTableSize: " + originalSwitchContainer.size());
+		if(!originalSwitchContainer.contains(swOriginal)){ ////////////
 			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Active Switch " + swActive + " Original Switch " + swOriginal + " is not found");  // TODO through exception
 		}
 		else{
