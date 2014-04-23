@@ -2,6 +2,7 @@ package org.flowvisor;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 import net.minidev.json.JSONObject;
@@ -29,10 +30,9 @@ public class LimeContainer {
 
 	// all switches in the network and connecting LIME 
 	private static HashMap<Long, FVClassifier> allWorkingSwitches = new HashMap<>();
-
+	
 	// list of original showing switches to OF controller to always use them to map to the controller
-	private static Set<Long>originalSeenSwitches = new HashSet<>();   // by their IDs
-
+	private static Hashtable<Long, LimeSwitch> originalSwitchContainer = new Hashtable<>();
 
 	private static HashMap<Long, Long> activeToOriginalSwitchMap = new HashMap<>();
 
@@ -46,29 +46,30 @@ public class LimeContainer {
 		return allWorkingSwitches;
 	}
 
-	public static synchronized void addWorkingSwitch(long swId, FVClassifier swClassifier){
-		System.out.println("MURAD: Added working switch " + swId);
-		allWorkingSwitches.put(swId, swClassifier);
-	}
-
 	/**
 	 * Get the original switch that OF controller can see
 	 * @return
 	 */
-	public static synchronized Set<Long> getOriginalSeenSwitches(){
-		return originalSeenSwitches;
+	public static Hashtable<Long, LimeSwitch>  getOriginalSwitchContainer(){
+		return originalSwitchContainer;
 	}
-
-	static synchronized void insertOriginalSeenSwitches(Long swId){
-		originalSeenSwitches.add(swId);
+	
+	static void addOriginalSwitch(long swID, Hashtable<Integer, PortInfo> portTable){
+		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
+	
+	
+	public static synchronized void addWorkingSwitch(long swId, FVClassifier swClassifier){
+		System.out.println("MURAD: Added working switch " + swId);
+		allWorkingSwitches.put(swId, swClassifier);
+	}	
 
 	public static synchronized HashMap<Long,Long> getActiveToOriginalSwitchMap(){
 		return activeToOriginalSwitchMap;
 	}
 
 	public static synchronized void insertActiveToOriginalSwitchMap(long swActive, long swOriginal){
-		if(!originalSeenSwitches.contains(swOriginal)){
+		if(!originalSwitchContainer.contains(swOriginal)){
 			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Active Switch. Original Switch is not found");  // TODO through exception
 		}
 		else{

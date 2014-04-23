@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.flowvisor.LimeContainer;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.classifier.FVSendMsg;
@@ -204,10 +205,12 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		}
 		for (Short port : ports) {
 			System.out.println("MURAD: Ports before adding: " + port);
-			if (!allowedPorts.keySet().contains(port)) {
-				FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);
-				allowedPorts.put(port, Boolean.TRUE);
-				addedPorts.add(port);
+			if(LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID()).getPortTable().contains(port)){ //TODO null pointer exception might happen here
+				if (!allowedPorts.keySet().contains(port)) {
+					FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);
+					allowedPorts.put(port, Boolean.TRUE);
+					addedPorts.add(port);
+				}
 			}
 		}
 		for (Iterator<Short> it = allowedPorts.keySet().iterator(); it
@@ -230,9 +233,6 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	private void updatePortStatus(ArrayList<Short> addedPorts,
 			ArrayList<Short> removedPorts) {
 		for (Short port : addedPorts) {
-			if(port == 40){
-				System.out.println("MURAD: GHOST port found!!!!!");
-			}
 			OFPhysicalPort phyPort = findPhyPort(port);
 			if (phyPort != null)
 				sendPortStatusUpdate(phyPort, true);

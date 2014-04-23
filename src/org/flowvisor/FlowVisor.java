@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.xmlrpc.webserver.WebServer;
+import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.api.APIServer;
 import org.flowvisor.api.JettyServer;
 import org.flowvisor.config.ConfDBHandler;
@@ -68,10 +70,10 @@ public class FlowVisor {
 	private static final Options options = Options.make(new Option[] {
 			new Option("d", "debug", LogLevel.NOTE.toString(),
 					"Override default logging threshold in config"),
-			new Option("l", "logging", "Log to stderr instead of syslog"),
-			new Option("p", "port", 0, "Override OpenFlow port from config"),
-			new Option("h", "help", "Print help"),
-			new Option("j", "JSON web api port",8081, "Override JSON API port from config"),
+					new Option("l", "logging", "Log to stderr instead of syslog"),
+					new Option("p", "port", 0, "Override OpenFlow port from config"),
+					new Option("h", "help", "Print help"),
+					new Option("j", "JSON web api port",8081, "Override JSON API port from config"),
 
 	});
 
@@ -157,13 +159,13 @@ public class FlowVisor {
 		FVLog.log(LogLevel.DEBUG, null, "HALLO");
 		FlowVisor.setInstance(this);
 		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-				// init polling loop
+		// init polling loop
 		FVLog.log(LogLevel.INFO, null, "initializing poll loop");
 		FVEventLoop pollLoop = new FVEventLoop();
 		sliceLimits = new SlicerLimits();
-		
+
 		JettyServer.spawnJettyServer(FVConfig.getJettyPort());//jettyPort);
-		
+
 		if (port == 0)
 			port = FVConfig.getListenPort();
 
@@ -177,16 +179,31 @@ public class FlowVisor {
 		}
 
 		// get switches from configured slices
-		Set flows = FlowSpaceUtil.getFlowMap(1).getRules();
-		Iterator it = flows.iterator();
-	      while (it.hasNext()) {
-	         // Get element
-	         FlowEntry element = (FlowEntry) it.next();
-	         System.out.println("Murad: Original Seen Switch: " + element.getDpid());
-	         LimeContainer.insertOriginalSeenSwitches(element.getDpid());
-	         LimeContainer.insertActiveToOriginalSwitchMap(element.getDpid(), element.getDpid());
-	      }
-	      
+
+
+		for(int j=0; j<3; j++){
+			Hashtable<Integer, PortInfo> portTable = new Hashtable<>();
+			for(int i= 1; i<4; i++){
+				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
+				portTable.put(i, pInfo);
+			}
+			LimeContainer.addOriginalSwitch(j, portTable);
+
+			System.out.println("Murad: Original Seen Switch: " + j);
+			LimeContainer.insertActiveToOriginalSwitchMap(j, j);
+		}
+
+		//Set flows = FlowSpaceUtil.getFlowMap(1).getRules();
+		//Iterator it = flows.iterator();
+		/*while (it.hasNext()) {
+			// Get element
+			FlowEntry element = (FlowEntry) it.next();
+			System.out.println("Murad: Original Seen Switch: " + element.getDpid());
+			//LimeContainer.insertOriginalSeenSwitches(element.getDpid()); // TODO, inset switch info. not only ID
+
+			LimeContainer.insertActiveToOriginalSwitchMap(element.getDpid(), element.getDpid());
+		}*/
+
 		// init switchAcceptor
 		OFSwitchAcceptor acceptor = new OFSwitchAcceptor(pollLoop, port, 16);
 		acceptor.setSlicerLimits(sliceLimits);
@@ -228,7 +245,7 @@ public class FlowVisor {
 	 */
 
 	public static void main(String args[]) throws Throwable {
-	
+
 		ThreadLogger threadLogger = new ThreadLogger();
 		Thread.setDefaultUncaughtExceptionHandler(threadLogger);		
 		long lastRestart = System.currentTimeMillis();
@@ -245,10 +262,10 @@ public class FlowVisor {
 				else 
 					// Set temp file for config checkpointing.
 					fv.configFile = "/tmp/flowisor";
-				
-				
+
+
 				fv.run(); 
-				
+
 			}  catch (NullPointerException e) {
 				System.err.println("Startup failed : " + e.getMessage());
 				System.exit(1);
@@ -277,7 +294,7 @@ public class FlowVisor {
 		}
 	}
 
-	
+
 
 	private void parseArgs(String[] args) {
 		SimpleCLI cmd = null;
@@ -316,7 +333,7 @@ public class FlowVisor {
 			System.err.println("Writting jetty port to config: setting to "
 					+ jp);
 		}
-		
+
 		if(cmd.hasOption("h")){
 			usage("FlowVisor Help");
 			System.exit(0);
@@ -346,9 +363,9 @@ public class FlowVisor {
 	private static void usage(String string) {
 		System.err.println("FlowVisor version: " + FLOWVISOR_VERSION);
 		System.err
-				.println("Ali Al-Shabibi: ali.al-shabibi@onlab.us");
+		.println("Ali Al-Shabibi: ali.al-shabibi@onlab.us");
 		System.err
-				.println("---------------------------------------------------------------");
+		.println("---------------------------------------------------------------");
 		System.err.println("\n msg: " + string + "\n");
 		SimpleCLI.printHelp("FlowVisor [options] [config.json]",
 				FlowVisor.getOptions());
@@ -412,8 +429,8 @@ public class FlowVisor {
 	 */
 	public void checkPointConfig() {
 		// FIXME dump db file!!
-		
-		
+
+
 		String tmpFile = this.configFile + ".tmp"; // assumes no one else can
 		// write to same dir
 		// else security problem
@@ -432,7 +449,7 @@ public class FlowVisor {
 		} catch (FileNotFoundException e) {
 			FVLog.log(LogLevel.CRIT, null,
 					"failed to save config: tried to write to '" + tmpFile
-							+ "' but got FileNotFoundException");
+					+ "' but got FileNotFoundException");
 			return;
 		}
 		// sometimes, Java has the stoopidest ways of doing things :-(
@@ -440,7 +457,7 @@ public class FlowVisor {
 		if (tmp.length() == 0) {
 			FVLog.log(LogLevel.CRIT, null,
 					"failed to save config: tried to write to '" + tmpFile
-							+ "' but wrote empty file");
+					+ "' but wrote empty file");
 			return;
 		}
 
@@ -453,9 +470,9 @@ public class FlowVisor {
 		// TODO pull from FVConfig; needed for slice stiching
 		return "magic flowvisor1";
 	}
-	
-	
-	
+
+
+
 	private static void updateDB() {
 		int db_version = FlowvisorImpl.getProxy().fetchDBVersion();
 		if (db_version == FLOWVISOR_DB_VERSION)
@@ -466,9 +483,9 @@ public class FlowVisor {
 		SliceImpl.getProxy().updateDB(db_version);
 		FlowSpaceImpl.getProxy().updateDB(db_version);
 		SwitchImpl.getProxy().updateDB(db_version);
-		
+
 	}
 
 
-	
+
 }
