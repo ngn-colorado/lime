@@ -1,9 +1,8 @@
 package org.flowvisor;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Set;
+
 
 import net.minidev.json.JSONObject;
 
@@ -34,10 +33,10 @@ public class LimeContainer {
 	// list of original showing switches to OF controller to always use them to map to the controller
 	private static Hashtable<Long, LimeSwitch> originalSwitchContainer = new Hashtable<>();
 
-	private static HashMap<Long, Long> activeToOriginalSwitchMap = new HashMap<>();
+	private static Hashtable<Long, Long> activeToOriginalSwitchMap = new Hashtable<>();
 
 
-	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
+	private static Hashtable<Long, Long> activeToCloneSwitchMap = new Hashtable<>();
 
 	// list of all slicers created
 	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
@@ -56,10 +55,6 @@ public class LimeContainer {
 	
 	static void addOriginalSwitch(long swID, Hashtable<Integer, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
-		
-		if(!originalSwitchContainer.contains(swID)){
-			System.out.println("MURAD: table contains " + swID + " found");
-		}
 	}
 	
 	
@@ -68,13 +63,12 @@ public class LimeContainer {
 		allWorkingSwitches.put(swId, swClassifier);
 	}	
 
-	public static synchronized HashMap<Long,Long> getActiveToOriginalSwitchMap(){
+	public static synchronized Hashtable<Long,Long> getActiveToOriginalSwitchMap(){
 		return activeToOriginalSwitchMap;
 	}
 
 	public static synchronized void insertActiveToOriginalSwitchMap(long swActive, long swOriginal){
-		System.out.println("Inside insert method, OrigSwTableSize: " + originalSwitchContainer.size());
-		if(!originalSwitchContainer.contains(swOriginal)){ ////////////
+		if(!originalSwitchContainer.containsKey(swOriginal)){ ////////////
 			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Active Switch " + swActive + " Original Switch " + swOriginal + " is not found");  // TODO through exception
 		}
 		else{
