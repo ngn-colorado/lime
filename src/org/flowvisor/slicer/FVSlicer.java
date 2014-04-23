@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.flowvisor.LimeContainer;
+import org.flowvisor.LimeSwitch;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.classifier.FVSendMsg;
@@ -205,15 +206,18 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		}
 		for (Short port : ports) {
 			System.out.println("MURAD: Ports before adding: " + port);
-			if(LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID()).getPortTable().containsKey(port)){ //TODO null pointer exception might happen here
-				if (!allowedPorts.keySet().contains(port)) {
-					FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);
-					allowedPorts.put(port, Boolean.TRUE);
-					addedPorts.add(port);
+			LimeSwitch lSwitch;
+			if((lSwitch = LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID())) != null){ //TODO null pointer exception might happen here
+				if(lSwitch.getPortTable().containsKey(port)){
+					if (!allowedPorts.keySet().contains(port)) {
+						FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);
+						allowedPorts.put(port, Boolean.TRUE);
+						addedPorts.add(port);
+					}
 				}
 			}
 		}
-		
+
 		for (Iterator<Short> it = allowedPorts.keySet().iterator(); it
 				.hasNext();) {
 			Short port = it.next();
