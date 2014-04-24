@@ -31,8 +31,10 @@ public class LimeContainer {
 	// list of original showing switches to OF controller to always use them to map to the controller
 	private static HashMap<Long, LimeSwitch> originalSwitchContainer = new HashMap<>();
 
+	// list of clone showing switches. those must be received my the time migration happens. And they must have ghost port identified.
+	private static HashMap<Long, LimeSwitch> cloneSwitchContainer = new HashMap<>();
+		
 	private static HashMap<Long, Long> activeToOriginalSwitchMap = new HashMap<>();
-
 
 	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
 
@@ -55,6 +57,13 @@ public class LimeContainer {
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 	
+	public static HashMap<Long, LimeSwitch>  getCloneSwitchContainer(){
+		return cloneSwitchContainer;
+	}
+	
+	static void addCloneSwitch(long swID, HashMap<Short, PortInfo> portTable){
+		cloneSwitchContainer.put(swID, new LimeSwitch(portTable));
+	}
 	
 	public static synchronized void addWorkingSwitch(long swId, FVClassifier swClassifier){
 		System.out.println("MURAD: Added working switch " + swId);
@@ -73,13 +82,26 @@ public class LimeContainer {
 			activeToOriginalSwitchMap.put(swActive, swOriginal);
 		}
 	}
+	
+	
+	public static synchronized HashMap<Long,Long> getActiveToCloneSwitchMap(){
+		return activeToCloneSwitchMap;
+	}
+	
+	static synchronized void insertActiveToCloneSwitchMap(long swActive, long swClone){
+		if((!activeToOriginalSwitchMap.containsKey(swActive)) || (!cloneSwitchContainer.containsKey(swClone))){ ////////////
+			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Clone Switch " + swClone + " and Active Switch " + swActive);  // TODO through exception
+		}
+		else{
+			activeToCloneSwitchMap.put(swActive, swClone);
+		}
+	}
 
 	public static synchronized void addSlicer(long sName, FVSlicer fvSlicer){
 		allSlicers.put(sName, fvSlicer);
 
 	}
 	public static synchronized HashMap<Long, FVSlicer> getAllSlicers(){
-		
 		return allSlicers;
 	}
 	

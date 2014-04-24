@@ -504,9 +504,12 @@ SwitchChangedListener {
 									"trying to ignore it");
 							continue;
 						}
-						System.out.println("MURAD: rec MSG TYPE: " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
+						if (m.getType().equals("PORT_STATUS") || m.getType().equals("FEATURES_REPLY")){
+							System.out.println("MURAD: Rcvd Msg Type: " + m.getType());
+						}
+						
 						if ((m instanceof SanityCheckable)
 								&& (!((SanityCheckable) m).isSane())) {
 							FVLog.log(LogLevel.WARN, this,
@@ -672,13 +675,15 @@ SwitchChangedListener {
 				// MURAD added below if statement 	
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 					makeActive();
-					FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  
-					slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
-					newSlicer.init();
-					LimeContainer.addSlicer(getDPID(), newSlicer);
-					System.out.println("MURAD: Creating slicer for switch: " + switchName);
+					if (!slicerMap.containsKey(LimeContainer.MainSlice)){
+						FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  
+						slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
+						newSlicer.init();
+						LimeContainer.addSlicer(getDPID(), newSlicer);
+						System.out.println("MURAD: Creating slicer for switch: " + switchName);
+					}
 				}
-				
+
 			} catch (ConfigError e) {
 				//System.out.println("MURAD: Config Error for FlowMap!!!!!");
 				FVLog.log(LogLevel.CRIT, this, "Unable to fetch Flow Space : " + e.getMessage());
@@ -1176,39 +1181,39 @@ SwitchChangedListener {
 				it.remove();
 		}		
 	}
-	
-	
+
+
 	//MURAD methods bellow
 	public Set<Short> getAcrivePorts(){
 		return activePorts;
 	}
-	
+
 	public boolean isBeenCloned(){
 		return isCloned;
 	}
-	
+
 	public void startClone(){
 		isCloned = true;
 	}
-	
+
 	public void stopClone(){
 		isCloned = false;
 	}
-	
+
 	public boolean isActive(){
 		return isActive;
 	}
-	
+
 	public void makeActive(){
 		System.out.println("MURAD: Added switch " + getDPID() + " as an active switch");
 		isActive = true;
 	}
-	
-	public long getduplicateSwitch(){
+
+	public long getDuplicateSwitch(){
 		return duplicateSwitch;
 	}
-	
-	public void setduplicateSwitch(long swId){
+
+	public void setDuplicateSwitch(long swId){
 		duplicateSwitch = swId;
 	}
 }

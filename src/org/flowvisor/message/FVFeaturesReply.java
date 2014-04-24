@@ -35,6 +35,10 @@ implements Classifiable, Slicable, TopologyControllable {
 			// insert the original switchId in this reply
 			if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(this.datapathId)){
 				this.datapathId = LimeContainer.getActiveToOriginalSwitchMap().get(this.datapathId);
+				
+				// only map wanted ports
+				
+				
 				fvSlicer.sendMsg(this, fvClassifier);
 			}
 			else{
@@ -42,9 +46,9 @@ implements Classifiable, Slicable, TopologyControllable {
 			}
 		}
 		else{
-			if(fvClassifier.getduplicateSwitch() != 0){
-				if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(fvClassifier.getduplicateSwitch())){
-					this.datapathId = LimeContainer.getActiveToOriginalSwitchMap().get(fvClassifier.getduplicateSwitch());
+			if(fvClassifier.getDuplicateSwitch() != 0){
+				if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(fvClassifier.getDuplicateSwitch())){
+					this.datapathId = LimeContainer.getActiveToOriginalSwitchMap().get(fvClassifier.getDuplicateSwitch());
 					fvSlicer.sendMsg(this, fvClassifier);
 				}
 				else{
