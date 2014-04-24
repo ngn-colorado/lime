@@ -201,8 +201,8 @@ public class FlowVisor {
 			}
 			LimeContainer.addOriginalSwitch(5, portTable);
 
-			System.out.println("Murad: Original Seen Switch: " + 5);
-			LimeContainer.insertActiveToOriginalSwitchMap(5, 5);
+			System.out.println("Murad: Original Seen Switch: " + 6);
+			LimeContainer.insertActiveToOriginalSwitchMap(6, 6);
 		//////////////////////////////////////	
 
 		//Set flows = FlowSpaceUtil.getFlowMap(1).getRules();
