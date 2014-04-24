@@ -188,7 +188,7 @@ public class FlowVisor {
 				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
 				portTable.put(i, pInfo);
 			}
-			LimeContainer.addOriginalSwitch(2, portTable);
+			LimeContainer.addOriginalSwitch(3, portTable);
 
 			System.out.println("Murad: Original Seen Switch: " + 3);
 			LimeContainer.insertActiveToOriginalSwitchMap(3, 3);
