@@ -51,7 +51,7 @@ Classifiable, Slicable, Cloneable {
 
 	@Override
 	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
-		System.out.println("MURAD: recv from slice " + fvSlicer.getSliceName() + this + " for switch " + fvClassifier.getSwitchName());
+		//System.out.println("MURAD: recv from slice " + fvSlicer.getSliceName() + this + " for switch " + fvClassifier.getSwitchName());
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
 		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
 		translateCookie(fvClassifier, fvSlicer);

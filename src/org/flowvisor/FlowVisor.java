@@ -14,6 +14,7 @@ import org.apache.xmlrpc.webserver.WebServer;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.api.APIServer;
 import org.flowvisor.api.JettyServer;
+import org.flowvisor.api.LimeServer;
 import org.flowvisor.config.ConfDBHandler;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
@@ -203,6 +204,10 @@ public class FlowVisor {
 
 			LimeContainer.insertActiveToOriginalSwitchMap(element.getDpid(), element.getDpid());
 		}*/
+		
+		// start Lime server
+		LimeServer lServer = new LimeServer();
+		new Thread(lServer).start();
 
 		// init switchAcceptor
 		OFSwitchAcceptor acceptor = new OFSwitchAcceptor(pollLoop, port, 16);
