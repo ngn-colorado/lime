@@ -51,7 +51,7 @@ public class LimeContainer {
 		return originalSwitchContainer;
 	}
 	
-	static void addOriginalSwitch(long swID, HashMap<Integer, PortInfo> portTable){
+	static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 	

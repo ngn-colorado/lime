@@ -182,8 +182,8 @@ public class FlowVisor {
 
 
 		for(long j=2; j<5; j++){
-			HashMap<Integer, PortInfo> portTable = new HashMap<>();
-			for(int i= 1; i<4; i++){
+			HashMap<Short, PortInfo> portTable = new HashMap<>();
+			for(short i= 1; i<4; i++){
 				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
 				portTable.put(i, pInfo);
 			}

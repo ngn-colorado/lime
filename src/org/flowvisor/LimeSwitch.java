@@ -6,22 +6,22 @@ import org.flowvisor.PortInfo.PortType;
 
 public class LimeSwitch {
 
-	private HashMap<Integer, PortInfo> portTable;
+	private HashMap<Short, PortInfo> portTable;
 	
     public LimeSwitch(){
     	this.portTable 	= new HashMap<>();
     }
     
-    public LimeSwitch(HashMap<Integer, PortInfo> portTable){
+    public LimeSwitch(HashMap<Short, PortInfo> portTable){
     	this.portTable = portTable;
     }
     
     
-    public HashMap<Integer, PortInfo> getPortTable(){
+    public HashMap<Short, PortInfo> getPortTable(){
     	return portTable;
     }
     
-    public void insertPortTable(HashMap<Integer, PortInfo> pTable){
+    public void insertPortTable(HashMap<Short, PortInfo> pTable){
     	this.portTable = pTable;
     }
     
@@ -29,7 +29,7 @@ public class LimeSwitch {
     	return portTable.size();
     }
     
-    public void addPort(int portNumber, PortType pType, String attMAC, String attIP){
+    public void addPort(short portNumber, PortType pType, String attMAC, String attIP){
     	PortInfo pInfo = new PortInfo(pType, attMAC, attIP);
     	portTable.put(portNumber, pInfo);
     }
