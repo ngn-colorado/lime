@@ -30,6 +30,7 @@ public  class LimeServer implements Runnable{
 			while ((inputLine = in.readLine()) != null) {
 				System.out.println("Recv from operator: " + inputLine);
 				out.println("LIME said: " + inputLine);
+				
 			}
 		} catch (IOException e) {
 			System.out.println("Exception caught when trying to listen on port "

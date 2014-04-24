@@ -20,7 +20,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 	@Override
 	public void classifyFromSwitch(FVClassifier fvClassifier) {
 		Short port = Short.valueOf(this.getDesc().getPortNumber());
-
+		System.out.println("MURAD: Recv port status from sw: " + fvClassifier.getDPID() + " about port: " + port);
 		byte reason = this.getReason();
 		boolean updateSlicers = false;
 
