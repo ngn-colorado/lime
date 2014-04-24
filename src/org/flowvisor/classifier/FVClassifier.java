@@ -506,7 +506,7 @@ SwitchChangedListener {
 						}
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
-						if (m.getType().equals("PORT_STATUS") || m.getType().equals("FEATURES_REPLY")){
+						if (m.getType().equals(OFType.PORT_STATUS) || m.getType().equals(OFType.FEATURES_REPLY)){
 							System.out.println("MURAD: Rcvd Msg Type: " + m.getType());
 						}
 						
