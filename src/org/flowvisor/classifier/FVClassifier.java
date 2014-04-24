@@ -504,6 +504,7 @@ SwitchChangedListener {
 									"trying to ignore it");
 							continue;
 						}
+						System.out.println("MURAD: rec MSG TYPE: " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
 						if ((m instanceof SanityCheckable)

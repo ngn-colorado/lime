@@ -182,28 +182,17 @@ public class FlowVisor {
 		// get switches from configured slices
 
 
-		//for(long j=2; j<5; j++){
+		for(long j=2; j<5; j++){
 			HashMap<Short, PortInfo> portTable = new HashMap<>();
 			for(short i= 1; i<4; i++){
 				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
 				portTable.put(i, pInfo);
 			}
-			LimeContainer.addOriginalSwitch(3, portTable);
+			LimeContainer.addOriginalSwitch(j, portTable);
 
-			System.out.println("Murad: Original Seen Switch: " + 3);
-			LimeContainer.insertActiveToOriginalSwitchMap(3, 3);
-		//}
-			
-			portTable = new HashMap<>();
-			for(short i= 1; i<4; i++){
-				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
-				portTable.put(i, pInfo);
-			}
-			LimeContainer.addOriginalSwitch(6, portTable);
-
-			System.out.println("Murad: Original Seen Switch: " + 6);
-			LimeContainer.insertActiveToOriginalSwitchMap(6, 6);
-		//////////////////////////////////////	
+			System.out.println("Murad: Original Seen Switch: " + j);
+			LimeContainer.insertActiveToOriginalSwitchMap(j, j);
+		}
 
 		//Set flows = FlowSpaceUtil.getFlowMap(1).getRules();
 		//Iterator it = flows.iterator();

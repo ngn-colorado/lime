@@ -205,7 +205,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				ports.add(phyPort.getPortNumber());
 		}
 		for (Short port : ports) {
-			System.out.println("MURAD: Ports before adding: " + port);
+			//System.out.println("MURAD: Ports before adding: " + port);
 			LimeSwitch lSwitch;
 			if((lSwitch = LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID())) != null){ //TODO null pointer exception might happen here
 				if(lSwitch.getPortTable().containsKey(port)){
@@ -256,7 +256,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		portStatus.setReason(added ? (byte) OFPortReason.OFPPR_ADD.ordinal() : 
 			(byte) OFPortReason.OFPPR_DELETE.ordinal());
 		FVLog.log(LogLevel.INFO, this, (added ? "added " : "removed ") + "port " + phyPort.getPortNumber());
-		System.out.println("MURAD: updating port " + phyPort.getPortNumber());
+		//System.out.println("MURAD: updating port " + phyPort.getPortNumber());
 		sendMsg(portStatus, this);
 	}
 
