@@ -190,8 +190,8 @@ public class FlowVisor {
 			}
 			LimeContainer.addOriginalSwitch(2, portTable);
 
-			System.out.println("Murad: Original Seen Switch: " + 2);
-			LimeContainer.insertActiveToOriginalSwitchMap(2, 2);
+			System.out.println("Murad: Original Seen Switch: " + 3);
+			LimeContainer.insertActiveToOriginalSwitchMap(3, 3);
 		//}
 			
 			portTable = new HashMap<>();
