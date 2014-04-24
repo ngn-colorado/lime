@@ -18,7 +18,6 @@ public class LimeSwitch {
     
     
     public HashMap<Integer, PortInfo> getPortTable(){
-    	System.out.println("First PortType when get" + portTable.get(1).getType());
     	return portTable;
     }
     

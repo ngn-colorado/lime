@@ -209,7 +209,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			LimeSwitch lSwitch;
 			if((lSwitch = LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID())) != null){ //TODO null pointer exception might happen here
 				System.out.println("MURAD: Switch: " + this.fvClassifier.getDPID() + " is not null");
-				System.out.println("MURAD: Switch port no: " + lSwitch.getNumberOfPorts());
+				System.out.println("First PortType when get" + lSwitch.getPortTable().get(1).getType());
 				if(lSwitch.getPortTable().containsKey(port)){
 					System.out.println("MURAD: Orignal switch has this port: " + port);
 					if (!allowedPorts.keySet().contains(port)) {
