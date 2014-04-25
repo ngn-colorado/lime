@@ -111,7 +111,7 @@ SwitchChangedListener {
 	private boolean isCloned = false;
 	private boolean isActive = false;
 	private long duplicateSwitch = 0;  // Assuming no switch will have 0 as an ID
-	HashMap<Short, PortInfo> activePorts;
+	private HashMap<Short, PortInfo> activePorts;
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
@@ -226,6 +226,7 @@ SwitchChangedListener {
 
 	// MURAD: Called once at the beginning of the classifier setup when it receives FEATURS_REPLY first time
 	private void setSwitchInfo(OFFeaturesReply switchInfo) {
+		System.out.println("MURAD: FVClassifier,229, switchInfoPortSetSize: " + switchInfo.getPorts().size());
 		this.switchInfo = switchInfo;
 		this.activePorts.clear();
 
