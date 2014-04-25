@@ -64,6 +64,7 @@ public class LimeMigrationHandler {
 					}
 					else{
 						portMissing = true;
+						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found"); 
 						break;
 					}
 				}
