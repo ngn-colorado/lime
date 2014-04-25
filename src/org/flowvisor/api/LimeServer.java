@@ -11,6 +11,8 @@ package org.flowvisor.api;
 import java.net.*;
 import java.io.*;
 
+import org.flowvisor.LimeMigrationHandler;
+
 public  class LimeServer implements Runnable{
 	@Override
 	public void run(){
@@ -30,9 +32,13 @@ public  class LimeServer implements Runnable{
 			while ((inputLine = in.readLine()) != null) {
 				System.out.println("Recv from operator: " + inputLine);
 				out.println("LIME said: " + inputLine);
+				if(inputLine.equals("start")){
+					LimeMigrationHandler limeMigHandler = new LimeMigrationHandler();
+					limeMigHandler.init();
+				}
 				
 			}
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			System.out.println("Exception caught when trying to listen on port "
 					+ portNumber + " or listening for a connection");
 			System.out.println(e.getMessage());
