@@ -22,7 +22,6 @@ import org.flowvisor.slicer.FVSlicer;
 
 public class LimeContainer {
 
-	private static int testCounter = 0;
 	public static final String MainSlice = "slice1"; 
 
 	// all switches in the network and connecting LIME 
@@ -31,7 +30,10 @@ public class LimeContainer {
 	// list of original showing switches to OF controller to always use them to map to the controller
 	private static HashMap<Long, LimeSwitch> originalSwitchContainer = new HashMap<>();
 
-	// list of clone showing switches. those must be received my the time migration happens. And they must have ghost port identified.
+	// list of active switches.
+	private static HashMap<Long, LimeSwitch> activeSwitchContainer = new HashMap<>();
+		
+	// list of clone switches. those must be received my the time migration happens. And they must have ghost port identified.
 	private static HashMap<Long, LimeSwitch> cloneSwitchContainer = new HashMap<>();
 		
 	private static HashMap<Long, Long> activeToOriginalSwitchMap = new HashMap<>();
@@ -41,7 +43,7 @@ public class LimeContainer {
 	// list of all slicers created
 	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
 
-	public static HashMap<Long, FVClassifier> getAllWorkingSwitcher(){
+	public static HashMap<Long, FVClassifier> getAllWorkingSwitches(){
 		return allWorkingSwitches;
 	}
 
@@ -55,6 +57,14 @@ public class LimeContainer {
 	
 	static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
+	}
+	
+	public static HashMap<Long, LimeSwitch>  getActiveSwitchContainer(){
+		return activeSwitchContainer;
+	}
+	
+	static void addActiveSwitch(long swID, HashMap<Short, PortInfo> portTable){
+		activeSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 	
 	public static HashMap<Long, LimeSwitch>  getCloneSwitchContainer(){

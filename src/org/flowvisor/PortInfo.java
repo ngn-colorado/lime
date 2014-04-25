@@ -19,27 +19,20 @@ public class PortInfo {
 		this.attachmentIP 	= attIP;
 	}
 	
-	public String getType(){
-		return portType.getType();
+	public PortType getType(){
+		return portType;
 	}
 
-
+	public void setType(PortType pType) {
+		this.portType = pType;
+		
+	}
+	
 	public enum PortType {
-		CONNECTED("C"),
-		EMPTY("E"),
-		GHOST("G");
-
-		protected String type;
-		private PortType(String type) {
-			this.type = type;
-		}
-		public String getType() {
-			return type;
-		}        
-	}
-
-	public void useEnum(){
-		PortType pInfo = PortType.CONNECTED;
-		pInfo.getType();
+		CONNECTED, // connected to switch or host
+		EMPTY,  // not connected to anything
+		GHOST,
+		UKNOWN;
+    
 	}
 }

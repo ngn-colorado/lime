@@ -17,6 +17,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.flowvisor.LimeContainer;
+import org.flowvisor.LimeSwitch;
+import org.flowvisor.PortInfo;
+import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.api.FlowTableCallback;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.config.ConfigError;
@@ -104,10 +107,12 @@ SwitchChangedListener {
 	SocketChannel sock;
 	String switchName;
 	boolean doneID;
-	//MURAD variables
+	//MURAD variables start
 	private boolean isCloned = false;
 	private boolean isActive = false;
 	private long duplicateSwitch = 0;  // Assuming no switch will have 0 as an ID
+	HashMap<Short, PortInfo> activePorts;
+	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
 	ConcurrentHashMap<String, FVSlicer> slicerMap;
@@ -116,7 +121,6 @@ SwitchChangedListener {
 	short missSendLength;
 	FlowMap switchFlowMap;
 	private boolean shutdown;
-	Set<Short> activePorts;
 	private final FVMessageFactory factory;
 	OFKeepAlive keepAlive;
 	SendRecvDropStats stats;
@@ -167,7 +171,7 @@ SwitchChangedListener {
 		this.cookieTranslator = new CookieTranslator();
 		this.missSendLength = 128;
 		this.switchFlowMap = null;
-		this.activePorts = new HashSet<Short>();
+		this.activePorts = new HashMap<>();
 		this.wantStatsDescHack = true;
 		FlowvisorImpl.addListener(this);
 
@@ -220,15 +224,29 @@ SwitchChangedListener {
 		return switchInfo;
 	}
 
-	public void setSwitchInfo(OFFeaturesReply switchInfo) {
+	// MURAD: Called once at the beginning of the classifier setup when it receives FEATURS_REPLY first time
+	private void setSwitchInfo(OFFeaturesReply switchInfo) {
 		this.switchInfo = switchInfo;
 		this.activePorts.clear();
-		for (OFPhysicalPort phyPort : switchInfo.getPorts())
-			this.activePorts.add(phyPort.getPortNumber());
+
+		for (OFPhysicalPort phyPort : switchInfo.getPorts()){	
+			if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
+				LimeSwitch origSwitch;
+				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
+				PortInfo pInfo;
+				if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+					this.activePorts.put(phyPort.getPortNumber(), pInfo);
+					return;
+				}
+			}
+			PortInfo pInfo = new PortInfo(PortType.UKNOWN, null, null);
+			this.activePorts.put(phyPort.getPortNumber(), pInfo);
+		}
+
 	}
 
 	public boolean isPortActive(short port) {
-		return this.activePorts.contains(port);
+		return this.activePorts.containsKey(port);
 	}
 
 	public void addPort(OFPhysicalPort phyPort) {
@@ -243,7 +261,17 @@ SwitchChangedListener {
 		}
 		// update new info
 		switchInfo.getPorts().add(phyPort);
-		this.activePorts.add(phyPort.getPortNumber());
+		LimeSwitch origSwitch;
+		if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
+			origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
+			PortInfo pInfo;
+			if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+				this.activePorts.put(phyPort.getPortNumber(), pInfo);
+				return;
+			}
+		}
+		PortInfo pInfo = new PortInfo(PortType.UKNOWN, null, null);
+		this.activePorts.put(phyPort.getPortNumber(), pInfo);
 	}
 
 	public void removePort(OFPhysicalPort phyPort) {
@@ -509,7 +537,7 @@ SwitchChangedListener {
 						if (m.getType().equals(OFType.PORT_STATUS) || m.getType().equals(OFType.FEATURES_REPLY)){
 							System.out.println("MURAD: Rcvd Msg Type: " + m.getType());
 						}
-						
+
 						if ((m instanceof SanityCheckable)
 								&& (!((SanityCheckable) m).isSane())) {
 							FVLog.log(LogLevel.WARN, this,
@@ -675,6 +703,7 @@ SwitchChangedListener {
 				// MURAD added below if statement 	
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 					makeActive();
+					// copy original lime switch ports 
 					if (!slicerMap.containsKey(LimeContainer.MainSlice)){
 						FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  
 						slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
@@ -1184,7 +1213,7 @@ SwitchChangedListener {
 
 
 	//MURAD methods bellow
-	public Set<Short> getAcrivePorts(){
+	public HashMap<Short, PortInfo> getAcrivePorts(){
 		return activePorts;
 	}
 
