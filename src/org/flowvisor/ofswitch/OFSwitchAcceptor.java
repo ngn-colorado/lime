@@ -9,7 +9,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
-import org.flowvisor.LimeContainer;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.events.FVEvent;
 import org.flowvisor.events.FVEventHandler;

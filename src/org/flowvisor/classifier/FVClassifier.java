@@ -225,7 +225,7 @@ SwitchChangedListener {
 	}
 
 	// MURAD: Called once at the beginning of the classifier setup when it receives FEATURS_REPLY first time
-	private void setSwitchInfo(OFFeaturesReply switchInfo) {
+	public void setSwitchInfo(OFFeaturesReply switchInfo) {
 		this.switchInfo = switchInfo;
 		this.activePorts.clear();
 
