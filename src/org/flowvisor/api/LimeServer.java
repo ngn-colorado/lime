@@ -16,7 +16,7 @@ import org.flowvisor.LimeMigrationHandler;
 public  class LimeServer implements Runnable{
 	@Override
 	public void run(){
-
+		System.out.println("MURAD: LimeServer is running...");
 		int portNumber = 8082;
 
 		try (

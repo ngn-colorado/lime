@@ -84,8 +84,9 @@ public class LimeMigrationHandler {
 			}
 			else{
 				System.out.println("MURAD: ERROR finding Active to Clone switches!!!!!!!!!!: " + entry.getKey() + " " + entry.getValue());
-				break;
+				return;
 			}
+			System.out.print("Initialization was seccuful..");
 		}
 	}
 	
