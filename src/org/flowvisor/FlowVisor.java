@@ -182,7 +182,7 @@ public class FlowVisor {
 		// get switches from configured slices
 
 
-		for(long j=2; j<5; j++){
+		for(long j=3; j<5; j++){
 			HashMap<Short, PortInfo> portTable = new HashMap<>();
 			for(short i= 1; i<4; i++){
 				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
