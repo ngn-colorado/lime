@@ -230,7 +230,7 @@ SwitchChangedListener {
 		this.activePorts.clear();
 
 		for (OFPhysicalPort phyPort : switchInfo.getPorts()){	
-			System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
+			//System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
 			if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 				LimeSwitch origSwitch;
 				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
@@ -251,6 +251,7 @@ SwitchChangedListener {
 	}
 
 	public void addPort(OFPhysicalPort phyPort) {
+		System.out.println("MURAD: FVClassifier, adding port " + phyPort.getPortNumber());
 		for (Iterator<OFPhysicalPort> it = switchInfo.getPorts().iterator(); it
 				.hasNext();) {
 			// remove stale info, if it exists
