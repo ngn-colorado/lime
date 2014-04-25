@@ -64,7 +64,7 @@ public class LimeMigrationHandler {
 					}
 					else{
 						portMissing = true;
-						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found"); 
+						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found for aSW " + activeSwID + " and cSW " + cloneSwID); 
 						break;
 					}
 				}
