@@ -536,8 +536,8 @@ SwitchChangedListener {
 						}
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
-						if (m.getType().equals(OFType.PORT_STATUS) || m.getType().equals(OFType.FEATURES_REPLY)){
-							//System.out.println("MURAD: Rcvd Msg Type: " + m.getType());
+						if (m.getType().equals(OFType.FEATURES_REPLY)){
+							System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID());
 						}
 
 						if ((m instanceof SanityCheckable)
