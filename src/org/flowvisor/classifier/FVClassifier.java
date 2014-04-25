@@ -225,12 +225,12 @@ SwitchChangedListener {
 	}
 
 	// MURAD: Called once at the beginning of the classifier setup when it receives FEATURS_REPLY first time
-	public void setSwitchInfo(OFFeaturesReply switchInfo) {
+	private void setSwitchInfo(OFFeaturesReply switchInfo) {
 		this.switchInfo = switchInfo;
 		this.activePorts.clear();
 
 		for (OFPhysicalPort phyPort : switchInfo.getPorts()){	
-			//System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
+			System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
 			if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 				LimeSwitch origSwitch;
 				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
