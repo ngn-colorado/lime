@@ -226,19 +226,18 @@ SwitchChangedListener {
 
 	// MURAD: Called once at the beginning of the classifier setup when it receives FEATURS_REPLY first time
 	private void setSwitchInfo(OFFeaturesReply switchInfo) {
-		System.out.println("MURAD: FVClassifier,229, switchInfoPortSetSize: " + switchInfo.getPorts().size());
 		this.switchInfo = switchInfo;
 		this.activePorts.clear();
 
 		for (OFPhysicalPort phyPort : switchInfo.getPorts()){	
-			System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
+			//System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
 			if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 				LimeSwitch origSwitch;
 				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
 				PortInfo pInfo;
 				if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
 					this.activePorts.put(phyPort.getPortNumber(), pInfo);
-					return;
+					continue;
 				}
 			}
 			PortInfo pInfo = new PortInfo(PortType.UKNOWN, null, null);
@@ -252,7 +251,7 @@ SwitchChangedListener {
 	}
 
 	public void addPort(OFPhysicalPort phyPort) {
-		System.out.println("MURAD: FVClassifier, adding port " + phyPort.getPortNumber());
+		//System.out.println("MURAD: FVClassifier, adding port " + phyPort.getPortNumber());
 		for (Iterator<OFPhysicalPort> it = switchInfo.getPorts().iterator(); it
 				.hasNext();) {
 			// remove stale info, if it exists
@@ -538,7 +537,7 @@ SwitchChangedListener {
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
 						if (m.getType().equals(OFType.FEATURES_REPLY) || m.getType().equals(OFType.PORT_STATUS)){
-							System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID());
+							//System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID());
 						}
 
 						if ((m instanceof SanityCheckable)
