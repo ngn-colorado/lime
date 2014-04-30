@@ -76,12 +76,12 @@ TopologyControllable {
 			// check if this is a clone switch from activeToClone table
 			long activeSwitchID;
 			if ((activeSwitchID = LimeContainer.getActiveSwitchForThisCloneSwithc(fvClassifier.getDPID())) != -1 ){
-				// get the slice from active switch
+				
 				FVClassifier activeClassifier = LimeContainer.getAllWorkingSwitches().get(activeSwitchID);
 
 				int newXid = LimeContainer.translateXid(this.getXid(), fvClassifier);
 				this.setXid(newXid);
-
+				// get the slice from active switch
 				FVSlicer fvSlicer = activeClassifier.getSlicerByName(LimeContainer.MainSlice);
 				if(fvSlicer != null){
 					fvSlicer.sendMsg(this, fvClassifier);

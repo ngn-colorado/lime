@@ -3,6 +3,7 @@ package org.flowvisor.message;
 import java.util.Arrays;
 import java.util.List;
 
+import org.flowvisor.LimeContainer;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.flows.FlowEntry;
@@ -29,6 +30,30 @@ import org.openflow.util.HexString;
  *
  * @author capveg
  *
+ *
+ * @author Murad
+ * since controller only talks with slicer that map to one single active switch
+	is active been cloned?
+		no, forward
+		yes, (might be sent from active or its clone)
+			retrieve info based on xid and get swID
+			swID is for active?
+				yes, edit action list based on LIME algorithem
+				send to active
+				get mapped clone id
+				but buffer id= -1
+				what about xid? would the switch accept that?
+				edit action list based on LIME algorithem
+				send it to clone
+			swID is for clone (verifiy that is indeed the clone from ActiveToCloneMap
+				yes, edict action list based on LIME algorithem
+				send to clone
+				get mapped active id
+				but buffer id= -1
+				what about xid? would the switch accept that?
+				edit action list based on LIME algorithem
+				send to active
+
  */
 
 public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
@@ -40,14 +65,14 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 	@Override
 	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
-		
+
 		// make sure that this slice can access this bufferID
 		if (! fvSlicer.isBufferIDAllowed(this.getBufferId())) {
 			FVLog.log(LogLevel.WARN, fvSlicer,
 					"EPERM buffer_id ", this.getBufferId(), " disallowed: "
-							, this.toVerboseString());
+					, this.toVerboseString());
 			fvSlicer.sendMsg(FVMessageUtil.makeErrorMsg(
-						OFBadRequestCode.OFPBRC_BUFFER_UNKNOWN, this), fvSlicer);
+					OFBadRequestCode.OFPBRC_BUFFER_UNKNOWN, this), fvSlicer);
 			return;
 		}
 
@@ -58,17 +83,26 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		}
 		// look at the original class to see how the matching is happening to use it later
 		//System.out.println("MURAD: sending Packet_out to switch: " + fvClassifier.getDPID());
-		
+
+
+
 		//MURAD added bellow
 		if(fvClassifier.isBeenCloned()){
+			if (LimeContainer.untranslate(xid) != null){
+				long switchID = LimeContainer.untranslate(xid).getClassifierID();
+				FVClassifier senderFVClassifier = LimeContainer.getAllWorkingSwitches().get(switchID);
+				if(senderFVClassifier.isActive()){
+					
+				}
+			}
 			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to active switch
-			
+
 			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to cloned switch
 		}
 		else{
 			fvClassifier.sendMsg(this, fvSlicer);
 		}
-		
+
 	}
 
 	// convenience function that Derickso doesn't want in main openflow.jar
@@ -88,19 +122,19 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-    public String toString() {
-        return "FVPacketOut [actions="
-                + FVMessageUtil.actionsToString(this.getActions()) + ", actionsLength=" + actionsLength + ", " +
-                " inPort=" + inPort + ", packetData=" +
-                 Arrays.toString(packetData) + "]";
-    }
-	
-	
+	public String toString() {
+		return "FVPacketOut [actions="
+				+ FVMessageUtil.actionsToString(this.getActions()) + ", actionsLength=" + actionsLength + ", " +
+				" inPort=" + inPort + ", packetData=" +
+				Arrays.toString(packetData) + "]";
+	}
+
+
 	private String toVerboseString() {
 		String pkt;
 		if (this.packetData != null && (this.packetData.length > 0))
 			pkt = new OFMatch().loadFromPacket(this.packetData, this.inPort)
-					.toString();
+			.toString();
 		else
 			pkt = "empty";
 		return this.toString() + ";pkt=" + pkt;
