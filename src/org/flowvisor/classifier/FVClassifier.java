@@ -5,6 +5,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -112,6 +113,9 @@ SwitchChangedListener {
 	private boolean isActive = false;
 	private long duplicateSwitch = 0;  // Assuming no switch will have 0 as an ID
 	private HashMap<Short, PortInfo> activePorts;
+	private LimitedQueue<FVFlowMod> flowRulesTable;
+	private HashMap<Short, ArrayList<FVFlowMod>> limeFlowTable;
+	private LimeXidTranslator limeXidTranslator;
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
@@ -155,6 +159,7 @@ SwitchChangedListener {
 		this.switchName = "unidentified:" + sock.toString();
 		this.factory = new FVMessageFactory();
 		this.stats = new SendRecvDropStats();
+		this.flowRulesTable = new LimitedQueue<>(20);
 		try {
 			this.msgStream = new FVMessageAsyncStream(sock, this.factory, this,
 					this.stats);
@@ -168,6 +173,7 @@ SwitchChangedListener {
 		this.floodPermsSlice = ""; // disabled, at first
 		this.slicerMap = new ConcurrentHashMap<String, FVSlicer>();
 		this.xidTranslator = new XidTranslatorWithMessage();
+		this.limeXidTranslator = new LimeXidTranslator();
 		this.cookieTranslator = new CookieTranslator();
 		this.missSendLength = 128;
 		this.switchFlowMap = null;
@@ -1246,5 +1252,66 @@ SwitchChangedListener {
 
 	public void setDuplicateSwitch(long swId){
 		duplicateSwitch = swId;
+	}
+
+	public void insertFlowRuleTable(LimitedQueue<FVFlowMod> newFlowRulesTable){
+		flowRulesTable = (LimitedQueue<FVFlowMod>) newFlowRulesTable.clone();
+	}
+	
+	public void addFlowRule(FVFlowMod flowMod){
+		flowRulesTable.add(flowMod);
+	}
+
+	public LimitedQueue<FVFlowMod> getFlowRuleTable(){
+		return flowRulesTable;
+	}
+
+	public void addLimeFlowRule(short port, FVFlowMod flowMod){
+		if (limeFlowTable.containsKey(port)){
+			limeFlowTable.get(port).add(flowMod);
+		}
+		else{
+			limeFlowTable.put(port, new ArrayList<FVFlowMod>());
+		}
+	}
+	
+	public ArrayList<FVFlowMod> getLimeFlowListForPort(short port){
+		return limeFlowTable.get(port);
+	}
+	
+	public void ereaseLimeFlowRuleListForPort(short port){
+		limeFlowTable.remove(port);
+	}
+	
+	public void ereaseLimeFlowTable(){
+		limeFlowTable.clear();
+	}
+	
+	public LimeXidTranslator getLimeXidTranslator(){
+		return limeXidTranslator;
+	}
+
+	/**
+	 * Get the port number that represent the Ghost port
+	 * @return port number if exist, -1 otherwise
+	 */
+	/*public short getGhostPort(){
+		for (Map.Entry portEntry : portTable.entrySet()){
+		Enumeration<Short> e = activePorts.keySet();
+	}*/
+	
+	private class LimitedQueue<E> extends LinkedList<E> {
+		private int limit;
+
+		public LimitedQueue(int limit) {
+			this.limit = limit;
+		}
+
+		@Override
+		public boolean add(E o) {
+			super.add(o);
+			while (size() > limit) { super.remove(); }
+			return true;
+		}
 	}
 }

@@ -1,11 +1,15 @@
 package org.flowvisor;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import net.minidev.json.JSONObject;
 
 import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.LimeXidPair;
 import org.flowvisor.slicer.FVSlicer;
+import org.openflow.protocol.OFMessage;
+import org.openflow.util.LRULinkedHashMap;
 
 /**
  * Keep track of created instances of switches and their info
@@ -21,6 +25,12 @@ import org.flowvisor.slicer.FVSlicer;
  */
 
 public class LimeContainer {
+	static final int MIN_XID = 256;
+	static final int INIT_SIZE = (1 << 12);
+	static final int MAX_SIZE = (1 << 14);
+	static int nextID  = MIN_XID;
+	static LRULinkedHashMap<Integer, LimeXidPair> xidMap  = new LRULinkedHashMap<Integer, LimeXidPair>(INIT_SIZE, MAX_SIZE);
+	
 
 	public static final String MainSlice = "slice1"; 
 
@@ -40,6 +50,8 @@ public class LimeContainer {
 
 	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
 
+	private static HashMap<Integer, Long> xIDMapper = new HashMap<>(); // to map message to the classifier
+	
 	// list of all slicers created
 	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
 
@@ -98,6 +110,20 @@ public class LimeContainer {
 		return activeToCloneSwitchMap;
 	}
 	
+	/**
+	 * Return Active switch ID that map to this clone switch
+	 * @param cloneSwitchID
+	 * @return active switch ID, -1 otherwise
+	 */
+	public static long getActiveSwitchForThisCloneSwithc(long cloneSwitchID){
+		for (Map.Entry entry : activeToCloneSwitchMap.entrySet()){
+			if (cloneSwitchID == (long)entry.getValue() )
+				return (long)entry.getKey();
+		}
+		return -1;
+		
+	}
+	
 	static synchronized void insertActiveToCloneSwitchMap(long swActive, long swClone){
 		if((!activeToOriginalSwitchMap.containsKey(swActive)) || (!cloneSwitchContainer.containsKey(swClone))){ ////////////
 			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Clone Switch " + swClone + " and Active Switch " + swActive);  // TODO through exception
@@ -119,5 +145,28 @@ public class LimeContainer {
 		
 	}
 
+	/**
+	 * Translate and add to the map to retrieve later
+	 * @param msg
+	 * @param fvClassifier
+	 */
+	public static synchronized int translateXid(int xid, FVClassifier fvClassifier){
+		int ret = nextID++;
+		if (nextID < MIN_XID)
+			nextID = MIN_XID;
+		xidMap.put(Integer.valueOf(ret), new LimeXidPair(xid, fvClassifier.getDPID()));
+		return ret;
+	}
+	
+	/**
+	 * Untranslate and delete
+	 * @param xid
+	 * @return
+	 */
+	public static synchronized LimeXidPair untranslate(int xid) {
+		LimeXidPair idPair = xidMap.get(Integer.valueOf(xid));
+		xidMap.remove(xid);
+		return idPair;
+	}
 
 }

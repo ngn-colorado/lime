@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.flowvisor.FlowVisor;
 import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.LimeXidTranslator;
 import org.flowvisor.classifier.XidPair;
 import org.flowvisor.classifier.XidPairWithMessage;
 import org.flowvisor.classifier.XidTranslator;
@@ -50,8 +51,7 @@ public class FVMessageUtil {
 		msg.setXid(newXid);
 	}
 	
-	
-	
+
 	public static void translateXidMsg(FVStatisticsRequest msg,
 			FVClassifier fvClassifier, FVSlicer fvSlicer) {
 		XidTranslatorWithMessage xidTranslator = (XidTranslatorWithMessage) fvClassifier.getXidTranslator();
@@ -78,6 +78,7 @@ public class FVMessageUtil {
 		return fvClassifier.getSlicerByName(sliceName);
 	}
 	 
+	
 	 
 	 static public XidPairWithMessage untranslateXidMsg(OFMessage msg, 
 			 FVClassifier fvClassifier) {

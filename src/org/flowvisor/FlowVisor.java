@@ -181,11 +181,15 @@ public class FlowVisor {
 
 		// get switches from configured slices
 
-
+		// TODO the following for loop just for testing and it is assuming this topology
 		for(long j=2; j<5; j++){
 			HashMap<Short, PortInfo> portTable = new HashMap<>();
-			for(short i= 1; i<4; i++){
-				PortInfo pInfo = new PortInfo(PortType.CONNECTED, null, null);
+			
+			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);
+			portTable.put((short) 1, pInfo);
+			
+			for(short i= 2; i<4; i++){
+				pInfo = new PortInfo(PortType.H_CONNECTED, null, null);
 				portTable.put(i, pInfo);
 			}
 			LimeContainer.addOriginalSwitch(j, portTable);

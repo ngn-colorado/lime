@@ -29,9 +29,10 @@ public class PortInfo {
 	}
 	
 	public enum PortType {
-		CONNECTED, // connected to switch or host
-		EMPTY,  // not connected to anything
-		GHOST,
+		SW_CONNECTED, // connected to another switch from its own active/clone group of switches)
+		H_CONNECTED, // connected to host
+		EMPTY,  // not connected to a host
+		GHOST, // connected to its duplicate switch
 		UKNOWN;
     
 	}

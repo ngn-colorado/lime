@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.flowvisor.FlowVisor;
+import org.flowvisor.LimeContainer;
 import org.flowvisor.api.LinkAdvertisement;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.config.ConfigError;
@@ -28,13 +29,25 @@ import org.openflow.protocol.OFType;
 import org.openflow.protocol.action.OFAction;
 
 public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
-		TopologyControllable {
+TopologyControllable {
 
 	/**
 	 * route and rewrite packet_in messages from switch to controller
 	 *
 	 * if it's lldp, do the lldp decode stuff else, look up the embedded
 	 * packet's controller(s) by flowspace and send to them
+	 * 
+	 * Murad
+	 * is originated from active switch?
+		yes, is cloned?
+			no, forward
+			yes, save xid and swID
+				forward
+		no, originated from cloned switch?
+			no, drop
+			yes, save xid and swID
+				map to active switch, slicer
+				forwatd
 	 */
 
 	@Override
@@ -44,15 +57,38 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
-		// TODO add ARP special case
-		FVSlicer fvSlicer = fvClassifier.getSlicerByName("slice1");
-		//System.out.println("MURAD: sending Packet_in: " + this.toString() + " to controller");
-		if(fvSlicer != null){
-			fvSlicer.sendMsg(this, fvClassifier);
+		if(fvClassifier.isActive()){
+			FVSlicer fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
+			if(fvSlicer != null){
+				if(!fvClassifier.isBeenCloned()){
+					fvSlicer.sendMsg(this, fvClassifier);
+				}
+				else{
+					// do LIME translator
+					int newXid = LimeContainer.translateXid(this.getXid(), fvClassifier);
+					this.setXid(newXid);
+					fvSlicer.sendMsg(this, fvClassifier);
+				}
+			}
 		}
 		
-		//this.lookupByFlowSpace(fvClassifier);
+		else{
+			// check if this is a clone switch from activeToClone table
+			long activeSwitchID;
+			if ((activeSwitchID = LimeContainer.getActiveSwitchForThisCloneSwithc(fvClassifier.getDPID())) != -1 ){
+				// get the slice from active switch
+				FVClassifier activeClassifier = LimeContainer.getAllWorkingSwitches().get(activeSwitchID);
 
+				int newXid = LimeContainer.translateXid(this.getXid(), fvClassifier);
+				this.setXid(newXid);
+
+				FVSlicer fvSlicer = activeClassifier.getSlicerByName(LimeContainer.MainSlice);
+				if(fvSlicer != null){
+					fvSlicer.sendMsg(this, fvClassifier);
+					return;
+				}
+			}
+		}
 	}
 
 	private void lookupByFlowSpace(FVClassifier fvClassifier) {
@@ -67,7 +103,7 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 					"dropping unclassifiable msg: " + this.toVerboseString());
 			return;
 		}
-		
+
 		boolean foundHome = false;
 		// foreach slice in that rule
 		for (OFAction ofAction : flowEntry.getActionsList()) {
@@ -134,7 +170,7 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 		match.loadFromPacket(this.packetData, this.inPort);
 		// different from previous policty of block by rule
 		// flowMod.setMatch(flowEntry.getRuleMatch());
-		
+
 		String drop_policy = null;
 		try {
 			drop_policy = FVConfig.getDropPolicy(sliceName);
@@ -171,7 +207,7 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 		String pkt;
 		if (this.packetData != null)
 			pkt = new OFMatch().loadFromPacket(this.packetData, this.inPort)
-					.toString();
+			.toString();
 		else
 			pkt = "empty";
 		return this.toString() + ";pkt=" + pkt;
@@ -202,9 +238,9 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 					.getPacketData());
 			if (dpidandport == null) {
 				FVLog
-						.log(LogLevel.DEBUG, topologyConnection,
-								"ignoring non-lldp packetin: "
-										+ this.toVerboseString());
+				.log(LogLevel.DEBUG, topologyConnection,
+						"ignoring non-lldp packetin: "
+								+ this.toVerboseString());
 				return;
 			}
 			OFFeaturesReply featuresReply = topologyConnection
@@ -216,26 +252,26 @@ public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 			}
 			LinkAdvertisement linkAdvertisement = new LinkAdvertisement(
 					dpidandport.getDpid(), dpidandport.getPort(), featuresReply
-							.getDatapathId(), this.inPort);
+					.getDatapathId(), this.inPort);
 			topologyConnection.getTopologyController().reportProbe(
 					linkAdvertisement);
 			topologyConnection.signalFastPort(this.inPort);
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-    public String toString() {
-        return "FVPacketIn [reason=" + 
-                 this.getReason().toString() + ", " +
-                " inPort=" + inPort + ", packetData=" +
-                 Arrays.toString(packetData) + "]";
-    }
-	
+	public String toString() {
+		return "FVPacketIn [reason=" + 
+				this.getReason().toString() + ", " +
+				" inPort=" + inPort + ", packetData=" +
+				Arrays.toString(packetData) + "]";
+	}
+
 
 	public static void main(String args[]) throws FileNotFoundException, ConfigError {
 		if (args.length < 3) {

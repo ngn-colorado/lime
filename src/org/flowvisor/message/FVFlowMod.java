@@ -63,6 +63,8 @@ Classifiable, Slicable, Cloneable {
 			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to cloned switch
 		}
 		else{
+			// save this FlowMod to list
+			fvClassifier.addFlowRule(this);
 			fvClassifier.sendMsg(this, fvSlicer);
 		}
 	}

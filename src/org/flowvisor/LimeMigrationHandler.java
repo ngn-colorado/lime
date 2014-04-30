@@ -3,12 +3,17 @@
  */
 package org.flowvisor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.message.FVFlowMod;
 import org.openflow.protocol.OFFeaturesRequest;
+import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionOutput;
 
 /**
  * @author Murad Kaplan
@@ -24,12 +29,14 @@ public class LimeMigrationHandler {
 		// this should be received from operator, for testing, we just assume that we have them
 		for(long j=5; j<8; j++){
 			HashMap<Short, PortInfo> portTable = new HashMap<>();
-			for(short i= 1; i<4; i++){
-				PortInfo pInfo = new PortInfo(PortType.EMPTY, null, null);
+			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);
+			portTable.put((short) 1, pInfo);
+			for(short i= 2; i<4; i++){
+				pInfo = new PortInfo(PortType.EMPTY, null, null);
 				portTable.put(i, pInfo);
 			}
 
-			PortInfo pInfo = new PortInfo(PortType.GHOST, null, null);
+			pInfo = new PortInfo(PortType.GHOST, null, null);
 			portTable.put((short) 4, pInfo);
 
 			LimeContainer.addCloneSwitch(j, portTable);
@@ -45,6 +52,8 @@ public class LimeMigrationHandler {
 		// just loop and make sure port number is there, if so, change its type to what its in clone one
 		// don't change CONNECTED switch, trigger error!
 
+		// copy tables from active to cloned after adding the high priority rules to both active and clone switches
+
 		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
 			if((LimeContainer.getAllWorkingSwitches().containsKey(entry.getKey())) &&
 					(LimeContainer.getAllWorkingSwitches().containsKey(entry.getValue()))){
@@ -53,32 +62,79 @@ public class LimeMigrationHandler {
 				long cloneSwID  = (long) entry.getValue();
 				FVClassifier cloneFVClassifier = LimeContainer.getAllWorkingSwitches().get(cloneSwID);
 				boolean portMissing = false;
+				short ghostPort = -1;
 				HashMap<Short, PortInfo> portTable = LimeContainer.getCloneSwitchContainer().get(cloneSwID).getPortTable();
 				for (Map.Entry portEntry : portTable.entrySet()){
 					short portNo = (short) portEntry.getKey();
 					PortInfo pInfo = (PortInfo) portEntry.getValue();
 					if(activeFVClassifier.getAcrivePorts().containsKey(portNo) && cloneFVClassifier.getAcrivePorts().containsKey(portNo)){
-						if(!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.CONNECTED)){
+						if(!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.H_CONNECTED) &&
+								!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ // we don't want to touch these ports that reflect original switch ports
 							activeFVClassifier.getAcrivePorts().get(portNo).setType(pInfo.getType());
+						}
+						cloneFVClassifier.getAcrivePorts().get(portNo).setType(pInfo.getType());
+						if(pInfo.getType().equals(PortType.GHOST)){
+							ghostPort = portNo;
 						}
 					}
 					else{
 						portMissing = true;
-						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found for aSW " + activeSwID + " and cSW " + cloneSwID); 
+						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found for aSW " + activeSwID + " or cSW " + cloneSwID); 
 						break;
 					}
 				}
-				if (!portMissing){
+				
+				if (!portMissing && ghostPort != -1){
 					// setup active switch
-					LimeContainer.getAllWorkingSwitches().get(activeSwID).setDuplicateSwitch(cloneSwID);
-					LimeContainer.getAllWorkingSwitches().get(activeSwID).startClone();
+					activeFVClassifier.setDuplicateSwitch(cloneSwID);
+					activeFVClassifier.startClone();
+					activeFVClassifier.ereaseLimeFlowTable();
+					// flush LimeFlowTable for active 
 
 					// setup clone switch
-					LimeContainer.getAllWorkingSwitches().get(cloneSwID).setDuplicateSwitch(activeSwID);
+					cloneFVClassifier.setDuplicateSwitch(activeSwID);
+					// copy FlowMod table from active to switch and push it the switch
+					cloneFVClassifier.insertFlowRuleTable(activeFVClassifier.getFlowRuleTable());
+					LinkedList<FVFlowMod> flowModList = cloneFVClassifier.getFlowRuleTable();
+					HashMap<Short, ArrayList<FVFlowMod>> cloneLimeFlowTable = new HashMap<>(); 
+
+					// loop through the table to create LimeFlowTable and push it
+					for(FVFlowMod flowMod: flowModList){
+						short originalPort = -1;
+						short originalPriority;
+						// check to see if this is an output port action
+						for (OFAction action : flowMod.getActions()){
+							if(action instanceof OFActionOutput){
+								if (cloneFVClassifier.getAcrivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+									originalPort = ((OFActionOutput) action).getPort(); //TODO, make sure that this is clone and won't be affected by its change
+									((OFActionOutput) action).setPort(ghostPort);
+								}
+								break; //Assuming that there is only one output port...	
+							}
+						}
+						
+						if(originalPort != -1){
+							originalPriority = flowMod.getPriority();
+							flowMod.setPriority((short) (originalPriority + 1));
+							cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
+							// now add this to LimeFlowTable
+							cloneFVClassifier.addLimeFlowRule(originalPort, flowMod);
+							
+							// return the original port and priority
+							for (OFAction action : flowMod.getActions()){
+								if(action instanceof OFActionOutput){
+									((OFActionOutput) action).setPort(originalPort);
+									break;
+								}
+							}
+							flowMod.setPriority(originalPriority);
+							cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
+						}
+					}
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");
-					break;
+					return;
 				}
 
 			}
@@ -86,11 +142,11 @@ public class LimeMigrationHandler {
 				System.out.println("MURAD: ERROR finding Active to Clone switches!!!!!!!!!!: " + entry.getKey() + " " + entry.getValue());
 				return;
 			}
-			System.out.print("Initialization was seccuful..");
 		}
+		System.out.println("Initialization was seccuful..");
 	}
-	
+
 	private void updatePort(FVClassifier fvClassifier, short port, PortType pType){
-		
+
 	}
 }
