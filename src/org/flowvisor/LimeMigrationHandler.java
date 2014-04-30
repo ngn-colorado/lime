@@ -53,7 +53,9 @@ public class LimeMigrationHandler {
 		}
 
 		// loop through classifier to make sure that all needed switches (active/cloned) are there
-		// make sure that all required ports are there from active-port table in classifier 
+		// make sure that all required ports are there from active-port table in active classifier 
+		// clone switches should not be connected to any VMs!!
+		
 		// just loop and make sure port number is there, if so, change its type to what its in clone one
 		// don't change CONNECTED switch, trigger error!
 		// add rules for both active and clone switches to handle packets in and out ghost ports
@@ -74,7 +76,7 @@ public class LimeMigrationHandler {
 				for (Map.Entry portEntry : portTable.entrySet()){
 					short portNo = (short) portEntry.getKey();
 					PortInfo pInfo = (PortInfo) portEntry.getValue();
-					if(activeFVClassifier.getAcrivePorts().containsKey(portNo) && cloneFVClassifier.getAcrivePorts().containsKey(portNo)){
+					if(activeFVClassifier.getAcrivePorts().containsKey(portNo)){
 						if(!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.H_CONNECTED) &&
 								!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ // we don't want to touch these ports that reflect original switch ports
 							activeFVClassifier.getAcrivePorts().get(portNo).setType(pInfo.getType());
