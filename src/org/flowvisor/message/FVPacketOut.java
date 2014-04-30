@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.flowvisor.LimeContainer;
+import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.LimeXidPair;
 import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.flows.SliceAction;
@@ -19,6 +21,7 @@ import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFError.OFBadActionCode;
 import org.openflow.protocol.OFError.OFBadRequestCode;
 import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.util.HexString;
 
 /**
@@ -88,16 +91,33 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 		//MURAD added bellow
 		if(fvClassifier.isBeenCloned()){
-			if (LimeContainer.untranslate(xid) != null){
-				long switchID = LimeContainer.untranslate(xid).getClassifierID();
+			LimeXidPair xIdPair;
+			if ((xIdPair = LimeContainer.untranslate(xid)) != null){
+				long switchID = xIdPair.getClassifierID();
 				FVClassifier senderFVClassifier = LimeContainer.getAllWorkingSwitches().get(switchID);
+				short originalPort = -1;
+				for (OFAction action : this.getActions()){
+					if(action instanceof OFActionOutput){
+						
+						if (fvClassifier.getAcrivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+							originalPort = ((OFActionOutput) action).getPort();
+							((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
+							break; //Assuming that there is only one output port...	
+						}
+						
+					}
+				}
 				if(senderFVClassifier.isActive()){
+					// send the packet to switch
+					fvClassifier.sendMsg(this, fvSlicer);
+				}
+				else{ // the packet-in was sent from clone, send it back to it
+					long cloneSwitchID = LimeContainer.getActiveToCloneSwitchMap().get(fvClassifier.getDPID());
+					FVClassifier cloneFVClassifier = LimeContainer.getAllWorkingSwitches().get(cloneSwitchID);
+					cloneFVClassifier.sendMsg(this, fvSlicer);
 					
 				}
 			}
-			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to active switch
-
-			// TODO MURAD modify packet (based on LIME/Eric algorithm) and send to cloned switch
 		}
 		else{
 			fvClassifier.sendMsg(this, fvSlicer);

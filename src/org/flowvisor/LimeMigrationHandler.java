@@ -6,14 +6,19 @@ package org.flowvisor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.message.FVFlowMod;
 import org.openflow.protocol.OFFeaturesRequest;
+import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.OFPort;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
+import org.openflow.protocol.action.OFActionType;
 
 /**
  * @author Murad Kaplan
@@ -51,7 +56,9 @@ public class LimeMigrationHandler {
 		// make sure that all required ports are there from active-port table in classifier 
 		// just loop and make sure port number is there, if so, change its type to what its in clone one
 		// don't change CONNECTED switch, trigger error!
-
+		// add rules for both active and clone switches to handle packets in and out ghost ports
+			// For any packet coming from port G and out to port C
+			// 		forward to port C
 		// copy tables from active to cloned after adding the high priority rules to both active and clone switches
 
 		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
@@ -105,7 +112,7 @@ public class LimeMigrationHandler {
 						// check to see if this is an output port action
 						for (OFAction action : flowMod.getActions()){
 							if(action instanceof OFActionOutput){
-								if (cloneFVClassifier.getAcrivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+								if (cloneFVClassifier.getAcrivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
 									originalPort = ((OFActionOutput) action).getPort(); //TODO, make sure that this is clone and won't be affected by its change
 									((OFActionOutput) action).setPort(ghostPort);
 								}
@@ -128,9 +135,22 @@ public class LimeMigrationHandler {
 								}
 							}
 							flowMod.setPriority(originalPriority);
-							cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
 						}
+						cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
 					}
+					
+					// send ghost output rules to both active and clone switches
+					OFFlowMod ofFlowMod = new OFFlowMod();
+					OFMatch ofMatch = new OFMatch();
+					ofMatch.setInputPort(ghostPort);
+					ofFlowMod.setMatch(new OFMatch());
+					List<OFAction> actionList = new ArrayList<>();
+					OFActionOutput ofAction = new OFActionOutput();
+					ofAction.setPort(OFPort.OFPP_NORMAL.getValue());
+					actionList.add(ofAction);
+					ofFlowMod.setActions(actionList);
+					activeFVClassifier.sendMsg(ofFlowMod, activeFVClassifier);
+					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");

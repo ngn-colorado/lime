@@ -1295,10 +1295,14 @@ SwitchChangedListener {
 	 * Get the port number that represent the Ghost port
 	 * @return port number if exist, -1 otherwise
 	 */
-	/*public short getGhostPort(){
-		for (Map.Entry portEntry : portTable.entrySet()){
-		Enumeration<Short> e = activePorts.keySet();
-	}*/
+	public short getGhostPort(){
+		for (Map.Entry portEntry : activePorts.entrySet()){
+			if (((PortInfo) portEntry.getValue()).getType().equals(PortType.GHOST)){
+				return (short) portEntry.getKey();
+			}
+		}
+		return -1;
+	}
 	
 	private class LimitedQueue<E> extends LinkedList<E> {
 		private int limit;
