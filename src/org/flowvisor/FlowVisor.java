@@ -181,8 +181,8 @@ public class FlowVisor {
 
 		// get switches from configured slices
 
-		// TODO the following for loop just for testing and it is assuming this topology
-		for(long j=2; j<5; j++){
+		// TODO the following for-loop just for testing and it is assuming this topology
+		for(long j=1; j<4; j++){
 			HashMap<Short, PortInfo> portTable = new HashMap<>();
 			
 			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);

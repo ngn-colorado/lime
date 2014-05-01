@@ -32,7 +32,7 @@ public class LimeMigrationHandler {
 	public void init() throws InterruptedException{ // TODO create LIME exception of missing ports or switches
 		System.out.println("MURAD: LimeMigration, inititlizing migration process");
 		// this should be received from operator, for testing, we just assume that we have them
-		for(long j=5; j<8; j++){
+		for(long j=4; j<7; j++){
 			HashMap<Short, PortInfo> portTable = new HashMap<>();
 			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);
 			portTable.put((short) 1, pInfo);
