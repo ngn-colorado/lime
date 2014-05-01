@@ -65,7 +65,10 @@ TopologyControllable {
 				}
 				else{
 					// do LIME translator
+					System.out.println("MURAD: FVPacketIn, sender is active and being cloned..");
+					System.out.println("MURAD: FVPacketIn, and orig xid: " + this.getXid());
 					int newXid = LimeContainer.translateXid(this.getXid(), fvClassifier);
+					System.out.println("MURAD: FVPacketIn, and new xid: " + newXid);
 					this.setXid(newXid);
 					fvSlicer.sendMsg(this, fvClassifier);
 				}
