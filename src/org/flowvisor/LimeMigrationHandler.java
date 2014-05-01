@@ -32,23 +32,31 @@ public class LimeMigrationHandler {
 	public void init() throws InterruptedException{ // TODO create LIME exception of missing ports or switches
 		System.out.println("MURAD: LimeMigration, inititlizing migration process");
 		// this should be received from operator, for testing, we just assume that we have them
-		for(long j=4; j<7; j++){
-			HashMap<Short, PortInfo> portTable = new HashMap<>();
+		
+		// top switch only has two ports and they are connected to switches (SW_CONNECTED)
+				HashMap<Short, PortInfo> portTable1 = new HashMap<>();
+				portTable1.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
+				portTable1.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
+				portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
+				System.out.println("MURAD: Clone Top-level Switch: " + 4);
+				LimeContainer.addCloneSwitch(4, portTable1);
+				LimeContainer.insertActiveToCloneSwitchMap(4-3, 4);
+				
+		for(long j=5; j<7; j++){
+			portTable1 = new HashMap<>();
 			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);
-			portTable.put((short) 1, pInfo);
+			portTable1.put((short) 1, pInfo);
 			for(short i= 2; i<4; i++){
-				pInfo = new PortInfo(PortType.EMPTY, null, null);
-				portTable.put(i, pInfo);
+				portTable1.put(i, new PortInfo(PortType.EMPTY, null, null));
 			}
+			
+			portTable1.put((short) 4, new PortInfo(PortType.GHOST, null, null));
 
-			pInfo = new PortInfo(PortType.GHOST, null, null);
-			portTable.put((short) 4, pInfo);
-
-			LimeContainer.addCloneSwitch(j, portTable);
+			LimeContainer.addCloneSwitch(j, portTable1);
 
 			// should receive list of cloned switches and their mapping from active ones
 			// Create a fake active to clone map
-			System.out.println("Murad: Clone Switch to be added: " + j);
+			System.out.println("MURAD: Clone Second-level Switch: " + j);
 			LimeContainer.insertActiveToCloneSwitchMap(j-3, j);
 		}
 

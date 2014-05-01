@@ -182,19 +182,27 @@ public class FlowVisor {
 		// get switches from configured slices
 
 		// TODO the following for-loop just for testing and it is assuming this topology
-		for(long j=1; j<4; j++){
-			HashMap<Short, PortInfo> portTable = new HashMap<>();
-			
-			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);
-			portTable.put((short) 1, pInfo);
+		
+		// top switch only has two ports and they are connected to switches (SW_CONNECTED)
+		HashMap<Short, PortInfo> portTable = new HashMap<>();
+		portTable.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
+		portTable.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
+		LimeContainer.addOriginalSwitch(1, portTable);
+
+		System.out.println("MURAD: Original Top-level Switch: " + 1);
+		LimeContainer.insertActiveToOriginalSwitchMap(1, 1);
+		
+		for(long j=2; j<4; j++){
+			portTable = new HashMap<>();
+
+			portTable.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
 			
 			for(short i= 2; i<4; i++){
-				pInfo = new PortInfo(PortType.H_CONNECTED, null, null);
-				portTable.put(i, pInfo);
+				portTable.put(i, new PortInfo(PortType.H_CONNECTED, null, null));
 			}
 			LimeContainer.addOriginalSwitch(j, portTable);
 
-			System.out.println("MURAD: Original Seen Switch: " + j);
+			System.out.println("MURAD: Original Second-level Switch: " + j);
 			LimeContainer.insertActiveToOriginalSwitchMap(j, j);
 		}
 		
