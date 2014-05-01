@@ -91,36 +91,37 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 		//MURAD added bellow
 		if(fvClassifier.isBeenCloned()){
-			LimeXidPair xIdPair;
 			System.out.println("MURAD: FVPacketOut, to sw: " + fvClassifier.getDPID());
-			System.out.println("MURAD: FVPacketOut, and new xid was attached to: " + this.getXid());
-			if ((xIdPair = fvSlicer.getLimeXidTranslator().untranslate(this.getXid())) != null){
-				System.out.println("MURAD: FVPacketOut, and orig xid: " + xIdPair.getXid());
-				
-				long switchID = xIdPair.getClassifierID();
-				this.setXid(xIdPair.getXid());
-				FVClassifier senderFVClassifier = LimeContainer.getAllWorkingSwitches().get(switchID);
-				short originalPort = -1;
-				for (OFAction action : this.getActions()){
-					if(action instanceof OFActionOutput){
-						
-						if (fvClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+			System.out.println("MURAD: FVPacketOut, and its xid: " + this.getXid());
+			short originalPort = -1;
+			for (OFAction action : this.getActions()){
+				if(action instanceof OFActionOutput){
+					if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+						if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 							originalPort = ((OFActionOutput) action).getPort();
 							((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
+							fvClassifier.sendMsg(this, fvSlicer);
+							((OFActionOutput) action).setPort(originalPort);
 							break; //Assuming that there is only one output port...	
 						}
-						
 					}
 				}
-				if(senderFVClassifier.isActive()){
-					// send the packet to switch
-					fvClassifier.sendMsg(this, fvSlicer);
-				}
-				else{ // the packet-in was sent from clone, send it back to it
-					long cloneSwitchID = LimeContainer.getActiveToCloneSwitchMap().get(fvClassifier.getDPID());
-					FVClassifier cloneFVClassifier = LimeContainer.getAllWorkingSwitches().get(cloneSwitchID);
-					cloneFVClassifier.sendMsg(this, fvSlicer);
-					
+			}
+			if(originalPort == -1){ // no change happened to action list
+				fvClassifier.sendMsg(this, fvSlicer);
+			}
+
+
+			FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+			for (OFAction action : this.getActions()){
+				if(action instanceof OFActionOutput){
+					if(duplicateFVClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+						if (duplicateFVClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
+							((OFActionOutput) action).setPort(duplicateFVClassifier.getGhostPort());
+							duplicateFVClassifier.sendMsg(this, fvSlicer);
+							break; //Assuming that there is only one output port...	
+						}
+					}
 				}
 			}
 		}

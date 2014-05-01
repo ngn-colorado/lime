@@ -115,7 +115,7 @@ public class LimeContainer {
 	 * @param cloneSwitchID
 	 * @return active switch ID, -1 otherwise
 	 */
-	public static long getActiveSwitchForThisCloneSwithc(long cloneSwitchID){
+	public static long getActiveSwitchForThisCloneSwitch(long cloneSwitchID){
 		for (Map.Entry entry : activeToCloneSwitchMap.entrySet()){
 			if (cloneSwitchID == (long)entry.getValue() )
 				return (long)entry.getKey();

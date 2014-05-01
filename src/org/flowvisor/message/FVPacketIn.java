@@ -57,33 +57,21 @@ TopologyControllable {
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
+		System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " and its xid: " + this.getXid());
 		if(fvClassifier.isActive()){
 			FVSlicer fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
 			if(fvSlicer != null){
-				if(!fvClassifier.isBeenCloned()){
-					fvSlicer.sendMsg(this, fvClassifier);
-				}
-				else{
-					// do LIME translator
-					//System.out.println("MURAD: FVPacketIn, sender is active and being cloned..");
-					System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " and orig xid: " + this.getXid());
-					int newXid = fvSlicer.getLimeXidTranslator().translate(this.getXid(), fvClassifier);
-					System.out.println("MURAD: FVPacketIn, and new xid attached to: " + newXid);
-					this.setXid(newXid);
-					fvSlicer.sendMsg(this, fvClassifier);
-				}
+				fvSlicer.sendMsg(this, fvClassifier);
 			}
 		}
-		
+
 		else{
 			// check if this is a clone switch from activeToClone table
 			long activeSwitchID;
-			if ((activeSwitchID = LimeContainer.getActiveSwitchForThisCloneSwithc(fvClassifier.getDPID())) != -1 ){
-				
+			if ((activeSwitchID = fvClassifier.getDuplicateSwitch()) != -1 ){
+
 				FVClassifier activeClassifier = LimeContainer.getAllWorkingSwitches().get(activeSwitchID);
 				FVSlicer fvSlicer = activeClassifier.getSlicerByName(LimeContainer.MainSlice);
-				int newXid = fvSlicer.getLimeXidTranslator().translate(this.getXid(), fvClassifier);
-				this.setXid(newXid);
 				// get the slice from active switch
 				if(fvSlicer != null){
 					fvSlicer.sendMsg(this, fvClassifier);

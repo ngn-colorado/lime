@@ -111,7 +111,7 @@ SwitchChangedListener {
 	//MURAD variables start
 	private boolean isCloned = false;
 	private boolean isActive = false;
-	private long duplicateSwitch = -1;  // Assuming no switch will have 0 as an ID
+	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
 	private HashMap<Short, PortInfo> activePorts;
 	private LimitedQueue<FVFlowMod> flowRulesTable;
 	private HashMap<Short, ArrayList<FVFlowMod>> limeFlowTable;
