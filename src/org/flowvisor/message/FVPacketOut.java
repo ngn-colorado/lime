@@ -99,7 +99,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 				for (OFAction action : this.getActions()){
 					if(action instanceof OFActionOutput){
 						
-						if (fvClassifier.getAcrivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+						if (fvClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
 							originalPort = ((OFActionOutput) action).getPort();
 							((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
 							break; //Assuming that there is only one output port...	

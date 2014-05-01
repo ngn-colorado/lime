@@ -111,7 +111,7 @@ SwitchChangedListener {
 	//MURAD variables start
 	private boolean isCloned = false;
 	private boolean isActive = false;
-	private long duplicateSwitch = 0;  // Assuming no switch will have 0 as an ID
+	private long duplicateSwitch = -1;  // Assuming no switch will have 0 as an ID
 	private HashMap<Short, PortInfo> activePorts;
 	private LimitedQueue<FVFlowMod> flowRulesTable;
 	private HashMap<Short, ArrayList<FVFlowMod>> limeFlowTable;
@@ -274,6 +274,16 @@ SwitchChangedListener {
 			origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
 			PortInfo pInfo;
 			if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+				this.activePorts.put(phyPort.getPortNumber(), pInfo);
+				return;
+			}
+		}
+		// this might be adding port during a clone process 
+		// duplicate switch should not be -1
+		// existing port should be there with EMPTY type
+		if((duplicateSwitch) != -1 && (activePorts.containsKey(phyPort.getPortNumber()))){
+			if (activePorts.get(phyPort.getPortNumber()).getType().equals(PortType.EMPTY)){
+				PortInfo pInfo = new PortInfo(PortType.H_CONNECTED, null, null);
 				this.activePorts.put(phyPort.getPortNumber(), pInfo);
 				return;
 			}
@@ -1221,10 +1231,19 @@ SwitchChangedListener {
 
 
 	//MURAD methods bellow
-	public HashMap<Short, PortInfo> getAcrivePorts(){
+	public HashMap<Short, PortInfo> getActivePorts(){
 		return activePorts;
 	}
 
+	public synchronized void clearActivePorts(){
+		activePorts.clear();
+	}
+	
+	public synchronized void setActivePorts(HashMap<Short, PortInfo> activePorts){
+		this.activePorts.clear();
+		this.activePorts = activePorts;
+	}
+	
 	public boolean isBeenCloned(){
 		return isCloned;
 	}
@@ -1246,6 +1265,10 @@ SwitchChangedListener {
 		isActive = true;
 	}
 
+	/**
+	 * Return duplicate switchID
+	 * @return switchID, -1 otherwise
+	 */
 	public long getDuplicateSwitch(){
 		return duplicateSwitch;
 	}

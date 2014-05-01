@@ -194,7 +194,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		/*Set<Short> ports = FlowSpaceUtil.getPortsBySlice(this.fvClassifier
 				.getSwitchInfo().getDatapathId(), this.sliceName,
 				this.localFlowSpace);*/
-		Set<Short> ports = this.fvClassifier.getAcrivePorts().keySet();
+		Set<Short> ports = this.fvClassifier.getActivePorts().keySet();
 		if (ports.contains(OFPort.OFPP_ALL.getValue())) {
 			// this switch has access to ALL PORTS; feed them in from the
 			// features request

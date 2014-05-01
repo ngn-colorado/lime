@@ -81,12 +81,12 @@ Classifiable, Slicable, Cloneable {
 			for (OFAction action : this.getActions()){
 				if(action instanceof OFActionOutput){
 					originalPort = ((OFActionOutput) action).getPort(); 
-					if (fvClassifier.getAcrivePorts().get(originalPort).getType().equals(PortType.EMPTY)){
+					if (fvClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){
 						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
 					}
 					fvClassifier.sendMsg(this, fvSlicer);
 					
-					if (cloneFVClassifier.getAcrivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+					if (cloneFVClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
 						cloneOriginalPort = originalPort; 
 						originalPriority = this.getPriority();
 						this.setPriority((short) (originalPriority + 1));

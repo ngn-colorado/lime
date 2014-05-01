@@ -70,18 +70,21 @@ public class LimeMigrationHandler {
 				FVClassifier activeFVClassifier = LimeContainer.getAllWorkingSwitches().get(activeSwID);
 				long cloneSwID  = (long) entry.getValue();
 				FVClassifier cloneFVClassifier = LimeContainer.getAllWorkingSwitches().get(cloneSwID);
+				
 				boolean portMissing = false;
 				short ghostPort = -1;
 				HashMap<Short, PortInfo> portTable = LimeContainer.getCloneSwitchContainer().get(cloneSwID).getPortTable();
+				cloneFVClassifier.setActivePorts(portTable);
+				
 				for (Map.Entry portEntry : portTable.entrySet()){
 					short portNo = (short) portEntry.getKey();
 					PortInfo pInfo = (PortInfo) portEntry.getValue();
-					if(activeFVClassifier.getAcrivePorts().containsKey(portNo)){
-						if(!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.H_CONNECTED) &&
-								!activeFVClassifier.getAcrivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ // we don't want to touch these ports that reflect original switch ports
-							activeFVClassifier.getAcrivePorts().get(portNo).setType(pInfo.getType());
+					if(activeFVClassifier.getActivePorts().containsKey(portNo)){
+						if(!activeFVClassifier.getActivePorts().get(portNo).getType().equals(PortType.H_CONNECTED) &&
+								!activeFVClassifier.getActivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ // we don't want to touch these ports that reflect original switch ports
+							activeFVClassifier.getActivePorts().get(portNo).setType(pInfo.getType());
 						}
-						cloneFVClassifier.getAcrivePorts().get(portNo).setType(pInfo.getType());
+						cloneFVClassifier.getActivePorts().get(portNo).setType(pInfo.getType());
 						if(pInfo.getType().equals(PortType.GHOST)){
 							ghostPort = portNo;
 						}
@@ -114,7 +117,7 @@ public class LimeMigrationHandler {
 						// check to see if this is an output port action
 						for (OFAction action : flowMod.getActions()){
 							if(action instanceof OFActionOutput){
-								if (cloneFVClassifier.getAcrivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+								if (cloneFVClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
 									originalPort = ((OFActionOutput) action).getPort(); //TODO, make sure that this is clone and won't be affected by its change
 									((OFActionOutput) action).setPort(ghostPort);
 								}
