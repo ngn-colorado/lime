@@ -44,12 +44,10 @@ public class LimeMigrationHandler {
 				
 		for(long j=5; j<7; j++){
 			portTable1 = new HashMap<>();
-			PortInfo pInfo = new PortInfo(PortType.SW_CONNECTED, null, null);
-			portTable1.put((short) 1, pInfo);
-			for(short i= 2; i<4; i++){
+			for(short i= 1; i<3; i++){
 				portTable1.put(i, new PortInfo(PortType.EMPTY, null, null));
-			}
-			
+			}	
+			portTable1.put((short) 3, new PortInfo(PortType.SW_CONNECTED, null, null));
 			portTable1.put((short) 4, new PortInfo(PortType.GHOST, null, null));
 
 			LimeContainer.addCloneSwitch(j, portTable1);
