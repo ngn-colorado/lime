@@ -38,9 +38,9 @@ public class LimeMigrationHandler {
 				portTable1.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
 				portTable1.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
 				portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
-				System.out.println("MURAD: Clone Top-level Switch: " + 4);
 				LimeContainer.addCloneSwitch(4, portTable1);
 				LimeContainer.insertActiveToCloneSwitchMap(4-3, 4);
+				System.out.println("MURAD: Clone Top-level Switch: " + 4);
 				
 		for(long j=5; j<7; j++){
 			portTable1 = new HashMap<>();
@@ -49,13 +49,9 @@ public class LimeMigrationHandler {
 			}	
 			portTable1.put((short) 3, new PortInfo(PortType.SW_CONNECTED, null, null));
 			portTable1.put((short) 4, new PortInfo(PortType.GHOST, null, null));
-
 			LimeContainer.addCloneSwitch(j, portTable1);
-
-			// should receive list of cloned switches and their mapping from active ones
-			// Create a fake active to clone map
-			System.out.println("MURAD: Clone Second-level Switch: " + j);
 			LimeContainer.insertActiveToCloneSwitchMap(j-3, j);
+			System.out.println("MURAD: Clone Second-level Switch: " + j);
 		}
 
 		// loop through classifier to make sure that all needed switches (active/cloned) are there
