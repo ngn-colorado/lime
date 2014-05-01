@@ -91,7 +91,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	SendRecvDropStats stats;
 	FlowRewriteDB flowRewriteDB;
 	boolean floodPerms;
-	Map<Short, Boolean> allowedPorts; // ports in this slice and whether they
+	private Map<Short, Boolean> allowedPorts; // ports in this slice and whether they
 	boolean reconnectEventScheduled = false;
 	LinkedHashMap<Integer, Integer> allowedBufferIDs; // LRU cached list of
 	// buffer-IDs
@@ -195,7 +195,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				.getSwitchInfo().getDatapathId(), this.sliceName,
 				this.localFlowSpace);*/
 		Set<Short> ports = this.fvClassifier.getActivePorts().keySet();
-		if (ports.contains(OFPort.OFPP_ALL.getValue())) {
+		if (ports.contains(OFPort.OFPP_ALL.getValue())) {  //TODO MURAD do we need this for LIME?
 			// this switch has access to ALL PORTS; feed them in from the
 			// features request
 			ports.clear(); // remove the OFPP_ALL virtual port
@@ -220,8 +220,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			}
 		}
 
-		for (Iterator<Short> it = allowedPorts.keySet().iterator(); it
-				.hasNext();) {
+		for (Iterator<Short> it = allowedPorts.keySet().iterator(); it.hasNext();){
 			Short port = it.next();
 			if (!ports.contains(port)) {
 				FVLog.log(LogLevel.DEBUG, this, "removing access to port ",
