@@ -150,23 +150,23 @@ public class LimeContainer {
 	 * @param msg
 	 * @param fvClassifier
 	 */
-	public static synchronized int translateXid(int xid, FVClassifier fvClassifier){
+	/*public static synchronized int translateXid(int xid, FVClassifier fvClassifier){
 		int ret = nextID++;
 		if (nextID < MIN_XID)
 			nextID = MIN_XID;
 		xidMap.put(Integer.valueOf(ret), new LimeXidPair(xid, fvClassifier.getDPID()));
 		return ret;
-	}
+	}*/
 	
 	/**
 	 * Untranslate and delete
 	 * @param xid
 	 * @return
 	 */
-	public static synchronized LimeXidPair untranslate(int xid) {
+	/*public static synchronized LimeXidPair untranslate(int xid) {
 		LimeXidPair idPair = xidMap.get(Integer.valueOf(xid));
 		//xidMap.remove(xid);
 		return idPair;
-	}
+	}*/
 
 }

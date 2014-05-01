@@ -1310,9 +1310,7 @@ SwitchChangedListener {
 		limeFlowTable.clear();
 	}
 	
-	public LimeXidTranslator getLimeXidTranslator(){
-		return limeXidTranslator;
-	}
+	
 
 	/**
 	 * Get the port number that represent the Ghost port

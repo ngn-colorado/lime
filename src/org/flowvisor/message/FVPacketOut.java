@@ -94,7 +94,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 			LimeXidPair xIdPair;
 			System.out.println("MURAD: FVPacketOut, to sw: " + fvClassifier.getDPID());
 			System.out.println("MURAD: FVPacketOut, and new xid was attached to: " + this.getXid());
-			if ((xIdPair = LimeContainer.untranslate(this.getXid())) != null){
+			if ((xIdPair = fvSlicer.getLimeXidTranslator().untranslate(this.getXid())) != null){
 				System.out.println("MURAD: FVPacketOut, and orig xid: " + xIdPair.getXid());
 				
 				long switchID = xIdPair.getClassifierID();
