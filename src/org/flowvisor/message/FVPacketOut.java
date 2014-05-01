@@ -92,7 +92,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		//MURAD added bellow
 		if(fvClassifier.isBeenCloned()){
 			LimeXidPair xIdPair;
-			System.out.println("MURAD: FVPacketOut, reciever is active and being cloned..");
+			System.out.println("MURAD: FVPacketOut, to sw: " + fvClassifier.getDPID());
 			System.out.println("MURAD: FVPacketOut, and new xid was attached to: " + this.getXid());
 			if ((xIdPair = LimeContainer.untranslate(this.getXid())) != null){
 				System.out.println("MURAD: FVPacketOut, and orig xid: " + xIdPair.getXid());
