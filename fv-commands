@@ -1,6 +1,11 @@
 make
 sudo make fvuser=flowvisor fvgroup=flowvisor install
 
+
+# or with pull
+git pull && make && sudo make fvuser=flowvisor fvgroup=flowvisor install
+
+
 # to run flowvisor
 sudo -u flowvisor flowvisor 
 
@@ -14,3 +19,17 @@ fvctl add-flowspace flow1 all 100 any slice1=7
 # to load from cong.json (flowvisor has to be running and not connected to the switches yet, then restart it)
 # also, make sure to reinstall flowvisor! because slices and flowspaces seem to be ereased when loading a new config.json file
 fvconfig load /etc/flowvisor/config.json
+
+
+# mininet
+# create link on fly
+py net.addLink(net.get('s3'), net.get('s6'))
+py s3.attach('s3-eth4')
+py s3.detach('s3-eth4')
+
+
+py net.addLink(net.get('s1'), net.get('s4'),3,3)
+
+py net.addLink(net.get('s2'), net.get('s5'),4,4)
+
+py s1.attach('s1-eth3')
