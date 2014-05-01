@@ -153,7 +153,7 @@ public class LimeMigrationHandler {
 					}
 					
 					// send ghost output rules to both active and clone switches
-					OFFlowMod ofFlowMod = new OFFlowMod();
+					/*OFFlowMod ofFlowMod = new OFFlowMod();
 					OFMatch ofMatch = new OFMatch();
 					ofMatch.setInputPort(ghostPort);
 					ofFlowMod.setMatch(new OFMatch());
@@ -163,7 +163,7 @@ public class LimeMigrationHandler {
 					actionList.add(ofAction);
 					ofFlowMod.setActions(actionList);
 					activeFVClassifier.sendMsg(ofFlowMod, activeFVClassifier);
-					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	
+					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	*/
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");
