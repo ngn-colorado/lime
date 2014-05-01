@@ -165,7 +165,7 @@ public class LimeContainer {
 	 */
 	public static synchronized LimeXidPair untranslate(int xid) {
 		LimeXidPair idPair = xidMap.get(Integer.valueOf(xid));
-		xidMap.remove(xid);
+		//xidMap.remove(xid);
 		return idPair;
 	}
 
