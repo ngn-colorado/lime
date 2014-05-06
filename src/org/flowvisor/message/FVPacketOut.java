@@ -85,7 +85,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 			return;
 		}
 		// look at the original class to see how the matching is happening to use it later
-		//System.out.println("MURAD: sending Packet_out to switch: " + fvClassifier.getDPID());
+		System.out.println("MURAD: FVPacketOut, sending PACKET_OUT to sw: " + fvClassifier.getDPID());
 
 
 

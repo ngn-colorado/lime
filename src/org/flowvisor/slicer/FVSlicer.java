@@ -593,7 +593,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			if (msgs == null)
 				throw new IOException("got null from read()");
 			for (OFMessage msg : msgs) {
-				if (msg.getType().equals(OFType.FLOW_MOD) || msg.getType().equals(OFType.PACKET_OUT) ){
+				if (msg.getType().equals(OFType.FLOW_MOD)){
 					System.out.println("MURAD: FVSlicer, Rcvd Msg Type: " + msg.getType() + " for-sw " + fvClassifier.getDPID());
 				}
 				//System.out.println("MURAD: recv from controller: " + msg.getType());
