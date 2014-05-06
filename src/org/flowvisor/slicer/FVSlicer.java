@@ -197,7 +197,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		/*Set<Short> ports = FlowSpaceUtil.getPortsBySlice(this.fvClassifier
 				.getSwitchInfo().getDatapathId(), this.sliceName,
 				this.localFlowSpace);*/
-		Set<Short> ports = this.fvClassifier.getActivePorts().keySet();
+		Set<Short> ports = this.fvClassifier.getOnlyConnectedPorts(); 
 		if (ports.contains(OFPort.OFPP_ALL.getValue())) {  //TODO MURAD do we need this for LIME?
 			// this switch has access to ALL PORTS; feed them in from the
 			// features request
@@ -212,7 +212,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			//System.out.println("MURAD: Ports before adding: " + port);
 			LimeSwitch lSwitch;
 			if((lSwitch = LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID())) != null){ //TODO null pointer exception might happen here
-				if(lSwitch.getPortTable().containsKey(port)){  //TODO must be connected port
+				if(lSwitch.getPortTable().containsKey(port)){  
 					if (!allowedPorts.keySet().contains(port)) {
 						System.out.println("MURAD: Adding port: " + port + " to slicer ports");
 						FVLog.log(LogLevel.DEBUG, this, "adding access to port ", port);

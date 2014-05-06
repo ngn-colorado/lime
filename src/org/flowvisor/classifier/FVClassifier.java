@@ -269,27 +269,42 @@ SwitchChangedListener {
 		}
 		// update new info
 		switchInfo.getPorts().add(phyPort);
+
 		LimeSwitch origSwitch;
-		if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
-			origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
-			PortInfo pInfo;
+		PortInfo pInfo;
+		if (isActive){
+			origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID())); // this should never be null!
 			if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
 				this.activePorts.put(phyPort.getPortNumber(), pInfo);
 				return;
 			}
-		}
-		// this might be adding port during a clone process 
-		// duplicate switch should not be -1
-		// existing port should be there with EMPTY type
-		if((duplicateSwitch) != -1 && (activePorts.containsKey(phyPort.getPortNumber()))){
-			if (activePorts.get(phyPort.getPortNumber()).getType().equals(PortType.EMPTY)){
-				PortInfo pInfo = new PortInfo(PortType.H_CONNECTED, null, null);
+			else{
+				if(this.isBeenCloned()){	
+					// check if it is ghost port
+					// get cloned switch and its table
+					LimeSwitch cloneSwitch;
+					cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+					if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+						if(pInfo.getType().equals(PortType.GHOST)){
+							this.activePorts.put(phyPort.getPortNumber(), pInfo);
+							return;
+						}
+					}
+				}
+				pInfo = new PortInfo(PortType.UKNOWN, null, null);
 				this.activePorts.put(phyPort.getPortNumber(), pInfo);
-				return;
 			}
 		}
-		PortInfo pInfo = new PortInfo(PortType.UKNOWN, null, null);
-		this.activePorts.put(phyPort.getPortNumber(), pInfo);
+		if(duplicateSwitch != -1){
+			LimeSwitch cloneSwitch;
+			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+				this.activePorts.put(phyPort.getPortNumber(), pInfo);
+				if(pInfo.getType().equals(PortType.H_CONNECTED)){
+					// update connected port counter
+				}
+			}
+		}
 	}
 
 	public void removePort(OFPhysicalPort phyPort) {
@@ -305,9 +320,32 @@ SwitchChangedListener {
 		if (!found)
 			FVLog.log(LogLevel.INFO, this,
 					"asked to remove non-existant port: ", phyPort);
+		
+		PortInfo pInfo;
+		if (isActive){	
+			if(this.isBeenCloned()){
+				if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
+					if(pInfo.getType().equals(PortType.H_CONNECTED)){ // then this for sure is a cloning port removing, we still need this port
+						this.activePorts.get(phyPort.getPortNumber()).setType(PortType.EMPTY);
+					}
+					else{
+						// trigger error!!
+					}
+				}
+			}
+		}
+		
+		if(duplicateSwitch != -1){
+			LimeSwitch cloneSwitch;
+			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+				// trigger error!!
+			}
+		}
 		this.activePorts.remove(phyPort.getPortNumber());
 	}
 
+	
 	public FVSlicer getSlicerByName(String sliceName) {
 		if (this.slicerMap == null)
 			return null; // race condition on shutdown
@@ -1231,19 +1269,34 @@ SwitchChangedListener {
 
 
 	//MURAD methods bellow
+	/**
+	 * Return all ports the switch told us about
+	 * @return table of ports and their info
+	 */
 	public HashMap<Short, PortInfo> getActivePorts(){
 		return activePorts;
+	}
+
+	public Set<Short> getOnlyConnectedPorts(){
+		Set<Short> ports = new HashSet<>();
+		for (Map.Entry entry : activePorts.entrySet()){
+			PortInfo pInfo = (PortInfo)entry.getValue();
+			if (pInfo.getType().equals(PortType.H_CONNECTED) || pInfo.getType().equals(PortType.SW_CONNECTED) || pInfo.getType().equals(PortType.EMPTY)){
+				ports.add((Short) entry.getKey());
+			}
+		}
+		return ports;
 	}
 
 	public synchronized void clearActivePorts(){
 		activePorts.clear();
 	}
-	
+
 	public synchronized void setActivePorts(HashMap<Short, PortInfo> activePorts){
 		this.activePorts.clear();
 		this.activePorts = activePorts;
 	}
-	
+
 	public boolean isBeenCloned(){
 		return isCloned;
 	}
@@ -1280,7 +1333,7 @@ SwitchChangedListener {
 	public void insertFlowRuleTable(LimitedQueue<FVFlowMod> newFlowRulesTable){
 		flowRulesTable = (LimitedQueue<FVFlowMod>) newFlowRulesTable.clone();
 	}
-	
+
 	public void addFlowRule(FVFlowMod flowMod){
 		flowRulesTable.add(flowMod);
 	}
@@ -1297,20 +1350,20 @@ SwitchChangedListener {
 			limeFlowTable.put(port, new ArrayList<FVFlowMod>());
 		}
 	}
-	
+
 	public ArrayList<FVFlowMod> getLimeFlowListForPort(short port){
 		return limeFlowTable.get(port);
 	}
-	
+
 	public void ereaseLimeFlowRuleListForPort(short port){
 		limeFlowTable.remove(port);
 	}
-	
+
 	public void ereaseLimeFlowTable(){
 		limeFlowTable.clear();
 	}
-	
-	
+
+
 
 	/**
 	 * Get the port number that represent the Ghost port
@@ -1324,7 +1377,7 @@ SwitchChangedListener {
 		}
 		return -1;
 	}
-	
+
 	private class LimitedQueue<E> extends LinkedList<E> {
 		private int limit;
 
