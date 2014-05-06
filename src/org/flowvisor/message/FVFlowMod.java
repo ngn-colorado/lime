@@ -56,6 +56,8 @@ Classifiable, Slicable, Cloneable {
 		is active been cloned?
 		no, forward
 		yes, (send this to both active and clone switches)
+		get map of who sent it (active/clone) based on buffer_id mapping
+		
 		edit action list based on LIME algorithm
 				forward to active
 				get mapped clone switch
