@@ -90,7 +90,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 
 		//MURAD added bellow
-		if(fvClassifier.isBeenCloned()){
+		if(fvClassifier.getDuplicateSwitch() != -1){
 			System.out.println("MURAD: FVPacketOut, to sw: " + fvClassifier.getDPID());
 			System.out.println("MURAD: FVPacketOut, and its xid: " + this.getXid());
 			short originalPort = -1;
