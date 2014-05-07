@@ -86,7 +86,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		}
 		// look at the original class to see how the matching is happening to use it later
 		
-		System.out.println("MURAD: FVPacket_OUT, buf_id: " + this.bufferId + " Packet-data: ");
+		System.out.println("MURAD: FVPacket_OUT, buf_id: " + this.bufferId + " Packet-data: " + this.toString());
 
 
 
