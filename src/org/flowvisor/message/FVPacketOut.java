@@ -86,7 +86,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		}
 		// look at the original class to see how the matching is happening to use it later
 		
-		//System.out.println("MURAD: FVPacket_OUT, Controller sent Msg: " + this.getType() + " for-sw " + fvClassifier.getDPID() + " buf_id: " + this.bufferId);
+		System.out.println("MURAD: FVPacket_OUT, Controller sent Msg: " + this.getType() + " for-sw " + fvClassifier.getDPID() + " buf_id: " + this.bufferId);
 
 
 
