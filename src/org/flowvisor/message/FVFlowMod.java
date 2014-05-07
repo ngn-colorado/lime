@@ -10,7 +10,8 @@ import org.flowvisor.LimeContainer;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.CookieTranslator;
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeXidPair;
+import org.flowvisor.classifier.LimeBuffer_idTranslator;
+import org.flowvisor.classifier.LimeMsgBuffer_idPair;
 import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.flows.FlowIntersect;
@@ -57,7 +58,7 @@ Classifiable, Slicable, Cloneable {
 		no, forward
 		yes, (send this to both active and clone switches)
 		get map of who sent it (active/clone) based on buffer_id mapping
-		
+
 		edit action list based on LIME algorithm
 				forward to active
 				get mapped clone switch
@@ -72,49 +73,72 @@ Classifiable, Slicable, Cloneable {
 		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
 		translateCookie(fvClassifier, fvSlicer);
 
+
 		//MURAD added bellow
-		if(fvClassifier.isBeenCloned()){
-			short originalPort = -1;
-			short cloneOriginalPort = -1;
-			short originalPriority = -1;
-			long cloneSwID = LimeContainer.getActiveToCloneSwitchMap().get(fvClassifier.getDPID());
-			FVClassifier cloneFVClassifier = LimeContainer.getAllWorkingSwitches().get(cloneSwID);
-			// check to see if this is an output port action
-			for (OFAction action : this.getActions()){
-				if(action instanceof OFActionOutput){
-					originalPort = ((OFActionOutput) action).getPort(); 
-					if (fvClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){
-						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
+		if(fvClassifier.getDuplicateSwitch() != -1){
+			LimeBuffer_idTranslator translator = fvSlicer.getLimeXidTranslator();
+			int buffer_id = this.bufferId;
+			FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+			LimeMsgBuffer_idPair pair = translator.untranslate(buffer_id);
+			FVClassifier senderFVClassifier = pair.getClassifier();
+
+			if (senderFVClassifier != null){
+				if (senderFVClassifier.getDPID() != fvClassifier.getDPID()){
+					if(senderFVClassifier.getDPID() != duplicateFVClassifier.getDPID()){
+						// drop msg, we don't know who sent it first place
+						return;
 					}
-					fvClassifier.sendMsg(this, fvSlicer);
-					
-					if (cloneFVClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
-						cloneOriginalPort = originalPort; 
-						originalPriority = this.getPriority();
-						this.setPriority((short) (originalPriority + 1));
-						((OFActionOutput) action).setPort(cloneFVClassifier.getGhostPort());
+					else{
+						duplicateFVClassifier = fvClassifier;
 					}
-					cloneFVClassifier.sendMsg(this, fvSlicer);
-					break; //Assuming that there is only one output port...	
 				}
-			}
-			
-			if(cloneOriginalPort != -1){
-				// now add this to LimeFlowTable
-				cloneFVClassifier.addLimeFlowRule(cloneOriginalPort, this);		
-				// return the original port and priority
+
+				short originalPort = -1;
+				short cloneOriginalPort = -1;
+				short originalPriority = -1;
+				// check to see if this is an output port action
 				for (OFAction action : this.getActions()){
 					if(action instanceof OFActionOutput){
-						((OFActionOutput) action).setPort(cloneOriginalPort);
-						this.setPriority(originalPriority);
-						cloneFVClassifier.addFlowRule(this);
-						cloneFVClassifier.sendMsg(this, fvSlicer);
-						break;
+						originalPort = ((OFActionOutput) action).getPort(); 
+						if (senderFVClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){
+							((OFActionOutput) action).setPort(senderFVClassifier.getGhostPort());
+						}
+						senderFVClassifier.sendMsg(this, fvSlicer);
+
+						if (duplicateFVClassifier.getActivePorts().get(originalPort).getType().equals(PortType.EMPTY)){ // this should never return null pointer exception, if so this is a serious problem! 
+							cloneOriginalPort = originalPort; 
+							originalPriority = this.getPriority();
+							this.setPriority((short) (originalPriority + 1)); // so later we will send OFPFC_DELETE_STRICT to remove them. 
+							// TODO we want to handle if the original is the maximum priority allowed by OF
+							((OFActionOutput) action).setPort(duplicateFVClassifier.getGhostPort());
+						}
+						duplicateFVClassifier.sendMsg(this, fvSlicer);
+						break; //Assuming that there is only one output port...	
 					}
 				}
+
+				if(cloneOriginalPort != -1){
+					// now add this to LimeFlowTable
+					duplicateFVClassifier.addLimeFlowRule(cloneOriginalPort, this);		
+					// return the original port and priority
+					for (OFAction action : this.getActions()){
+						if(action instanceof OFActionOutput){
+							((OFActionOutput) action).setPort(cloneOriginalPort);
+							this.setPriority(originalPriority);
+							duplicateFVClassifier.addFlowRule(this);
+							duplicateFVClassifier.sendMsg(this, fvSlicer);
+							break;
+						}
+					}
+				}
+
 			}
+			else{
+				// send it as it is, buffer_id might be generated before cloning start 
+			}
+
 		}
-		
+
 		else{
 			// save this FlowMod to list
 			fvClassifier.addFlowRule(this);

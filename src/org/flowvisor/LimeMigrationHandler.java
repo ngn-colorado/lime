@@ -101,7 +101,6 @@ public class LimeMigrationHandler {
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
 					activeFVClassifier.setDuplicateSwitch(cloneSwID);
-					activeFVClassifier.startClone();
 					activeFVClassifier.ereaseLimeFlowTable();
 					// flush LimeFlowTable for active 
 

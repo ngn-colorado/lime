@@ -6,7 +6,7 @@ import java.util.Map;
 import net.minidev.json.JSONObject;
 
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeXidPair;
+import org.flowvisor.classifier.LimeMsgBuffer_idPair;
 import org.flowvisor.slicer.FVSlicer;
 import org.openflow.protocol.OFMessage;
 import org.openflow.util.LRULinkedHashMap;
@@ -29,7 +29,7 @@ public class LimeContainer {
 	static final int INIT_SIZE = (1 << 12);
 	static final int MAX_SIZE = (1 << 14);
 	static int nextID  = MIN_XID;
-	static LRULinkedHashMap<Integer, LimeXidPair> xidMap  = new LRULinkedHashMap<Integer, LimeXidPair>(INIT_SIZE, MAX_SIZE);
+	static LRULinkedHashMap<Integer, LimeMsgBuffer_idPair> buffer_idMap  = new LRULinkedHashMap<Integer, LimeMsgBuffer_idPair>(INIT_SIZE, MAX_SIZE);
 	
 
 	public static final String MainSlice = "slice1"; 
@@ -150,11 +150,11 @@ public class LimeContainer {
 	 * @param msg
 	 * @param fvClassifier
 	 */
-	/*public static synchronized int translateXid(int xid, FVClassifier fvClassifier){
+	/*private static synchronized int translateXid(int buffer_id, FVClassifier fvClassifier){
 		int ret = nextID++;
 		if (nextID < MIN_XID)
 			nextID = MIN_XID;
-		xidMap.put(Integer.valueOf(ret), new LimeXidPair(xid, fvClassifier.getDPID()));
+		buffer_idMap.put(Integer.valueOf(ret), new LimeMsgBuffer_idPair(buffer_id, fvClassifier.getDPID()));
 		return ret;
 	}*/
 	
@@ -163,8 +163,8 @@ public class LimeContainer {
 	 * @param xid
 	 * @return
 	 */
-	/*public static synchronized LimeXidPair untranslate(int xid) {
-		LimeXidPair idPair = xidMap.get(Integer.valueOf(xid));
+	/*private static synchronized LimeMsgBuffer_idPair untranslate(int buffer_id) {
+		LimeMsgBuffer_idPair idPair = buffer_idMap.get(Integer.valueOf(buffer_id));
 		//xidMap.remove(xid);
 		return idPair;
 	}*/

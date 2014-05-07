@@ -115,7 +115,6 @@ SwitchChangedListener {
 	private HashMap<Short, PortInfo> activePorts;
 	private LimitedQueue<FVFlowMod> flowRulesTable;
 	private HashMap<Short, ArrayList<FVFlowMod>> limeFlowTable;
-	private LimeXidTranslator limeXidTranslator;
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
@@ -173,7 +172,6 @@ SwitchChangedListener {
 		this.floodPermsSlice = ""; // disabled, at first
 		this.slicerMap = new ConcurrentHashMap<String, FVSlicer>();
 		this.xidTranslator = new XidTranslatorWithMessage();
-		this.limeXidTranslator = new LimeXidTranslator();
 		this.cookieTranslator = new CookieTranslator();
 		this.missSendLength = 128;
 		this.switchFlowMap = null;
@@ -279,7 +277,7 @@ SwitchChangedListener {
 				return;
 			}
 			else{
-				if(this.isBeenCloned()){	
+				if(this.getDuplicateSwitch() != -1){	
 					// check if it is ghost port
 					// get cloned switch and its table
 					LimeSwitch cloneSwitch;
@@ -323,7 +321,7 @@ SwitchChangedListener {
 		
 		PortInfo pInfo;
 		if (isActive){	
-			if(this.isBeenCloned()){
+			if(this.getDuplicateSwitch() != -1){
 				if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 					if(pInfo.getType().equals(PortType.H_CONNECTED)){ // then this for sure is a cloning port removing, we still need this port
 						this.activePorts.get(phyPort.getPortNumber()).setType(PortType.EMPTY);
@@ -1297,7 +1295,7 @@ SwitchChangedListener {
 		this.activePorts = activePorts;
 	}
 
-	public boolean isBeenCloned(){
+	/*public boolean isBeenCloned(){
 		return isCloned;
 	}
 
@@ -1307,7 +1305,7 @@ SwitchChangedListener {
 
 	public void stopClone(){
 		isCloned = false;
-	}
+	}*/
 
 	public boolean isActive(){
 		return isActive;

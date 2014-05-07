@@ -21,7 +21,7 @@ import org.flowvisor.LimeSwitch;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.classifier.FVClassifier;
 import org.flowvisor.classifier.FVSendMsg;
-import org.flowvisor.classifier.LimeXidTranslator;
+import org.flowvisor.classifier.LimeBuffer_idTranslator;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.ConfigurationEvent;
 import org.flowvisor.config.FVConfig;
@@ -71,7 +71,7 @@ import org.openflow.util.LRULinkedHashMap;
  */
 public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedListener, SliceChangedListener {
 
-	private LimeXidTranslator limeXidTranslator;
+	private LimeBuffer_idTranslator limeXidTranslator;
 	public static final int MessagesPerRead = 50; // for performance tuning
 	String sliceName;
 	FVClassifier fvClassifier;
@@ -107,7 +107,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 
 	public FVSlicer(FVEventLoop loop, FVClassifier fvClassifier,
 			String sliceName) {
-		this.limeXidTranslator = new LimeXidTranslator();
+		this.limeXidTranslator = new LimeBuffer_idTranslator();
 		this.loop = loop;
 		this.fvClassifier = fvClassifier;
 		this.sliceName = sliceName;
@@ -864,7 +864,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 
 	
 	// Murad methods
-	public LimeXidTranslator getLimeXidTranslator(){
+	public LimeBuffer_idTranslator getLimeXidTranslator(){
 		return limeXidTranslator;
 	}
 

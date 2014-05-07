@@ -6,7 +6,7 @@ import java.util.List;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeXidPair;
+import org.flowvisor.classifier.LimeMsgBuffer_idPair;
 import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.flows.SliceAction;

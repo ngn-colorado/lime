@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.flowvisor.FlowVisor;
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeXidTranslator;
 import org.flowvisor.classifier.XidPair;
 import org.flowvisor.classifier.XidPairWithMessage;
 import org.flowvisor.classifier.XidTranslator;
