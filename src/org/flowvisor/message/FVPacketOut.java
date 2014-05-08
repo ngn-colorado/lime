@@ -106,7 +106,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		else{
 			LimeBuffer_idTranslator translator = fvSlicer.getLimeXidTranslator();
 			LimeMsgBuffer_idPair pair = translator.untranslate(this.bufferId);
-			if (pair != null){
+			if (pair != null){ // we only add to table packets during migration, so duplicate switch should never be null
 				FVClassifier senderFVClassifier, cloneFVClassifier;
 				senderFVClassifier = pair.getClassifier();
 				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(senderFVClassifier.getDuplicateSwitch());

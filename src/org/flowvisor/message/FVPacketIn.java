@@ -78,6 +78,17 @@ TopologyControllable {
 			this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier));
 			fvSlicer.sendMsg(this, fvClassifier);
 		}
+		else{
+			if(fvClassifier.isActive()){
+				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
+				fvSlicer.sendMsg(this, fvClassifier);
+			}
+			else{
+				// ignore packet, we only forward to controller from active switches when no migration is happening 
+				FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
+			}
+		}
+		
 	}
 
 	private void lookupByFlowSpace(FVClassifier fvClassifier) {
