@@ -75,7 +75,7 @@ Classifiable, Slicable, Cloneable {
 
 		int originalBufferId = this.bufferId;
 		if(originalBufferId == -1){
-			if(fvClassifier.getDuplicateSwitch() == -1){
+			if(fvClassifier.getDuplicateSwitch() != -1){
 				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
 				sendFlowMod(fvClassifier, -1, originalBufferId);
 				sendFlowMod(duplicateFVClassifier,-1, originalBufferId);

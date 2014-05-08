@@ -94,7 +94,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		//MURAD added bellow
 		int originalBufferId = this.bufferId;
 		if (originalBufferId == -1){
-			if(fvClassifier.getDuplicateSwitch() == -1){
+			if(fvClassifier.getDuplicateSwitch() != -1){
 				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
 				sendPacketOut(fvClassifier, -1, originalBufferId);
 				sendPacketOut(duplicateFVClassifier,-1, originalBufferId);
@@ -133,10 +133,6 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		short originalPort = -1;
 		for (OFAction action : this.getActions()){
 			if(action instanceof OFActionOutput){
-				if(fvClassifier.getActivePorts() == null){
-					System.out.println("MURAD: FVPacketOut, activePorts is null");
-				}
-				
 				if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
