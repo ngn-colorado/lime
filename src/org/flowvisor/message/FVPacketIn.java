@@ -9,6 +9,7 @@ import org.flowvisor.FlowVisor;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.api.LinkAdvertisement;
 import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.LimeBuffer_idTranslator;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
 import org.flowvisor.flows.FlowEntry;
@@ -57,28 +58,25 @@ TopologyControllable {
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
-		
-		System.out.println("MURAD: FVPacket_IN, sw: " + fvClassifier.getDPID() + " send-packet" + this.getType() +  " buf_id: " + this.bufferId);
-		if(fvClassifier.isActive()){
-			FVSlicer fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
-			if(fvSlicer != null){
-				fvSlicer.sendMsg(this, fvClassifier);
+		System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " and its xid: " + this.getXid());
+		FVSlicer fvSlicer;
+		if(fvClassifier.getDuplicateSwitch() != -1){
+			FVClassifier duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
+			if(fvClassifier.isActive()){
+				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
 			}
-		}
-
-		else{
-			// check if this is a clone switch from activeToClone table
-			long activeSwitchID;
-			if ((activeSwitchID = fvClassifier.getDuplicateSwitch()) != -1 ){
-
-				FVClassifier activeClassifier = LimeContainer.getAllWorkingSwitches().get(activeSwitchID);
-				FVSlicer fvSlicer = activeClassifier.getSlicerByName(LimeContainer.MainSlice);
-				// get the slice from active switch
-				if(fvSlicer != null){
-					fvSlicer.sendMsg(this, fvClassifier);
+			else{ 
+				if(duplicateVFClassifier.isActive()){
+					fvSlicer = duplicateVFClassifier.getSlicerByName(LimeContainer.MainSlice);
+				}
+				else{
+					// ignore msg, we don't know this witch
 					return;
 				}
 			}
+			LimeBuffer_idTranslator buffIdTranslator = fvSlicer.getLimeXidTranslator();
+			this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier));
+			fvSlicer.sendMsg(this, fvClassifier);
 		}
 	}
 

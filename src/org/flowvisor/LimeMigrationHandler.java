@@ -133,7 +133,7 @@ public class LimeMigrationHandler {
 							flowMod.setPriority((short) (originalPriority + 1));
 							cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
 							// now add this to LimeFlowTable
-							cloneFVClassifier.addLimeFlowRule(originalPort, flowMod);
+							cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone());  //TODO is this clone going to help us and not change?
 
 							// return the original port and priority
 							for (OFAction action : flowMod.getActions()){

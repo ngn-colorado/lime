@@ -114,7 +114,8 @@ SwitchChangedListener {
 	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
 	private HashMap<Short, PortInfo> activePorts;
 	private LimitedQueue<FVFlowMod> flowRulesTable;
-	private HashMap<Short, ArrayList<FVFlowMod>> limeFlowTable;
+	private HashMap<Short, ArrayList<OFFlowMod>> limeFlowTable;  // contains FlowMods added during migration to be
+	// reomved later iff the port is changed from the original flowmod sent from controller
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
@@ -1340,16 +1341,16 @@ SwitchChangedListener {
 		return flowRulesTable;
 	}
 
-	public void addLimeFlowRule(short port, FVFlowMod flowMod){
+	public void addLimeFlowRule(short port, OFFlowMod flowMod){
 		if (limeFlowTable.containsKey(port)){
 			limeFlowTable.get(port).add(flowMod);
 		}
 		else{
-			limeFlowTable.put(port, new ArrayList<FVFlowMod>());
+			limeFlowTable.put(port, new ArrayList<OFFlowMod>());
 		}
 	}
 
-	public ArrayList<FVFlowMod> getLimeFlowListForPort(short port){
+	public ArrayList<OFFlowMod> getLimeFlowListForPort(short port){
 		return limeFlowTable.get(port);
 	}
 
