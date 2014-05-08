@@ -133,6 +133,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		short originalPort = -1;
 		for (OFAction action : this.getActions()){
 			if(action instanceof OFActionOutput){
+				System.out.println("MURAD: FVPacketOut, output action port: " + ((OFActionOutput) action).getPort());
 				if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
