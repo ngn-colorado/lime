@@ -88,7 +88,7 @@ public class LimeMigrationHandler {
 						}
 						cloneFVClassifier.getActivePorts().get(portNo).setType(pInfo.getType());
 						if(pInfo.getType().equals(PortType.GHOST)){
-							ghostPort = portNo;
+							ghostPort = portNo; // this should only happens once since we only have one ghost port
 						}
 					}
 					else{
@@ -107,12 +107,12 @@ public class LimeMigrationHandler {
 					// setup clone switch
 					cloneFVClassifier.setDuplicateSwitch(activeSwID);
 					// copy FlowMod table from active to switch and push it the switch
-					cloneFVClassifier.insertFlowRuleTable(activeFVClassifier.getFlowRuleTable());
-					LinkedList<FVFlowMod> flowModList = cloneFVClassifier.getFlowRuleTable();
+					cloneFVClassifier.insertFlowRuleTable(activeFVClassifier.getFlowRuleTable());  //FIXME we may need to clone this
+					LinkedList<OFFlowMod> flowModList = cloneFVClassifier.getFlowRuleTable();
 					HashMap<Short, ArrayList<FVFlowMod>> cloneLimeFlowTable = new HashMap<>(); 
 
 					// loop through the table to create LimeFlowTable and push it
-					for(FVFlowMod flowMod: flowModList){
+					for(OFFlowMod flowMod: flowModList){
 						short originalPort = -1;
 						short originalPriority;
 						// check to see if this is an output port action
@@ -128,12 +128,12 @@ public class LimeMigrationHandler {
 							}
 						}
 
-						if(originalPort != -1){
+						/*if(originalPort != -1){
 							originalPriority = flowMod.getPriority();
 							flowMod.setPriority((short) (originalPriority + 1));
 							cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
 							// now add this to LimeFlowTable
-							cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone());  //TODO is this clone going to help us and not change?
+							cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone()); 
 
 							// return the original port and priority
 							for (OFAction action : flowMod.getActions()){
@@ -143,22 +143,24 @@ public class LimeMigrationHandler {
 								}
 							}
 							flowMod.setPriority(originalPriority);
-						}
+						}*/
+						
+						cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone()); 
 						cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
 					}
 
 					// send ghost output rules to both active and clone switches
-					/*OFFlowMod ofFlowMod = new OFFlowMod();
+					OFFlowMod ofFlowMod = new OFFlowMod(); 
 					OFMatch ofMatch = new OFMatch();
 					ofMatch.setInputPort(ghostPort);
 					ofFlowMod.setMatch(new OFMatch());
 					List<OFAction> actionList = new ArrayList<>();
 					OFActionOutput ofAction = new OFActionOutput();
-					ofAction.setPort(OFPort.OFPP_NORMAL.getValue());
+					ofAction.setPort(OFPort.OFPP_NORMAL.getValue()); // TODO we need to verify this works for any incoming packet
 					actionList.add(ofAction);
 					ofFlowMod.setActions(actionList);
 					activeFVClassifier.sendMsg(ofFlowMod, activeFVClassifier);
-					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	*/
+					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");

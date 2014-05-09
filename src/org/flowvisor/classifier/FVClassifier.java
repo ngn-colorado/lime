@@ -113,7 +113,7 @@ SwitchChangedListener {
 	private boolean isActive = false;
 	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
 	private HashMap<Short, PortInfo> activePorts;
-	private LimitedQueue<FVFlowMod> flowRulesTable;
+	private LimitedQueue<OFFlowMod> flowRulesTable;
 	private HashMap<Short, ArrayList<OFFlowMod>> limeFlowTable;  // contains FlowMods added during migration to be
 	// reomved later iff the port is changed from the original flowmod sent from controller
 	//MURAD variables end
@@ -1330,15 +1330,19 @@ SwitchChangedListener {
 		duplicateSwitch = swId;
 	}
 
-	public void insertFlowRuleTable(LimitedQueue<FVFlowMod> newFlowRulesTable){
-		flowRulesTable = (LimitedQueue<FVFlowMod>) newFlowRulesTable.clone();
+	@SuppressWarnings("unchecked")
+	public void insertFlowRuleTable(LimitedQueue<OFFlowMod> newFlowRulesTable){
+		flowRulesTable.clear();
+		for (OFFlowMod fm : newFlowRulesTable){
+			flowRulesTable.add(fm.clone());
+		}
 	}
 
 	public void addFlowRule(FVFlowMod flowMod){
 		flowRulesTable.add(flowMod);
 	}
 
-	public LimitedQueue<FVFlowMod> getFlowRuleTable(){
+	public LimitedQueue<OFFlowMod> getFlowRuleTable(){
 		return flowRulesTable;
 	}
 
