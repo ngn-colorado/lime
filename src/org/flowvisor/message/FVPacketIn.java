@@ -58,7 +58,8 @@ TopologyControllable {
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
-		//System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " and its xid: " + this.getXid());
+		System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " and Packet-data: " + this.toVerboseString());
+		
 		FVSlicer fvSlicer;
 		if(fvClassifier.getDuplicateSwitch() != -1){
 			FVClassifier duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
