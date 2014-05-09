@@ -596,7 +596,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 				if (msg.getType().equals(OFType.FLOW_MOD)){
 					//System.out.println("MURAD: FVSlicer, Rcvd Msg Type: " + msg.getType() + " for-sw " + fvClassifier.getDPID() + " buf_id: " + msg.ge);
 				}
-				//System.out.println("MURAD: recv from controller: " + msg.getType());
+				System.out.println("MURAD: FVSlicer, Rcvd Msg Type: " + msg.getType() + " for-sw " + fvClassifier.getDPID() + " data: " + msg.toString());
 				FVLog.log(LogLevel.INFO, this, "recv from controller: ", msg);
 				this.stats.increment(FVStatsType.SEND, this, msg);
 				if ((msg instanceof SanityCheckable)
