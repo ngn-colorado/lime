@@ -683,7 +683,7 @@ SwitchChangedListener {
 	 */
 	private void handleOFMessage_unidenitified(OFMessage m) {
 		switch (m.getType()) {
-		case HELLO: // aleady sent our hello; just NOOP here
+		case HELLO: // already sent our hello; just NOOP here
 			if (m.getVersion() != OFMessage.OFP_VERSION) {
 				FVLog.log(LogLevel.WARN, this,
 						"Mismatched version from switch ", sock, " Got: ", m

@@ -93,7 +93,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 		//MURAD added bellow
 		int originalBufferId = this.bufferId;
-		if (originalBufferId == -1){
+		/*if (originalBufferId == -1){
 			if(fvClassifier.getDuplicateSwitch() != -1){
 				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
 				sendPacketOut(fvClassifier, -1, originalBufferId);
@@ -117,7 +117,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 				// for now, drop the message because we don't know who sent it
 				FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
 			}
-		}
+		}*/
 	}
 
 	/**
