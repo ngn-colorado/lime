@@ -589,7 +589,7 @@ SwitchChangedListener {
 						}
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
-						//System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID() + " and data: " + m.toString());
+						System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " xid: " + m.getXid());
 						if (m.getType().equals(OFType.FEATURES_REPLY) || m.getType().equals(OFType.PORT_STATUS)){
 							//System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID());
 						}
