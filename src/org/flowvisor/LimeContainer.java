@@ -6,9 +6,8 @@ import java.util.Map;
 import net.minidev.json.JSONObject;
 
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeMsgBuffer_idPair;
 import org.flowvisor.slicer.FVSlicer;
-import org.openflow.protocol.OFMessage;
+import org.flowvisor.slicer.LimeMsgData;
 import org.openflow.util.LRULinkedHashMap;
 
 /**
@@ -29,7 +28,7 @@ public class LimeContainer {
 	static final int INIT_SIZE = (1 << 12);
 	static final int MAX_SIZE = (1 << 14);
 	static int nextID  = MIN_XID;
-	static LRULinkedHashMap<Integer, LimeMsgBuffer_idPair> buffer_idMap  = new LRULinkedHashMap<Integer, LimeMsgBuffer_idPair>(INIT_SIZE, MAX_SIZE);
+	static LRULinkedHashMap<Integer, LimeMsgData> buffer_idMap  = new LRULinkedHashMap<Integer, LimeMsgData>(INIT_SIZE, MAX_SIZE);
 	
 
 	public static final String MainSlice = "slice1"; 

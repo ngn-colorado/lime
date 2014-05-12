@@ -1,29 +1,23 @@
 package org.flowvisor.message;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.flowvisor.LimeContainer;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeBuffer_idTranslator;
-import org.flowvisor.classifier.LimeMsgBuffer_idPair;
-import org.flowvisor.exceptions.ActionDisallowedException;
-import org.flowvisor.flows.FlowEntry;
-import org.flowvisor.flows.SliceAction;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.lldp.LLDPUtil;
-import org.flowvisor.openflow.protocol.FVMatch;
 import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.LimeMsgData;
+import org.flowvisor.slicer.LimeMsgTranslator;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPacketOut;
-import org.openflow.protocol.OFPort;
-import org.openflow.protocol.OFError.OFBadActionCode;
 import org.openflow.protocol.OFError.OFBadRequestCode;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
-import org.openflow.util.HexString;
+import org.openflow.protocol.action.OFActionType;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 
 /**
  * Verify that this packet_out operation is allowed by slice definition, in
@@ -93,29 +87,32 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 		//MURAD added bellow
 		int originalBufferId = this.bufferId;
-		if (originalBufferId == -1){
-			if(fvClassifier.getDuplicateSwitch() != -1){
-				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
-				sendPacketOut(fvClassifier, -1, originalBufferId);
-				sendPacketOut(duplicateFVClassifier,-1, originalBufferId);
-			}
-			else{
-				sendPacketOut(fvClassifier, -1, originalBufferId);
-			}
+		if (originalBufferId == -1){ // send it to either active or clone. Since we always receive to active, we just forward to active to save time
+			sendPacketOut(fvClassifier, -1, originalBufferId);
 		}
 		else{
-			LimeBuffer_idTranslator translator = fvSlicer.getLimeXidTranslator();
-			LimeMsgBuffer_idPair pair = translator.untranslate(this.bufferId);
-			if (pair != null){ // we only add to table packets during migration, so duplicate switch should never be null
-				FVClassifier senderFVClassifier, cloneFVClassifier;
-				senderFVClassifier = pair.getClassifier();
-				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(senderFVClassifier.getDuplicateSwitch());
-				sendPacketOut(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
-				sendFlowMod(duplicateFVClassifier);
+			LimeMsgTranslator translator = fvSlicer.getLimeMsgTranslator();
+			LimeMsgData pair = translator.untranslate(this.bufferId);
+			if (pair != null){
+				if(fvClassifier.getDuplicateSwitch() != -1){
+					FVClassifier senderFVClassifier; //, cloneFVClassifier;
+					senderFVClassifier = pair.getClassifier();
+					//FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(senderFVClassifier.getDuplicateSwitch());
+					sendPacketOut(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
+					//sendFlowMod(duplicateFVClassifier);
+				}
+				else{
+					sendPacketOut(fvClassifier, pair.getBuffer_id(), originalBufferId);
+				}
 			}
 			else{
-				// for now, drop the message because we don't know who sent it
-				FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
+				if(fvClassifier.getDuplicateSwitch() != -1){
+					sendPacketOut(fvClassifier, originalBufferId, originalBufferId); // its in cloning process so we need to modify the action
+				}
+				else{
+					fvClassifier.sendMsg(this, fvSlicer); // send it as it is
+				}
+
 			}
 		}
 	}
@@ -130,13 +127,18 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 	 * @param originalBufferId
 	 */
 	private void sendPacketOut(FVClassifier fvClassifier, int bufferId, int originalBufferId){
-		short originalPort = -1;
-		for (OFAction action : this.getActions()){
+		short originalPort = -1;int listCounter = 0;
+		OFAction action;
+		for(int i = 0; i<this.getActions().size(); i++ ){
+			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
 				if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
+						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						this.getActions().add(i, addedVlanAction);
 						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
+
 						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
 							this.setBufferId(bufferId);
 						}
@@ -150,12 +152,13 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 					}
 				}
 			}
+			listCounter++;
 		}
 		// if we are here, then no change happened to action list
 		if (originalBufferId != -1){ 
 			this.setBufferId(bufferId);
 		}
-		
+
 		fvClassifier.sendMsg(this, fvClassifier);
 		this.setBufferId(originalBufferId);
 	}

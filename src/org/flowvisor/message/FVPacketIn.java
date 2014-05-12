@@ -9,7 +9,6 @@ import org.flowvisor.FlowVisor;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.api.LinkAdvertisement;
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeBuffer_idTranslator;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
 import org.flowvisor.flows.FlowEntry;
@@ -22,6 +21,7 @@ import org.flowvisor.ofswitch.DPIDandPort;
 import org.flowvisor.ofswitch.TopologyConnection;
 import org.flowvisor.openflow.protocol.FVMatch;
 import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.LimeMsgTranslator;
 import org.openflow.protocol.OFFeaturesReply;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMatch;
@@ -69,26 +69,27 @@ TopologyControllable {
 			else{ 
 				if(duplicateVFClassifier.isActive()){
 					fvSlicer = duplicateVFClassifier.getSlicerByName(LimeContainer.MainSlice);
+					fvClassifier = duplicateVFClassifier;
 				}
 				else{
 					// ignore msg, we don't know this witch
 					return;
 				}
 			}
-			LimeBuffer_idTranslator buffIdTranslator = fvSlicer.getLimeXidTranslator();
-			this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier));
-			fvSlicer.sendMsg(this, fvClassifier);
 		}
 		else{
 			if(fvClassifier.isActive()){
 				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
-				fvSlicer.sendMsg(this, fvClassifier);
 			}
 			else{
 				// ignore packet, we only forward to controller from active switches when no migration is happening 
 				FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
+				return;
 			}
 		}
+		LimeMsgTranslator buffIdTranslator = fvSlicer.getLimeMsgTranslator();
+		this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier, new OFMatch().loadFromPacket(this.packetData, this.inPort)));
+		fvSlicer.sendMsg(this, fvClassifier);
 		
 	}
 

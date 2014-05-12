@@ -4,33 +4,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.flowvisor.LimeContainer;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.CookieTranslator;
 import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.classifier.LimeBuffer_idTranslator;
-import org.flowvisor.classifier.LimeMsgBuffer_idPair;
-import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.flows.FlowEntry;
-import org.flowvisor.flows.FlowIntersect;
-import org.flowvisor.flows.FlowSpaceRuleStore;
-import org.flowvisor.flows.FlowSpaceUtil;
-import org.flowvisor.flows.SliceAction;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.openflow.protocol.FVMatch;
 import org.flowvisor.slicer.FVSlicer;
-import org.openflow.protocol.OFError.OFBadRequestCode;
-import org.openflow.protocol.OFError.OFFlowModFailedCode;
-import org.openflow.protocol.OFFlowMod;
+import org.flowvisor.slicer.LimeMsgData;
+import org.flowvisor.slicer.LimeMsgTranslator;
 import org.openflow.protocol.OFMatch;
-import org.openflow.protocol.OFPort;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionEnqueue;
 import org.openflow.protocol.action.OFActionOutput;
-import org.openflow.util.U16;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 
 public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 Classifiable, Slicable, Cloneable {
@@ -81,7 +71,35 @@ Classifiable, Slicable, Cloneable {
 				sendFlowMod(duplicateFVClassifier,-1, originalBufferId);
 			}
 			else{
-				sendFlowMod(fvClassifier, -1, originalBufferId);
+				fvClassifier.sendMsg(this, fvSlicer); // no need to modify it
+			}
+		}
+		
+		else{
+			// we need to send to sender the original bufer_id and to duplicate buffer_if of -1
+			LimeMsgTranslator translator = fvSlicer.getLimeMsgTranslator();
+			LimeMsgData pair = translator.untranslate(this.bufferId);
+			if (pair != null){
+				FVClassifier senderFVClassifier; //, cloneFVClassifier;
+				senderFVClassifier = pair.getClassifier();
+				if(senderFVClassifier.getDuplicateSwitch() != -1){
+					FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(senderFVClassifier.getDuplicateSwitch());
+					sendFlowMod(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
+					sendFlowMod(duplicateFVClassifier, -1, -1);
+				}
+				else{
+					sendFlowMod(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
+				}				
+			}
+			else{
+				if(fvClassifier.getDuplicateSwitch() != -1){
+					FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+					sendFlowMod(fvClassifier, originalBufferId, originalBufferId);
+					sendFlowMod(duplicateFVClassifier, -1, -1);
+				}
+				else{
+					fvClassifier.sendMsg(this, fvSlicer); // no need to modify it
+				}	
 			}
 		}
 	}
@@ -97,21 +115,29 @@ Classifiable, Slicable, Cloneable {
 	 */
 	private void sendFlowMod(FVClassifier fvClassifier, int bufferId, int originalBufferId){
 		short originalPort = -1;
-		for (OFAction action : this.getActions()){
+		OFAction action;
+		for(int i = 0; i<this.getActions().size(); i++ ){
+			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
 				if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
+						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						this.getActions().add(i, addedVlanAction);
 						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
 						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
 							this.setBufferId(bufferId);
 						}
 						fvClassifier.sendMsg(this, fvClassifier);
-
+						if (!fvClassifier.isActive()){  // then this is a clone switch and we need to save this flowmod to temp flow mod and real flowmod table
+							fvClassifier.addLimeFlowRule(originalPort, this.clone());
+						}
+						
 						// return the packet back as we received in this method
 						this.setBufferId(originalBufferId);
 						((OFActionOutput) action).setPort(originalPort);
-						break; //Assuming that there is only one output port...	
+						this.getActions().remove(i);  // removing vlan tag
+						return; //Assuming that there is only one output port...	
 					}
 				}
 			}
@@ -124,17 +150,15 @@ Classifiable, Slicable, Cloneable {
 		
 		fvClassifier.sendMsg(this, fvClassifier);	
 		
-		//return everything in place
+		//return everything in place in case we want to use this method more than once
 		this.setBufferId(originalBufferId);
 		if(originalPort != -1){
-			for (OFAction action : this.getActions()){
-				if(action instanceof OFActionOutput){
-					if(((OFActionOutput) action).getPort() == fvClassifier.getGhostPort()){
-						((OFActionOutput) action).setPort(originalPort);
-
-						if (!fvClassifier.isActive()){  // then this is a clone switch and we need to save this flowmod
-							fvClassifier.addLimeFlowRule(originalPort, this.clone());
-						}
+			OFAction action2;
+			for(int i = 0; i<this.getActions().size(); i++ ){
+				action2 = this.getActions().get(i);
+				if(action2 instanceof OFActionOutput){
+					if(((OFActionOutput) action2).getPort() == fvClassifier.getGhostPort()){
+						((OFActionOutput) action2).setPort(originalPort);
 						break;
 					}
 				}
