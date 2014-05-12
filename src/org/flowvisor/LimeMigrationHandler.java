@@ -19,6 +19,7 @@ import org.openflow.protocol.OFPort;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.protocol.action.OFActionType;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 
 /**
  * @author Murad Kaplan
@@ -61,9 +62,10 @@ public class LimeMigrationHandler {
 		// just loop and make sure port number is there, if so, change its type to what its in clone one
 		// don't change CONNECTED switch, trigger error!
 		// add rules for both active and clone switches to handle packets in and out ghost ports
-		// For any packet coming from port G and out to port C
-		// 		forward to port C
-		// copy tables from active to cloned after adding the high priority rules to both active and clone switches
+		// For any packet coming from port G 
+		// 		remove vlanid 
+		// 		forward to port = to vlanid
+
 
 		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
 			if((LimeContainer.getAllWorkingSwitches().containsKey(entry.getKey())) &&
@@ -114,13 +116,16 @@ public class LimeMigrationHandler {
 					// loop through the table to create LimeFlowTable and push it
 					for(OFFlowMod flowMod: flowModList){
 						short originalPort = -1;
-						short originalPriority;
 						// check to see if this is an output port action
-						for (OFAction action : flowMod.getActions()){
+						OFAction action;
+						for(int i = 0; i<flowMod.getActions().size(); i++ ){
+							action = flowMod.getActions().get(i);
 							if(action instanceof OFActionOutput){
 								if(cloneFVClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 									if (cloneFVClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 										originalPort = ((OFActionOutput) action).getPort(); //TODO, make sure that this is clone and won't be affected by its change
+										OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+										flowMod.getActions().add(i, addedVlanAction);
 										((OFActionOutput) action).setPort(ghostPort);
 										break; //Assuming that there is only one output port...	
 									}
@@ -128,29 +133,13 @@ public class LimeMigrationHandler {
 							}
 						}
 
-						/*if(originalPort != -1){
-							originalPriority = flowMod.getPriority();
-							flowMod.setPriority((short) (originalPriority + 1));
-							cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
-							// now add this to LimeFlowTable
-							cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone()); 
-
-							// return the original port and priority
-							for (OFAction action : flowMod.getActions()){
-								if(action instanceof OFActionOutput){
-									((OFActionOutput) action).setPort(originalPort);
-									break;
-								}
-							}
-							flowMod.setPriority(originalPriority);
-						}*/
 						
 						cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone()); 
 						cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
 					}
-
+					// TODO below should be only pushed when port updated from empty to h_connected or vice versa
 					// send ghost output rules to both active and clone switches
-					OFFlowMod ofFlowMod = new OFFlowMod(); 
+					/*OFFlowMod ofFlowMod = new OFFlowMod(); 
 					OFMatch ofMatch = new OFMatch();
 					ofMatch.setInputPort(ghostPort);
 					ofFlowMod.setMatch(new OFMatch());
@@ -160,7 +149,7 @@ public class LimeMigrationHandler {
 					actionList.add(ofAction);
 					ofFlowMod.setActions(actionList);
 					activeFVClassifier.sendMsg(ofFlowMod, activeFVClassifier);
-					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	
+					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	*/
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");
