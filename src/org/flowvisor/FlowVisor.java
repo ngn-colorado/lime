@@ -187,11 +187,12 @@ public class FlowVisor {
 		HashMap<Short, PortInfo> portTable = new HashMap<>();
 		portTable.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
 		portTable.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
-		LimeContainer.addOriginalSwitch(1, portTable);
+
+		LimeContainer.addOriginalSwitch(46200400562356225L, portTable);  // this represnts the switch 00:a4:23:05:00:00:00:01 in OVX
 		LimeContainer.insertActiveToOriginalSwitchMap(1, 1);
 		System.out.println("MURAD: Original Top-level Switch: " + 1);
 		
-		for(long j=2; j<4; j++){
+		for(long j=46200400562356226L; j<46200400562356228L; j++){
 			portTable = new HashMap<>();
 			for(short i= 1; i<3; i++){
 				portTable.put(i, new PortInfo(PortType.H_CONNECTED, null, null));
