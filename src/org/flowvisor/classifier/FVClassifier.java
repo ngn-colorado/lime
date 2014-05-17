@@ -379,14 +379,16 @@ SwitchChangedListener {
 		// send initial handshake
 		sendMsg(new OFHello(), this);
 		// delete all entries in the flowtable
-		OFMatch match = new OFMatch();
+		// MURAD, do we need to send flowmod in the beginning ? OVX generates error because of that!
+		/*OFMatch match = new OFMatch();
 		match.setWildcards(OFMatch.OFPFW_ALL);
 		OFFlowMod fm = new OFFlowMod();
 		fm.setMatch(match);
 		fm.setCommand(OFFlowMod.OFPFC_DELETE);
 		fm.setOutPort(OFPort.OFPP_NONE);
 		fm.setBufferId(0xffffffff); // buffer to NONE
-		sendMsg(fm, this);
+		sendMsg(fm, this);*/
+		
 		// request the switch's features
 		sendMsg(new OFFeaturesRequest(), this);
 		msgStream.flush();
