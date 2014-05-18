@@ -18,6 +18,8 @@ public class FVPortMod extends OFPortMod implements Classifiable, Slicable {
 	@Override
 	public void classifyFromSwitch(FVClassifier fvClassifier) {
 		FVLog.log(LogLevel.DEBUG, fvClassifier, "recv from switch: " + this);
+		System.out.println("MURAD: FVPortMod, sw: " + fvClassifier.getSwitchName() + " for port " + this.portNumber);
+		
 		for (FVSlicer fvSlicer : fvClassifier.getSlicers())
 			if (fvSlicer.portInSlice(this.portNumber))
 				fvSlicer.sendMsg(this, fvClassifier);
