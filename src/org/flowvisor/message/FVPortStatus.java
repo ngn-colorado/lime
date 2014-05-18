@@ -33,14 +33,14 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 			fvClassifier.addPort(this.getDesc()); // new port dynamically added
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_DELETE.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + "dynamically removing port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
 			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically removing port "
 					+ port);
 			fvClassifier.removePort(this.getDesc());
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_MODIFY.ordinal()) {
 			// replace/update the port definition
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port "+ this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
 			FVLog.log(LogLevel.INFO, fvClassifier, "modifying port " + port);
 			//fvClassifier.removePort(this.getDesc());
 			/*
@@ -48,7 +48,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 			 */
 			fvClassifier.addPort(this.getDesc());
 		} else {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically unknown reason " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
 			FVLog.log(LogLevel.CRIT, fvClassifier, "unknown reason " + reason
 					+ " in port_status msg: " + this);
 		}
