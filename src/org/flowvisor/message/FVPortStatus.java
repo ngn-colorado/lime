@@ -6,6 +6,7 @@ import org.flowvisor.log.LogLevel;
 import org.flowvisor.ofswitch.TopologyConnection;
 import org.flowvisor.slicer.FVSlicer;
 import org.openflow.protocol.OFPortStatus;
+import org.openflow.util.HexString;
 
 /**
  * Send the port status message to each slice that uses this port
@@ -25,20 +26,21 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 		boolean updateSlicers = false;
 
 		if (reason == OFPortReason.OFPPR_ADD.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + port + " with pPort " + this.getDesc().getPortNumber());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + port + " with pPort " + this.getDesc().getPortNumber() + " and mac " + HexString.toHexString(this.desc.getHardwareAddress()));
+			
 			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically adding port "
 					+ port);
 			fvClassifier.addPort(this.getDesc()); // new port dynamically added
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_DELETE.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically removing port " + port + " with pPort " + this.getDesc().getPortNumber());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically removing port " + port + " with pPort " + this.getDesc().getPortNumber() + " and mac " + HexString.toHexString(this.desc.getHardwareAddress()));
 			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically removing port "
 					+ port);
 			fvClassifier.removePort(this.getDesc());
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_MODIFY.ordinal()) {
 			// replace/update the port definition
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port " + port + " with pPort " + this.getDesc().getPortNumber());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port " + port + " with pPort " + this.getDesc().getPortNumber() + " and mac " + HexString.toHexString(this.desc.getHardwareAddress()));
 			FVLog.log(LogLevel.INFO, fvClassifier, "modifying port " + port);
 			//fvClassifier.removePort(this.getDesc());
 			/*
@@ -46,7 +48,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 			 */
 			fvClassifier.addPort(this.getDesc());
 		} else {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " unknown reason " + port + " with pPort " + this.getDesc().getPortNumber());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " unknown reason " + port + " with pPort " + this.getDesc().getPortNumber() + " and mac " + HexString.toHexString(this.desc.getHardwareAddress()));
 			FVLog.log(LogLevel.CRIT, fvClassifier, "unknown reason " + reason
 					+ " in port_status msg: " + this);
 		}
