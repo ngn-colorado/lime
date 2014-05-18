@@ -38,7 +38,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_MODIFY.ordinal()) {
 			// replace/update the port definition
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " modifying port " + port);
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port " + port);
 			FVLog.log(LogLevel.INFO, fvClassifier, "modifying port " + port);
 			//fvClassifier.removePort(this.getDesc());
 			/*
