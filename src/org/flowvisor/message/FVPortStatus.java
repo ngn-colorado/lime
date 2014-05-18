@@ -26,21 +26,21 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 		boolean updateSlicers = false;
 
 		if (reason == OFPortReason.OFPPR_ADD.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + this.desc.toString());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + this.getDesc().toString());
 			
 			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically adding port "
 					+ port);
 			fvClassifier.addPort(this.getDesc()); // new port dynamically added
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_DELETE.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically removing port " + this.desc.toString());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically removing port " + this.getDesc().toString());
 			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically removing port "
 					+ port);
 			fvClassifier.removePort(this.getDesc());
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_MODIFY.ordinal()) {
 			// replace/update the port definition
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port " + this.desc.toString());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port " + this.getDesc().toString());
 			FVLog.log(LogLevel.INFO, fvClassifier, "modifying port " + port);
 			//fvClassifier.removePort(this.getDesc());
 			/*
@@ -48,7 +48,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 			 */
 			fvClassifier.addPort(this.getDesc());
 		} else {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " unknown reason for port " + this.desc.toString());
+			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " unknown reason for port " + this.getDesc().toString());
 			FVLog.log(LogLevel.CRIT, fvClassifier, "unknown reason " + reason
 					+ " in port_status msg: " + this);
 		}
