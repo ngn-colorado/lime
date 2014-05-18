@@ -20,11 +20,12 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 	@Override
 	public void classifyFromSwitch(FVClassifier fvClassifier) {
 		Short port = Short.valueOf(this.getDesc().getPortNumber());
-		System.out.println("MURAD: Recv port status from sw: " + fvClassifier.getDPID() + " about port: " + port);
 		byte reason = this.getReason();
+		System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " Recv port status " + reason + " from about port: " + port);
 		boolean updateSlicers = false;
 
 		if (reason == OFPortReason.OFPPR_ADD.ordinal()) {
+			
 			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically adding port "
 					+ port);
 			fvClassifier.addPort(this.getDesc()); // new port dynamically added
