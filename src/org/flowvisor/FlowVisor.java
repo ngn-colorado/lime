@@ -190,7 +190,7 @@ public class FlowVisor {
 
 		LimeContainer.addOriginalSwitch(46200400562356225L, portTable);  // this represnts the switch 00:a4:23:05:00:00:00:01 in OVX
 		LimeContainer.insertActiveToOriginalSwitchMap(46200400562356225L, 46200400562356225L);
-		System.out.println("MURAD: Original Top-level Switch: " + 1);
+		System.out.println("MURAD: Original Top-level Switch: " + 46200400562356225L);
 		
 		for(long j=46200400562356226L; j<46200400562356228L; j++){
 			portTable = new HashMap<>();
