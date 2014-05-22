@@ -284,7 +284,7 @@ SwitchChangedListener {
 					LimeSwitch cloneSwitch;
 					cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
 					if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
-						if(pInfo.getType().equals(PortType.GHOST)){
+						if(pInfo.getType().equals(PortType.GHOST)){ // do we need this if statement, since clone switch is identical to active switch? 
 							this.activePorts.put(phyPort.getPortNumber(), pInfo);
 							return;
 						}
@@ -292,6 +292,7 @@ SwitchChangedListener {
 				}
 				pInfo = new PortInfo(PortType.UKNOWN, null, null);
 				this.activePorts.put(phyPort.getPortNumber(), pInfo);
+				return;
 			}
 		}
 		if(duplicateSwitch != -1){
@@ -302,8 +303,15 @@ SwitchChangedListener {
 				if(pInfo.getType().equals(PortType.H_CONNECTED)){
 					// update connected port counter
 				}
+				return;
+			}
+			else{
+				// TODO it is adding port we don't know about. ??
 			}
 		}
+		// if we are here, then this is unknown switch
+		pInfo = new PortInfo(PortType.UKNOWN, null, null);
+		this.activePorts.put(phyPort.getPortNumber(), pInfo);
 	}
 
 	public void removePort(OFPhysicalPort phyPort) {
@@ -322,10 +330,14 @@ SwitchChangedListener {
 		
 		PortInfo pInfo;
 		if (isActive){	
-			if(this.getDuplicateSwitch() != -1){
+			if(duplicateSwitch != -1){
 				if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 					if(pInfo.getType().equals(PortType.H_CONNECTED)){ // then this for sure is a cloning port removing, we still need this port
 						this.activePorts.get(phyPort.getPortNumber()).setType(PortType.EMPTY);
+						// update flow-mod for this port
+						// remove them from limeFlow table
+						// add the update to switch flow table
+						
 						return;
 					}
 					else{
@@ -333,13 +345,18 @@ SwitchChangedListener {
 					}
 				}
 			}
+			else{
+				// TODO what if active switch wants to add/remove port that in original switch? Should we trigger error?
+				this.activePorts.remove(phyPort.getPortNumber());
+				return;
+			}
 		}
 		
-		if(duplicateSwitch != -1){
+		if(duplicateSwitch != -1){ // if we are here, then this is a clone switch
 			LimeSwitch cloneSwitch;
 			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
 			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
-				// trigger error!! we shouldn't remove any ports from clone switch during migration
+				// trigger error!! for now, we shouldn't remove any ports from clone switch during migration
 			}
 		}
 		this.activePorts.remove(phyPort.getPortNumber());
