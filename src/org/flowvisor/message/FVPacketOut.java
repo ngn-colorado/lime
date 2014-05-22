@@ -105,7 +105,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 					sendPacketOut(fvClassifier, pair.getBuffer_id(), originalBufferId);
 				}
 			}
-			else{
+			else{ //TODO is this possible to happen??
 				if(fvClassifier.getDuplicateSwitch() != -1){
 					sendPacketOut(fvClassifier, originalBufferId, originalBufferId); // its in cloning process so we need to modify the action
 				}

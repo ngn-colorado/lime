@@ -16,6 +16,7 @@ import org.flowvisor.openflow.protocol.FVMatch;
 import org.flowvisor.slicer.FVSlicer;
 import org.flowvisor.slicer.LimeMsgData;
 import org.flowvisor.slicer.LimeMsgTranslator;
+import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionEnqueue;
@@ -116,6 +117,9 @@ Classifiable, Slicable, Cloneable {
 	private void sendFlowMod(FVClassifier fvClassifier, int bufferId, int originalBufferId){
 		short originalPort = -1;
 		OFAction action;
+		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
+		this.setFlags((short) (this.getFlags() | OFFlowMod.OFPFF_SEND_FLOW_REM));
+		
 		for(int i = 0; i<this.getActions().size(); i++ ){
 			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
