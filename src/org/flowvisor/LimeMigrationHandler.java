@@ -103,53 +103,15 @@ public class LimeMigrationHandler {
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
 					activeFVClassifier.setDuplicateSwitch(cloneSwID);
-					activeFVClassifier.ereaseLimeFlowTable();
+					activeFVClassifier.ereaseFlowTable();
 					// flush LimeFlowTable for active 
 
 					// setup clone switch
 					cloneFVClassifier.setDuplicateSwitch(activeSwID);
 					// copy FlowMod table from active to switch and push it the switch
-					cloneFVClassifier.insertFlowRuleTable(activeFVClassifier.getFlowRuleTable());  //FIXME we may need to clone this
+					cloneFVClassifier.insertFlowRuleTableAndSend(activeFVClassifier.getFlowRuleTable(), ghostPort);  //FIXME we may need to clone this
 					LinkedList<OFFlowMod> flowModList = cloneFVClassifier.getFlowRuleTable();
 					HashMap<Short, ArrayList<FVFlowMod>> cloneLimeFlowTable = new HashMap<>(); 
-
-					// loop through the table to create LimeFlowTable and push it
-					for(OFFlowMod flowMod: flowModList){
-						short originalPort = -1;
-						// check to see if this is an output port action
-						OFAction action;
-						for(int i = 0; i<flowMod.getActions().size(); i++ ){
-							action = flowMod.getActions().get(i);
-							if(action instanceof OFActionOutput){
-								if(cloneFVClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
-									if (cloneFVClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
-										originalPort = ((OFActionOutput) action).getPort(); //TODO, make sure that this is clone and won't be affected by its change
-										OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
-										flowMod.getActions().add(i, addedVlanAction);
-										((OFActionOutput) action).setPort(ghostPort);
-										break; //Assuming that there is only one output port...	
-									}
-								}
-							}
-						}
-
-						
-						cloneFVClassifier.addLimeFlowRule(originalPort, flowMod.clone()); 
-						cloneFVClassifier.sendMsg(flowMod, cloneFVClassifier);
-					}
-					// TODO below should be only pushed when port updated from empty to h_connected or vice versa
-					// send ghost output rules to both active and clone switches
-					/*OFFlowMod ofFlowMod = new OFFlowMod(); 
-					OFMatch ofMatch = new OFMatch();
-					ofMatch.setInputPort(ghostPort);
-					ofFlowMod.setMatch(new OFMatch());
-					List<OFAction> actionList = new ArrayList<>();
-					OFActionOutput ofAction = new OFActionOutput();
-					ofAction.setPort(OFPort.OFPP_NORMAL.getValue()); // TODO we need to verify this works for any incoming packet
-					actionList.add(ofAction);
-					ofFlowMod.setActions(actionList);
-					activeFVClassifier.sendMsg(ofFlowMod, activeFVClassifier);
-					cloneFVClassifier.sendMsg(ofFlowMod, cloneFVClassifier);	*/
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");

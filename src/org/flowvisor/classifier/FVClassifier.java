@@ -114,7 +114,7 @@ SwitchChangedListener {
 	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
 	private HashMap<Short, PortInfo> activePorts;
 	private LimitedQueue<OFFlowMod> flowRulesTable;
-	private HashMap<Short, ArrayList<OFFlowMod>> limeFlowTable;  // contains FlowMods added during migration to be
+	//private HashMap<Short, ArrayList<OFFlowMod>> limeFlowTable;  // contains FlowMods added during migration to be
 	// reomved later iff the port is changed from the original flowmod sent from controller
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
@@ -1350,11 +1350,29 @@ SwitchChangedListener {
 		duplicateSwitch = swId;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void insertFlowRuleTable(LimitedQueue<OFFlowMod> newFlowRulesTable){
-		flowRulesTable.clear();
+	
+	public void insertFlowRuleTableAndSend(LimitedQueue<OFFlowMod> newFlowRulesTable, short ghostPort){
 		for (OFFlowMod fm : newFlowRulesTable){
 			flowRulesTable.add(fm.clone());
+		}
+		OFAction action;
+		short originalPort;
+		for (OFFlowMod flowMod : flowRulesTable){
+			for(int i = 0; i<flowMod.getActions().size(); i++ ){
+				action = flowMod.getActions().get(i);
+				if(action instanceof OFActionOutput){
+					if(this.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+						if (this.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
+							originalPort = ((OFActionOutput) action).getPort(); 
+							OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+							flowMod.getActions().add(i, addedVlanAction);
+							((OFActionOutput) action).setPort(ghostPort);
+							break; //Assuming that there is only one output port...	
+						}
+					}
+				}
+			}
+			sendMsg(flowMod, this);
 		}
 	}
 
@@ -1366,7 +1384,11 @@ SwitchChangedListener {
 		return flowRulesTable;
 	}
 
-	public void addLimeFlowRule(short port, OFFlowMod flowMod){
+	public void ereaseFlowTable(){
+		flowRulesTable.clear();
+	}
+	
+	/*public void addLimeFlowRule(short port, OFFlowMod flowMod){
 		if (limeFlowTable.containsKey(port)){
 			limeFlowTable.get(port).add(flowMod);
 		}
@@ -1385,7 +1407,7 @@ SwitchChangedListener {
 
 	public void ereaseLimeFlowTable(){
 		limeFlowTable.clear();
-	}
+	}*/
 
 
 
