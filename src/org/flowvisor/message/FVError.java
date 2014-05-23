@@ -3,10 +3,10 @@
  */
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFMessage;
 
 /**
@@ -20,11 +20,11 @@ public class FVError extends org.openflow.protocol.OFError implements
 	 * (non-Javadoc)
 	 *
 	 * @seeorg.flowvisor.message.Classifiable#classifyFromSwitch(org.flowvisor.
-	 * classifier.FVClassifier)
+	 * classifier.WorkerSwitch)
 	 */
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
-		FVSlicer fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
 		if (fvSlicer == null) {
 			FVLog.log(LogLevel.WARN, fvClassifier,
 					"dropping msg with unknown xid: " + this);
@@ -42,10 +42,10 @@ public class FVError extends org.openflow.protocol.OFError implements
 	 *
 	 * @see
 	 * org.flowvisor.message.Slicable#sliceFromController(org.flowvisor.classifier
-	 * .FVClassifier, org.flowvisor.slicer.FVSlicer)
+	 * .WorkerSwitch, org.flowvisor.slicer.OriginalSwitch)
 	 */
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 

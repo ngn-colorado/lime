@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.flowvisor.FlowVisor;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.SliceImpl;
 import org.flowvisor.events.FVEventHandler;
@@ -16,7 +16,7 @@ import org.flowvisor.exceptions.UnknownMatchField;
 import org.flowvisor.flows.FlowSpaceUtil;
 import org.flowvisor.openflow.protocol.FVMatch;
 import org.flowvisor.resources.SlicerLimits;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.util.U16;
 import org.openflow.util.U8;
 
@@ -142,21 +142,21 @@ public class HandlerUtils {
 		
 	}
 	
-	public static List<FVClassifier> getAllClassifiers() {
-		List<FVClassifier> list = new LinkedList<FVClassifier>();
+	public static List<WorkerSwitch> getAllClassifiers() {
+		List<WorkerSwitch> list = new LinkedList<WorkerSwitch>();
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				list.add(classifier);
 			}
 		}
 		return list;
 	}
 	
-	public static FVClassifier getClassifierByDPID(Long dpid) throws DPIDNotFound {
-		for (FVClassifier classifier : getAllClassifiers()) {
+	public static WorkerSwitch getClassifierByDPID(Long dpid) throws DPIDNotFound {
+		for (WorkerSwitch classifier : getAllClassifiers()) {
 			if (!classifier.isIdentified())
 				continue;
 			if (dpid == classifier.getDPID())
@@ -166,13 +166,13 @@ public class HandlerUtils {
 	}
 	
 	
-	public static FVSlicer getSlicerByName(String sliceName) {
-		FVSlicer fvSlicer = null;
+	public static OriginalSwitch getSlicerByName(String sliceName) {
+		OriginalSwitch fvSlicer = null;
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (!classifier.isIdentified()) 
 					continue;
 				fvSlicer = classifier.getSlicerByName(sliceName);
@@ -188,8 +188,8 @@ public class HandlerUtils {
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				return classifier.getSlicerLimits();
 			}
 		}
@@ -199,7 +199,7 @@ public class HandlerUtils {
 	
 	public static List<String> getAllDevices() {
 		List<String> dpids = new LinkedList<String>();
-		for (FVClassifier classifier : HandlerUtils.getAllClassifiers())
+		for (WorkerSwitch classifier : HandlerUtils.getAllClassifiers())
 			dpids.add(FlowSpaceUtil.dpidToString(classifier.getDPID()));
 		return dpids;
 	}

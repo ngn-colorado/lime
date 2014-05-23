@@ -1,7 +1,7 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.slicer.OriginalSwitch;
 
 /**
  * Interface for slice specific, message specific rewriting
@@ -22,5 +22,5 @@ public interface Slicable {
 	 * @param fvSlicer
 	 *            The slicing policy and source of the message
 	 */
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer);
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer);
 }

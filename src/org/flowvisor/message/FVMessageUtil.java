@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.flowvisor.FlowVisor;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.classifier.XidPair;
 import org.flowvisor.classifier.XidPairWithMessage;
 import org.flowvisor.classifier.XidTranslator;
@@ -17,7 +17,7 @@ import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.actions.SlicableAction;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
@@ -37,14 +37,14 @@ public class FVMessageUtil {
 
 	/**
 	 * Translate the XID of a message from controller-unique to switch unique
-	 * Also, record the <oldXid,FVSlicer> mapping so we can reverse this later
+	 * Also, record the <oldXid,OriginalSwitch> mapping so we can reverse this later
 	 *
 	 * @param msg
 	 * @param fvClassifier
 	 * @param fvSlicer
 	 */
-	static public void translateXid(OFMessage msg, FVClassifier fvClassifier,
-			FVSlicer fvSlicer) {
+	static public void translateXid(OFMessage msg, WorkerSwitch fvClassifier,
+			OriginalSwitch fvSlicer) {
 		XidTranslator xidTranslator = fvClassifier.getXidTranslator();
 		int newXid = xidTranslator.translate(msg.getXid(), fvSlicer);
 		msg.setXid(newXid);
@@ -52,22 +52,22 @@ public class FVMessageUtil {
 	
 
 	public static void translateXidMsg(FVStatisticsRequest msg,
-			FVClassifier fvClassifier, FVSlicer fvSlicer) {
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		XidTranslatorWithMessage xidTranslator = (XidTranslatorWithMessage) fvClassifier.getXidTranslator();
 		int newXid = xidTranslator.translate(msg.clone(), msg.getXid(), fvSlicer);
 		msg.setXid(newXid);
 	}
 
 	/**
-	 * Undo the effect of translateXID, and return the FVSlicer this came from
+	 * Undo the effect of translateXID, and return the OriginalSwitch this came from
 	 *
 	 * @param msg
 	 * @param fvClassifier
 	 * @return the fvSlicer that was input in the translate step or null if not
 	 *         found
 	 */
-	 static public FVSlicer untranslateXid(OFMessage msg,
-			FVClassifier fvClassifier) {
+	 static public OriginalSwitch untranslateXid(OFMessage msg,
+			WorkerSwitch fvClassifier) {
 		XidTranslator xidTranslator = fvClassifier.getXidTranslator();
 		XidPair pair = xidTranslator.untranslate(msg.getXid());
 		if (pair == null)
@@ -80,7 +80,7 @@ public class FVMessageUtil {
 	
 	 
 	 static public XidPairWithMessage untranslateXidMsg(OFMessage msg, 
-			 FVClassifier fvClassifier) {
+			 WorkerSwitch fvClassifier) {
 		 XidTranslatorWithMessage xidTranslator = (XidTranslatorWithMessage) fvClassifier.getXidTranslator();
 		 XidPairWithMessage pair = xidTranslator.untranslate(msg.getXid());
 		 if (pair == null)
@@ -105,7 +105,7 @@ public class FVMessageUtil {
 	 * @throws ActionDisallowedException
 	 */
 	static public List<OFAction> approveActions(List<OFAction> actionList,
-			OFMatch match, FVClassifier fvClassifier, FVSlicer fvSlicer)
+			OFMatch match, WorkerSwitch fvClassifier, OriginalSwitch fvSlicer)
 			throws ActionDisallowedException {
 		List<OFAction> approvedList = new ArrayList<OFAction>();
 
@@ -125,14 +125,14 @@ public class FVMessageUtil {
 	}
 
 	public static void translateXidAndSend(OFMessage msg,
-			FVClassifier fvClassifier, FVSlicer fvSlicer) {
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.translateXid(msg, fvClassifier, fvSlicer);
 		fvClassifier.sendMsg(msg, fvSlicer);
 	}
 	
 	public static void translateXidMsgAndSend(
-			FVStatisticsRequest msg, FVClassifier fvClassifier,
-			FVSlicer fvSlicer) {
+			FVStatisticsRequest msg, WorkerSwitch fvClassifier,
+			OriginalSwitch fvSlicer) {
 		FVMessageUtil.translateXidMsg(msg, fvClassifier, fvSlicer);
 		fvClassifier.sendMsg(msg, fvSlicer);
 	}
@@ -144,8 +144,8 @@ public class FVMessageUtil {
 	}
 
 	public static void untranslateXidAndSend(OFMessage msg,
-			FVClassifier fvClassifier) {
-		FVSlicer fvSlicer = FVMessageUtil.untranslateXid(msg, fvClassifier);
+			WorkerSwitch fvClassifier) {
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(msg, fvClassifier);
 		if (fvSlicer == null) {
 			FVLog.log(LogLevel.WARN, fvClassifier,
 					"dropping msg with unknown xid: " + msg);

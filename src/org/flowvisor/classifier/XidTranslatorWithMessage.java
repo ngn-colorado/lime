@@ -1,6 +1,6 @@
 package org.flowvisor.classifier;
 
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFMessage;
 import org.openflow.util.LRULinkedHashMap;
 
@@ -15,7 +15,7 @@ public class XidTranslatorWithMessage extends XidTranslator {
 				MAX_SIZE);
 	}
 	
-	public int translate(OFMessage original, int xid, FVSlicer fvSlicer) {
+	public int translate(OFMessage original, int xid, OriginalSwitch fvSlicer) {
 		int ret = translate(xid, fvSlicer);
 		msgMap.put(Integer.valueOf(ret), original);
 		return ret;

@@ -9,7 +9,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.events.FVEvent;
 import org.flowvisor.events.FVEventHandler;
 import org.flowvisor.events.FVEventLoop;
@@ -25,7 +25,7 @@ public class OFSwitchAcceptor implements FVEventHandler {
 	int backlog;
 	int listenPort;
 	ServerSocketChannel ssc;
-	List<FVClassifier> switches;
+	List<WorkerSwitch> switches;
 
 	private SlicerLimits slicerLimits;
 
@@ -137,7 +137,7 @@ public class OFSwitchAcceptor implements FVEventHandler {
 			}
 			
 			FVLog.log(LogLevel.INFO, this, "got new connection: " + sock);
-			FVClassifier fvc = new FVClassifier(pollLoop, sock);
+			WorkerSwitch fvc = new WorkerSwitch(pollLoop, sock);
 			fvc.setSlicerLimits(this.slicerLimits);
 			fvc.init();
 		} catch (IOException e) // ignore IOExceptions -- is this the right

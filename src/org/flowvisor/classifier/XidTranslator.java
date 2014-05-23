@@ -3,7 +3,7 @@
  */
 package org.flowvisor.classifier;
 
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.util.LRULinkedHashMap;
 
 /**
@@ -31,7 +31,7 @@ public class XidTranslator {
 		return xidMap.get(Integer.valueOf(xid));
 	}
 
-	public int translate(int xid, FVSlicer fvSlicer) {
+	public int translate(int xid, OriginalSwitch fvSlicer) {
 		int ret = this.nextID++;
 		if (nextID < MIN_XID)
 			nextID = MIN_XID;

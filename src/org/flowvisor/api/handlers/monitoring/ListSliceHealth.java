@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.flowvisor.api.handlers.ApiHandler;
 import org.flowvisor.api.handlers.HandlerUtils;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.exceptions.DPIDNotFound;
 import org.flowvisor.exceptions.MissingRequiredField;
 import org.flowvisor.flows.FlowSpaceUtil;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
@@ -27,7 +27,7 @@ public class ListSliceHealth implements ApiHandler<Map<String, Object>> {
 		HashMap<String, Object> retvals = new HashMap<String, Object>();
 		try {
 			String sliceName = HandlerUtils.<String>fetchField(SLICENAME, params, true, null);
-			FVSlicer slicer = HandlerUtils.getSlicerByName(sliceName);
+			OriginalSwitch slicer = HandlerUtils.getSlicerByName(sliceName);
 			retvals.put(CONNECTED, slicer.isConnected());
 			retvals.put(CONNCOUNT, slicer.getConnectCount());
 			retvals.put(FSENTRIES, HandlerUtils.getSliceLimits().getSliceFMLimit(sliceName)); 
@@ -53,7 +53,7 @@ public class ListSliceHealth implements ApiHandler<Map<String, Object>> {
 
 	private List<String> getConnectedDpid(String sliceName) {
 		List<String> list = new LinkedList<String>();
-		for (FVClassifier classifier : HandlerUtils.getAllClassifiers())
+		for (WorkerSwitch classifier : HandlerUtils.getAllClassifiers())
 			if (classifier.getSlicerByName(sliceName) != null && classifier.isIdentified())
 				list.add(FlowSpaceUtil.dpidToString(classifier.getDPID()));
 		

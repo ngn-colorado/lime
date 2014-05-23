@@ -3,7 +3,7 @@
  */
 package org.flowvisor.slicer;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.openflow.protocol.OFMatch;
 
 
@@ -13,10 +13,10 @@ import org.openflow.protocol.OFMatch;
  */
 public class LimeMsgData {
 	int 			buffer_id;
-	FVClassifier 	classifierID;
+	WorkerSwitch 	classifierID;
 	OFMatch 		ofMatch;
 
-	public LimeMsgData(int bid, FVClassifier fvClassifier, OFMatch match) {
+	public LimeMsgData(int bid, WorkerSwitch fvClassifier, OFMatch match) {
 		this.buffer_id 		= bid;
 		this.classifierID 	= fvClassifier;
 		this.ofMatch		= match;
@@ -36,7 +36,7 @@ public class LimeMsgData {
 	/**
 	 * @return the classifier ID
 	 */
-	public FVClassifier getClassifier() {
+	public WorkerSwitch getClassifier() {
 		return classifierID;
 	}
 }

@@ -8,7 +8,7 @@ import org.flowvisor.api.APIUserCred;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.api.handlers.ApiHandler;
 import org.flowvisor.api.handlers.HandlerUtils;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.FlowSpace;
 import org.flowvisor.exceptions.DPIDNotFound;
 import org.flowvisor.exceptions.MissingRequiredField;
@@ -39,7 +39,7 @@ public class UnRegisterEventCallback implements ApiHandler<Map<String, Object>> 
 			{
 				if(dpidStr != null){
 					Long dpid = FlowSpaceUtil.parseDPID(dpidStr);
-					FVClassifier classifier = HandlerUtils.getClassifierByDPID(dpid);
+					WorkerSwitch classifier = HandlerUtils.getClassifierByDPID(dpid);
 					if (classifier!= null){
 					classifier.deRegisterCallBack(APIUserCred.getUserName(), method, cookie, TopologyCallback.EventType.FLOWTABLE_CALLBACK, dpid);
 					resp = new JSONRPC2Response(true, 0);
@@ -48,8 +48,8 @@ public class UnRegisterEventCallback implements ApiHandler<Map<String, Object>> 
 						resp = new JSONRPC2Response(false,0);
 				}
 				else if(dpidStr == null){
-					List<FVClassifier> cList = HandlerUtils.getAllClassifiers();
-					for (FVClassifier c: cList){
+					List<WorkerSwitch> cList = HandlerUtils.getAllClassifiers();
+					for (WorkerSwitch c: cList){
 						if(c!=null){
 							c.deRegisterCallBack(APIUserCred.getUserName(), method, cookie, TopologyCallback.EventType.FLOWTABLE_CALLBACK, c.getDPID());
 							resp = new JSONRPC2Response(true, 0);

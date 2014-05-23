@@ -72,7 +72,7 @@ import org.flowvisor.openflow.protocol.FVMatch;
 import org.flowvisor.resources.SlicerLimits;
 import org.flowvisor.resources.ratelimit.FixedIntervalRefillStrategy;
 import org.flowvisor.resources.ratelimit.TokenBucket;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFEchoReply;
 import org.openflow.protocol.OFError.OFErrorType;
 import org.openflow.protocol.OFFeaturesReply;
@@ -91,16 +91,17 @@ import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.protocol.statistics.OFStatisticsType;
 
 /**
- * Map OF messages from the switch to the appropriate slice
- *
- * Also handles all of the switch-specific but slice-general state and
- * rewriting.
- *
+ * Taken from WorkerSwitch class
+ * This class represents virtual switch beneath LIME proxy and OF controller cannot see
+ * 
  * @author capveg
+ * @author Murad Kaplan
+ * 
+ *
  *
  */
 
-public class FVClassifier implements FVEventHandler, FVSendMsg, FlowMapChangedListener, FlowvisorChangedListener,
+public class WorkerSwitch implements FVEventHandler, FVSendMsg, FlowMapChangedListener, FlowvisorChangedListener,
 SwitchChangedListener {
 
 	public static final int MessagesPerRead = 50; // for performance tuning
@@ -119,7 +120,7 @@ SwitchChangedListener {
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
-	ConcurrentHashMap<String, FVSlicer> slicerMap;
+	ConcurrentHashMap<String, OriginalSwitch> slicerMap;
 	XidTranslator xidTranslator;
 	CookieTranslator cookieTranslator;
 	short missSendLength;
@@ -154,7 +155,7 @@ SwitchChangedListener {
 
 	// OFPP_FLOOD
 
-	public FVClassifier(FVEventLoop loop, SocketChannel sock) {
+	public WorkerSwitch(FVEventLoop loop, SocketChannel sock) {
 		this.loop = loop;
 		this.switchName = "unidentified:" + sock.toString();
 		this.factory = new FVMessageFactory();
@@ -171,7 +172,7 @@ SwitchChangedListener {
 		this.switchInfo = null;
 		this.doneID = false;
 		this.floodPermsSlice = ""; // disabled, at first
-		this.slicerMap = new ConcurrentHashMap<String, FVSlicer>();
+		this.slicerMap = new ConcurrentHashMap<String, OriginalSwitch>();
 		this.xidTranslator = new XidTranslatorWithMessage();
 		this.cookieTranslator = new CookieTranslator();
 		this.missSendLength = 128;
@@ -235,7 +236,7 @@ SwitchChangedListener {
 		this.activePorts.clear();
 
 		for (OFPhysicalPort phyPort : switchInfo.getPorts()){	
-			//System.out.println("MURAD: FVClassifier, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
+			//System.out.println("MURAD: WorkerSwitch, trying to add port " + phyPort.getPortNumber() + " for switch "+ getDPID());
 			if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 				LimeSwitch origSwitch;
 				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID()));
@@ -256,7 +257,7 @@ SwitchChangedListener {
 	}
 
 	public void addPort(OFPhysicalPort phyPort) {
-		//System.out.println("MURAD: FVClassifier, adding port " + phyPort.getPortNumber());
+		//System.out.println("MURAD: WorkerSwitch, adding port " + phyPort.getPortNumber());
 		for (Iterator<OFPhysicalPort> it = switchInfo.getPorts().iterator(); it
 				.hasNext();) {
 			// remove stale info, if it exists
@@ -363,7 +364,7 @@ SwitchChangedListener {
 	}
 
 	
-	public FVSlicer getSlicerByName(String sliceName) {
+	public OriginalSwitch getSlicerByName(String sliceName) {
 		if (this.slicerMap == null)
 			return null; // race condition on shutdown
 		synchronized (slicerMap) {
@@ -563,7 +564,7 @@ SwitchChangedListener {
 			// update ourselves first
 			connectToControllers(); // re-figure out who we should connect to
 			// then tell everyone who depends on us (causality important :-)
-			for (FVSlicer fvSlicer : slicerMap.values())
+			for (OriginalSwitch fvSlicer : slicerMap.values())
 				this.loop.queueEvent(new ConfigUpdateEvent(e).setDst(fvSlicer));
 		} else if (config.equals(FVConfig.FLOW_TRACKING)) {
 			updateFlowTrackingConfig();
@@ -597,7 +598,7 @@ SwitchChangedListener {
 			// read stuff, if need be
 			if ((ops & SelectionKey.OP_READ) != 0) {
 				List<OFMessage> newMsgs = msgStream.read();
-				//.read(FVClassifier.MessagesPerRead);
+				//.read(WorkerSwitch.MessagesPerRead);
 				if (newMsgs != null) {
 					for (OFMessage m : newMsgs) {
 						if (m == null) {
@@ -609,9 +610,9 @@ SwitchChangedListener {
 						}
 						//FVLog.log(LogLevel.DEBUG, this, "THE TYPE " + m.getType());
 						//FVLog.log(LogLevel.DEBUG, this, "read ", m);
-						//System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " xid: " + m.getXid());
+						//System.out.println("MURAD: WorkerSwitch, Rcvd Msg Type: " + m.getType() + " xid: " + m.getXid());
 						if (m.getType().equals(OFType.FEATURES_REPLY) || m.getType().equals(OFType.PORT_STATUS)){
-							//System.out.println("MURAD: FVClassifier, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID());
+							//System.out.println("MURAD: WorkerSwitch, Rcvd Msg Type: " + m.getType() + " from sw " + getDPID());
 						}
 
 						if ((m instanceof SanityCheckable)
@@ -657,9 +658,9 @@ SwitchChangedListener {
 		try {
 			this.sock.close();
 			// shutdown each of the connections to the controllers
-			Map<String, FVSlicer> tmpMap = slicerMap;
+			Map<String, OriginalSwitch> tmpMap = slicerMap;
 			slicerMap = null; // to prevent tearDown(slice) corruption
-			for (FVSlicer fvSlicer : tmpMap.values())
+			for (OriginalSwitch fvSlicer : tmpMap.values())
 				fvSlicer.closeDown(false);
 		} catch (IOException e) {
 			FVLog.log(LogLevel.WARN, this, "weird error on close:: ", e);
@@ -781,7 +782,7 @@ SwitchChangedListener {
 					makeActive();
 					// copy original lime switch ports 
 					if (!slicerMap.containsKey(LimeContainer.MainSlice)){
-						FVSlicer newSlicer = new FVSlicer(this.loop, this, LimeContainer.MainSlice);  
+						OriginalSwitch newSlicer = new OriginalSwitch(this.loop, this, LimeContainer.MainSlice);  
 						slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
 						newSlicer.init();
 						LimeContainer.addSlicer(getDPID(), newSlicer);
@@ -843,7 +844,7 @@ SwitchChangedListener {
 	}
 
 	/**
-	 * Called by FVSlicer to tell us to forget about them
+	 * Called by OriginalSwitch to tell us to forget about them
 	 *
 	 * @param sliceName
 	 */
@@ -910,7 +911,7 @@ SwitchChangedListener {
 		return this.switchInfo != null;
 	}
 
-	public Collection<FVSlicer> getSlicers() {
+	public Collection<OriginalSwitch> getSlicers() {
 		// TODO: figure out if this is a copy and could have SYNCH issues
 		return slicerMap.values();
 	}
@@ -964,7 +965,7 @@ SwitchChangedListener {
 		// update ourselves first
 		connectToControllers(in); // re-figure out who we should connect to
 		// then tell everyone who depends on us (causality important :-)
-		for (FVSlicer fvSlicer : slicerMap.values())
+		for (OriginalSwitch fvSlicer : slicerMap.values())
 			fvSlicer.updateFlowSpace();
 	}
 
@@ -1098,7 +1099,7 @@ SwitchChangedListener {
 		return stats;
 	}
 
-	public void sendAggStatsResp(FVSlicer fvSlicer, FVStatisticsRequest original) {
+	public void sendAggStatsResp(OriginalSwitch fvSlicer, FVStatisticsRequest original) {
 		boolean found = false;
 		FVAggregateStatisticsRequest orig = (FVAggregateStatisticsRequest) original.getStatistics().get(0);
 
@@ -1154,7 +1155,7 @@ SwitchChangedListener {
 		return false;
 	}
 
-	public void sendFlowStatsResp(FVSlicer fvSlicer, FVStatisticsRequest original, short flag) {
+	public void sendFlowStatsResp(OriginalSwitch fvSlicer, FVStatisticsRequest original, short flag) {
 		FVFlowStatisticsRequest orig = (FVFlowStatisticsRequest) original.getStatistics().get(0);
 
 
@@ -1351,7 +1352,7 @@ SwitchChangedListener {
 	}
 
 	
-	public void insertFlowRuleTableAndSend(LimitedQueue<OFFlowMod> newFlowRulesTable, short ghostPort){
+	public synchronized void insertFlowRuleTableAndSend(LimitedQueue<OFFlowMod> newFlowRulesTable, short ghostPort){
 		for (OFFlowMod fm : newFlowRulesTable){
 			flowRulesTable.add(fm.clone());
 		}
@@ -1376,7 +1377,7 @@ SwitchChangedListener {
 		}
 	}
 
-	public void addFlowRule(FVFlowMod flowMod){
+	public synchronized void addFlowRule(FVFlowMod flowMod){
 		flowRulesTable.add(flowMod);
 	}
 
@@ -1384,8 +1385,17 @@ SwitchChangedListener {
 		return flowRulesTable;
 	}
 
-	public void ereaseFlowTable(){
+	public synchronized void ereaseFlowTable(){
 		flowRulesTable.clear();
+	}
+	
+	public synchronized void findAndEditMatchedFlowRule(OFFlowMod fm){
+		for (OFFlowMod flowMod : flowRulesTable){
+			if (flowMod.equals(fm)){  // this is strict matching (considering priority and wildcars)
+				
+				
+			}
+		}
 	}
 	
 	/*public void addLimeFlowRule(short port, OFFlowMod flowMod){

@@ -6,12 +6,12 @@ package org.flowvisor.message.lldp;
 import java.nio.ByteBuffer;
 
 import org.flowvisor.FlowVisor;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.FVPacketIn;
 import org.flowvisor.message.FVPacketOut;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 /**
  * Set of utilities for handling our LLDP virtualization hacks
@@ -40,7 +40,7 @@ public class LLDPUtil {
 	 * @return did we handle the message?
 	 */
 	static public boolean handleLLDPFromController(FVPacketOut po,
-			FVClassifier fvClassifier, FVSlicer fvSlicer) {
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 
 		FVLog.log(LogLevel.DEBUG,null,"inside handleLLDPFromController in LLDPUtil" );
 		if (!LLDPCheck(po.getPacketData()))
@@ -128,13 +128,13 @@ public class LLDPUtil {
 	 * @return did we handle this message?
 	 */
 	static public boolean handleLLDPFromSwitch(FVPacketIn pi,
-			FVClassifier fvClassifier) {
+			WorkerSwitch fvClassifier) {
 		FVLog.log(LogLevel.DEBUG,null,"inside handleLLDPFromSwitch in LLDPUtil" );
 		if (!LLDPCheck(pi.getPacketData()))
 			return false;
 		LLDPTrailer trailer = LLDPTrailer.getTrailer(pi);
 		if (trailer != null) {
-			FVSlicer fvSlicer = fvClassifier.getSlicerByName(trailer
+			OriginalSwitch fvSlicer = fvClassifier.getSlicerByName(trailer
 					.getSliceName());
 			if (fvSlicer != null) {
 				if (fvSlicer.isConnected()) {
@@ -166,7 +166,7 @@ public class LLDPUtil {
 		pi.setXid(0xdeaddead); // mark this as broadcasted
 		
 		
-		for (FVSlicer fvSlicer : fvClassifier.getSlicers()) {
+		for (OriginalSwitch fvSlicer : fvClassifier.getSlicers()) {
 				if (fvSlicer.portInSlice(inport) && fvSlicer.isConnected() && fvSlicer.isOptedIn())
 					fvSlicer.sendMsg(pi, fvClassifier);
 		}

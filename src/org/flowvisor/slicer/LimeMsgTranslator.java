@@ -6,7 +6,7 @@ package org.flowvisor.slicer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.openflow.protocol.OFMatch;
 import org.openflow.util.LRULinkedHashMap;
 
@@ -56,7 +56,7 @@ public class LimeMsgTranslator {
 	}
 	
 	
-	public int translate(int buffer_id, FVClassifier fvClassifier, OFMatch ofMatch) {
+	public int translate(int buffer_id, WorkerSwitch fvClassifier, OFMatch ofMatch) {
 		int ret = this.nextID++;
 		if (nextID < MIN_XID)
 			nextID = MIN_XID;

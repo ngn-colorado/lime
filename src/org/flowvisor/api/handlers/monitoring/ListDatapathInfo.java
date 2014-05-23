@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.flowvisor.api.handlers.ApiHandler;
 import org.flowvisor.api.handlers.HandlerUtils;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FlowSpace;
 import org.flowvisor.exceptions.DPIDNotFound;
@@ -33,7 +33,7 @@ public class ListDatapathInfo implements ApiHandler<Map<String, Object>> {
 		try {
 			Long dpid = FlowSpaceUtil.parseDPID(
 					HandlerUtils.<String>fetchField(FlowSpace.DPID, params, true, null));
-			FVClassifier classifier = HandlerUtils.getClassifierByDPID(dpid);
+			WorkerSwitch classifier = HandlerUtils.getClassifierByDPID(dpid);
 			getPortLists(classifier, portnos, portNames);
 			retvals.put(FlowSpace.DPID, FlowSpaceUtil.dpidToString(dpid));
 			retvals.put(NUMPORTS, classifier.getSwitchInfo().getPorts().size());
@@ -60,7 +60,7 @@ public class ListDatapathInfo implements ApiHandler<Map<String, Object>> {
 		
 	}
 
-	private HashMap<String, Integer> getDPIDFMLimits(FVClassifier classifier) 
+	private HashMap<String, Integer> getDPIDFMLimits(WorkerSwitch classifier) 
 			throws ConfigError {
 		List<String> slices = HandlerUtils.getAllSlices();
 		HashMap<String, Integer> ret = new HashMap<String, Integer>();
@@ -79,7 +79,7 @@ public class ListDatapathInfo implements ApiHandler<Map<String, Object>> {
 
 
 
-	private void getPortLists(FVClassifier classifier, List<Integer> portnos,
+	private void getPortLists(WorkerSwitch classifier, List<Integer> portnos,
 			List<String> portNames) {
 		for (OFPhysicalPort port : classifier.getSwitchInfo().getPorts()) {
 			portnos.add(U16.f(port.getPortNumber()));

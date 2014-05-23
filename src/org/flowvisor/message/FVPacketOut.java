@@ -4,11 +4,11 @@ import java.util.Arrays;
 
 import org.flowvisor.LimeContainer;
 import org.flowvisor.PortInfo.PortType;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.lldp.LLDPUtil;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.flowvisor.slicer.LimeMsgData;
 import org.flowvisor.slicer.LimeMsgTranslator;
 import org.openflow.protocol.OFMatch;
@@ -57,12 +57,12 @@ import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 
 		// make sure that this slice can access this bufferID
 		if (! fvSlicer.isBufferIDAllowed(this.getBufferId())) {
@@ -95,11 +95,11 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 			LimeMsgData pair = translator.untranslate(this.bufferId);
 			if (pair != null){
 				if(fvClassifier.getDuplicateSwitch() != -1){
-					FVClassifier senderFVClassifier; //, cloneFVClassifier;
-					senderFVClassifier = pair.getClassifier();
-					//FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(senderFVClassifier.getDuplicateSwitch());
-					sendPacketOut(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
-					//sendFlowMod(duplicateFVClassifier);
+					WorkerSwitch senderWorkerSwitch; //, cloneWorkerSwitch;
+					senderWorkerSwitch = pair.getClassifier();
+					//WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(senderWorkerSwitch.getDuplicateSwitch());
+					sendPacketOut(senderWorkerSwitch, pair.getBuffer_id(), originalBufferId);
+					//sendFlowMod(duplicateWorkerSwitch);
 				}
 				else{
 					sendPacketOut(fvClassifier, pair.getBuffer_id(), originalBufferId);
@@ -126,7 +126,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 	 * @param bufferId
 	 * @param originalBufferId
 	 */
-	private void sendPacketOut(FVClassifier fvClassifier, int bufferId, int originalBufferId){
+	private void sendPacketOut(WorkerSwitch fvClassifier, int bufferId, int originalBufferId){
 		short originalPort = -1;int listCounter = 0;
 		OFAction action;
 		for(int i = 0; i<this.getActions().size(); i++ ){
@@ -165,7 +165,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 
 	/**
-	 * Create FlowMod with same actions and matches from PacketOput and send to only duplicate FVClassifier
+	 * Create FlowMod with same actions and matches from PacketOput and send to only duplicate WorkerSwitch
 	 * Set bufferId to -1
 	 * if switch is clone, then save original actions list to its table
 	 * @param fvClassifier
@@ -174,7 +174,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 	 * @param bufferId
 	 * @param originalBufferId
 	 */
-	private void sendFlowMod(FVClassifier duplicateFVClassifier){
+	private void sendFlowMod(WorkerSwitch duplicateWorkerSwitch){
 		short originalPort = -1;
 		FVFlowMod fvFlowMod = new FVFlowMod();
 		fvFlowMod.setCommand(FVFlowMod.OFPFC_ADD);
@@ -184,26 +184,26 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 
 		for (OFAction action : fvFlowMod.getActions()){
 			if(action instanceof OFActionOutput){
-				if(duplicateFVClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
-					if (duplicateFVClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
+				if(duplicateWorkerSwitch.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+					if (duplicateWorkerSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
-						((OFActionOutput) action).setPort(duplicateFVClassifier.getGhostPort());
+						((OFActionOutput) action).setPort(duplicateWorkerSwitch.getGhostPort());
 						break; //Assuming that there is only one output port...	
 					}
 				}
 			}
 		}
 
-		duplicateFVClassifier.sendMsg(fvFlowMod, duplicateFVClassifier);
+		duplicateWorkerSwitch.sendMsg(fvFlowMod, duplicateWorkerSwitch);
 
 		// return the original port 
-		if (!duplicateFVClassifier.isActive()){  // then this is a clone switch and we need to save this flowmod
+		if (!duplicateWorkerSwitch.isActive()){  // then this is a clone switch and we need to save this flowmod
 			if(originalPort != -1){
 				for (OFAction action : fvFlowMod.getActions()){
 					if(action instanceof OFActionOutput){
-						if(((OFActionOutput) action).getPort() == duplicateFVClassifier.getGhostPort()){
+						if(((OFActionOutput) action).getPort() == duplicateWorkerSwitch.getGhostPort()){
 							((OFActionOutput) action).setPort(originalPort);
-							duplicateFVClassifier.addLimeFlowRule(originalPort, fvFlowMod.clone());
+							duplicateWorkerSwitch.addLimeFlowRule(originalPort, fvFlowMod.clone());
 							break;
 						}
 					}

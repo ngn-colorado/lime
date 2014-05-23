@@ -3,13 +3,13 @@ package org.flowvisor.message.statistics;
 import java.net.InetSocketAddress;
 
 import org.flowvisor.FlowVisor;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.FVMessageUtil;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.statistics.OFDescriptionStatistics;
 
 public class FVDescriptionStatistics extends OFDescriptionStatistics implements
@@ -25,7 +25,7 @@ public class FVDescriptionStatistics extends OFDescriptionStatistics implements
 	 */
 
 	@Override
-	public void classifyFromSwitch(FVStatisticsReply msg, FVClassifier fvClassifier) {
+	public void classifyFromSwitch(FVStatisticsReply msg, WorkerSwitch fvClassifier) {
 		
 		if (fvClassifier.wantStatsDescHack()) {
 			InetSocketAddress remote = (InetSocketAddress) fvClassifier
@@ -45,8 +45,8 @@ public class FVDescriptionStatistics extends OFDescriptionStatistics implements
 	}
 
 	@Override
-	public void sliceFromController(FVStatisticsRequest msg, FVClassifier fvClassifier,
-			FVSlicer fvSlicer) {
+	public void sliceFromController(FVStatisticsRequest msg, WorkerSwitch fvClassifier,
+			OriginalSwitch fvSlicer) {
 		FVLog.log(LogLevel.INFO, fvSlicer, "FVDescriptions requests have no body; message is illegal. Dropping: ", this);
 		
 	}

@@ -19,7 +19,7 @@ import java.util.Set;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.LimeSwitch;
 import org.flowvisor.api.TopologyCallback;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.classifier.FVSendMsg;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.ConfigurationEvent;
@@ -65,15 +65,18 @@ import org.openflow.util.LRULinkedHashMap;
 
 
 /**
+ * Taken from OriginalSwitch
+ * This class represent the original switch that OF controller on top of LIME always sees
  * @author capveg
+ * @author Murad Kaplan
  * 
  */
-public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedListener, SliceChangedListener {
+public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChangedListener, SliceChangedListener {
 
 	private LimeMsgTranslator limeMsgTranslator;
 	public static final int MessagesPerRead = 50; // for performance tuning
 	String sliceName;
-	FVClassifier fvClassifier;
+	WorkerSwitch fvClassifier;
 	FVEventLoop loop;
 	SocketChannel sock;
 	String hostname;
@@ -101,10 +104,10 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 
 	private Integer fmlimit = -1;
 
-	protected FVSlicer() {}
+	protected OriginalSwitch() {}
 	// get OFPP_FLOOD'd
 
-	public FVSlicer(FVEventLoop loop, FVClassifier fvClassifier,
+	public OriginalSwitch(FVEventLoop loop, WorkerSwitch fvClassifier,
 			String sliceName) {
 		this.limeMsgTranslator = new LimeMsgTranslator();
 		this.loop = loop;
@@ -149,7 +152,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	}*/
 
 	public void init() {
-		FVLog.log(LogLevel.DEBUG, this, "initializing new FVSlicer");
+		FVLog.log(LogLevel.DEBUG, this, "initializing new OriginalSwitch");
 
 		hostname = "128.138.201.93";
 		port = 6633;
@@ -466,7 +469,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 		info.put("controller-port", this.port);
 		info.put("shutdown-status", this.isShutdown);
 		info.put("floodperms", this.floodPerms);
-		FVLog.log(LogLevel.DEBUG, this, "FVSlicer StatusInfo: " + info);
+		FVLog.log(LogLevel.DEBUG, this, "OriginalSwitch StatusInfo: " + info);
 		return info;
 	}
 
@@ -587,15 +590,15 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 			if (msgStream.needsFlush()) // flush any pending messages
 				msgStream.flush();
 			List<OFMessage> msgs = this.msgStream.read();
-			// .read(FVSlicer.MessagesPerRead); // read any new
+			// .read(OriginalSwitch.MessagesPerRead); // read any new
 			// messages
 			if (msgs == null)
 				throw new IOException("got null from read()");
 			for (OFMessage msg : msgs) {
 				//if (!(msg.getType().equals(msg.getType().equals(OFType.FLOW_MOD) || msg.getType().equals(OFType.PACKET_OUT)))){
-					//System.out.println("MURAD: FVSlicer, Rcvd Msg Type: " + msg.getType() + " xid: " + msg.getXid());
+					//System.out.println("MURAD: OriginalSwitch, Rcvd Msg Type: " + msg.getType() + " xid: " + msg.getXid());
 				//}
-				//System.out.println("MURAD: FVSlicer, Rcvd Msg Type: " + msg.getType() + " for-sw " + fvClassifier.getDPID() + " data: " + msg.toString());
+				//System.out.println("MURAD: OriginalSwitch, Rcvd Msg Type: " + msg.getType() + " for-sw " + fvClassifier.getDPID() + " data: " + msg.toString());
 				FVLog.log(LogLevel.INFO, this, "recv from controller: ", msg);
 				this.stats.increment(FVStatsType.SEND, this, msg);
 				if ((msg instanceof SanityCheckable)
@@ -781,7 +784,7 @@ public class FVSlicer implements FVEventHandler, FVSendMsg, FlowvisorChangedList
 	 * Hopefully one day we will remove the need to copy 
 	 * the linear flow space all over the place!
 	 * 
-	 * Called by FVClassifier when he updates his flowspace.
+	 * Called by WorkerSwitch when he updates his flowspace.
 	 */
 
 	public void updateFlowSpace() {

@@ -3,7 +3,7 @@
  */
 package org.flowvisor.message.statistics;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVStatisticsReply;
 
 /**
@@ -20,9 +20,9 @@ public interface ClassifiableStatistic {
 	 * @param fvClassifier
 	 * @param fvSlicer
 	 */
-	public void classifyFromSwitch(FVStatisticsReply msg, FVClassifier fvClassifier);
+	public void classifyFromSwitch(FVStatisticsReply msg, WorkerSwitch fvClassifier);
 	
 	
-	/*public void classifyFromSwitch(OFMessage original, List<OFStatistics> approvedStats, FVClassifier fvClassifier,
-			FVSlicer fvSlicer) throws StatDisallowedException;*/
+	/*public void classifyFromSwitch(OFMessage original, List<OFStatistics> approvedStats, WorkerSwitch fvClassifier,
+			OriginalSwitch fvSlicer) throws StatDisallowedException;*/
 }

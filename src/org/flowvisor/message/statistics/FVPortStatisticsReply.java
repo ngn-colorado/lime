@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.FVMessageUtil;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.statistics.OFPortStatisticsReply;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.util.U16;
@@ -22,10 +22,10 @@ public class FVPortStatisticsReply extends OFPortStatisticsReply implements
 
 	@Override
 	public void classifyFromSwitch(FVStatisticsReply msg,
-			FVClassifier fvClassifier) {
+			WorkerSwitch fvClassifier) {
 		//statsMap = toMap(msg);
 		
-		FVSlicer fvSlicer = FVMessageUtil.untranslateXid(msg, fvClassifier);
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(msg, fvClassifier);
         if (fvSlicer == null) {
                 FVLog.log(LogLevel.WARN, fvClassifier,
                                 "dropping unclassifiable port stats reply: " + this);
@@ -56,7 +56,7 @@ public class FVPortStatisticsReply extends OFPortStatisticsReply implements
 
 	@Override
 	public void sliceFromController(FVStatisticsRequest msg,
-			FVClassifier fvClassifier, FVSlicer fvSlicer) {
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVLog.log(LogLevel.WARN, fvSlicer, "dropping unexpected msg: " + this);
 		
 	}

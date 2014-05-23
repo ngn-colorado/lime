@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.classifier.XidPairWithMessage;
 import org.flowvisor.config.FlowSpace;
 import org.flowvisor.flows.FlowSpaceUtil;
@@ -14,7 +14,7 @@ import org.flowvisor.message.FVMessageUtil;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
 import org.flowvisor.openflow.protocol.FVMatch.cidrToIp;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
@@ -53,7 +53,7 @@ public class FVFlowStatisticsReply extends OFFlowStatisticsReply implements
 	private long trans_cookie;
 	
 	@Override
-	public void classifyFromSwitch(FVStatisticsReply msg, FVClassifier fvClassifier) {
+	public void classifyFromSwitch(FVStatisticsReply msg, WorkerSwitch fvClassifier) {
 		FVLog.log(LogLevel.DEBUG, null, "Inside classifyFromSwitch in FVFlowStatisticsReply");
 		
 		//fvClassifier.classifyFlowStats(msg,statsMap);
@@ -79,8 +79,8 @@ public class FVFlowStatisticsReply extends OFFlowStatisticsReply implements
 
 
 	@Override
-	public void sliceFromController(FVStatisticsRequest msg, FVClassifier fvClassifier,
-			FVSlicer fvSlicer) {
+	public void sliceFromController(FVStatisticsRequest msg, WorkerSwitch fvClassifier,
+			OriginalSwitch fvSlicer) {
 		FVLog.log(LogLevel.WARN, fvSlicer, "dropping unexpected msg: " + this);
 		
 	}

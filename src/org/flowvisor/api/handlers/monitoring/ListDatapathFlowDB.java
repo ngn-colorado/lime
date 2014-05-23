@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.flowvisor.api.handlers.ApiHandler;
 import org.flowvisor.api.handlers.HandlerUtils;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.FlowSpace;
 import org.flowvisor.exceptions.DPIDNotFound;
 import org.flowvisor.exceptions.MissingRequiredField;
@@ -29,7 +29,7 @@ public class ListDatapathFlowDB implements ApiHandler<Map<String, Object>> {
 		try {
 			Long dpid = FlowSpaceUtil.parseDPID(
 					HandlerUtils.<String>fetchField(FlowSpace.DPID, params, true, null));
-			FVClassifier classifier = HandlerUtils.getClassifierByDPID(dpid);
+			WorkerSwitch classifier = HandlerUtils.getClassifierByDPID(dpid);
 			for (FlowDBEntry fbe : classifier.getFlowDB()) {
 				retvals.add(fbe.toMap());
 			}

@@ -4,13 +4,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.flows.SliceAction;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.openflow.protocol.FVMatch;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFQueueConfigReply;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.queue.OFPacketQueue;
@@ -20,13 +20,13 @@ public class FVQueueConfigReply extends OFQueueConfigReply implements
 		Classifiable, Slicable  {
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
 	}
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
-		FVSlicer fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
 		if (fvSlicer == null) {
 			FVLog.log(LogLevel.WARN, fvClassifier,
 					"dropping unclassifiable xid in QueueConfigReply: " + this);

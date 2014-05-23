@@ -8,12 +8,12 @@ import java.util.List;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.CookieTranslator;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.openflow.protocol.FVMatch;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.flowvisor.slicer.LimeMsgData;
 import org.flowvisor.slicer.LimeMsgTranslator;
 import org.openflow.protocol.OFFlowMod;
@@ -31,7 +31,7 @@ Classifiable, Slicable, Cloneable {
 
 	private HashMap<Integer,Integer> priorityMap = new HashMap<Integer,Integer>();
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
 	}
 
@@ -58,7 +58,7 @@ Classifiable, Slicable, Cloneable {
 	 */
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		//System.out.println("MURAD: FV_MOD, buf_id: " + this.bufferId + " Packet-data: " + this.toString());
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
 		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
@@ -67,9 +67,9 @@ Classifiable, Slicable, Cloneable {
 		int originalBufferId = this.bufferId;
 		if(originalBufferId == -1){
 			if(fvClassifier.getDuplicateSwitch() != -1){
-				FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+				WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
 				sendFlowMod(fvClassifier, -1, originalBufferId);
-				sendFlowMod(duplicateFVClassifier,-1, originalBufferId);
+				sendFlowMod(duplicateWorkerSwitch,-1, originalBufferId);
 			}
 			else{
 				fvClassifier.sendMsg(this, fvSlicer); // no need to modify it
@@ -81,22 +81,22 @@ Classifiable, Slicable, Cloneable {
 			LimeMsgTranslator translator = fvSlicer.getLimeMsgTranslator();
 			LimeMsgData pair = translator.untranslate(this.bufferId);
 			if (pair != null){
-				FVClassifier senderFVClassifier; //, cloneFVClassifier;
-				senderFVClassifier = pair.getClassifier();
-				if(senderFVClassifier.getDuplicateSwitch() != -1){
-					FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(senderFVClassifier.getDuplicateSwitch());
-					sendFlowMod(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
-					sendFlowMod(duplicateFVClassifier, -1, -1);
+				WorkerSwitch senderWorkerSwitch; //, cloneWorkerSwitch;
+				senderWorkerSwitch = pair.getClassifier();
+				if(senderWorkerSwitch.getDuplicateSwitch() != -1){
+					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(senderWorkerSwitch.getDuplicateSwitch());
+					sendFlowMod(senderWorkerSwitch, pair.getBuffer_id(), originalBufferId);
+					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}
 				else{
-					sendFlowMod(senderFVClassifier, pair.getBuffer_id(), originalBufferId);
+					sendFlowMod(senderWorkerSwitch, pair.getBuffer_id(), originalBufferId);
 				}				
 			}
 			else{
 				if(fvClassifier.getDuplicateSwitch() != -1){
-					FVClassifier duplicateFVClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
 					sendFlowMod(fvClassifier, originalBufferId, originalBufferId);
-					sendFlowMod(duplicateFVClassifier, -1, -1);
+					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}
 				else{
 					fvClassifier.sendMsg(this, fvSlicer); // no need to modify it
@@ -114,7 +114,7 @@ Classifiable, Slicable, Cloneable {
 	 * @param bufferId
 	 * @param originalBufferId
 	 */
-	private void sendFlowMod(FVClassifier fvClassifier, int bufferId, int originalBufferId){
+	private void sendFlowMod(WorkerSwitch fvClassifier, int bufferId, int originalBufferId){
 		short originalPort = -1;
 		OFAction action;
 		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
@@ -133,6 +133,22 @@ Classifiable, Slicable, Cloneable {
 							this.setBufferId(bufferId);
 						}
 						fvClassifier.sendMsg(this, fvClassifier);
+						
+						switch(this.command){
+						case OFFlowMod.OFPFC_ADD:
+							
+							break;
+						case OFFlowMod.OFPFC_DELETE:
+							break;
+						case OFFlowMod.OFPFC_DELETE_STRICT:
+							break;
+						case OFFlowMod.OFPFC_MODIFY:
+							break;
+						case OFFlowMod.OFPFC_MODIFY_STRICT:
+							break;
+						}
+											
+						
 						if (!fvClassifier.isActive()){  // then this is a clone switch and we need to save this flowmod to temp flow mod and real flowmod table
 							fvClassifier.addLimeFlowRule(originalPort, this.clone());
 						}
@@ -173,7 +189,7 @@ Classifiable, Slicable, Cloneable {
 	}
 
 	
-	private Integer getNewPriority(int oldPriority, Integer intersectPrio, FVSlicer fvSlicer){
+	private Integer getNewPriority(int oldPriority, Integer intersectPrio, OriginalSwitch fvSlicer){
 		if(oldPriority > 65535){
 			FVLog.log(LogLevel.CRIT, null, "The range of priority is between 0 & 65535");
 		}
@@ -236,7 +252,7 @@ Classifiable, Slicable, Cloneable {
 	}
 
 
-	private void translateCookie(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	private void translateCookie(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		CookieTranslator cookieTrans = fvClassifier.getCookieTranslator();
 		long newCookie = cookieTrans.translate(this.cookie, fvSlicer);
 		this.setCookie(newCookie);

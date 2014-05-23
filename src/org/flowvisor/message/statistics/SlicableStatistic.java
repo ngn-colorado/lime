@@ -3,9 +3,9 @@
  */
 package org.flowvisor.message.statistics;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVStatisticsRequest;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 /**
  * @author capveg
@@ -22,8 +22,8 @@ public interface SlicableStatistic {
 	 * @param fvSlicer
 	 */
 	
-	public void sliceFromController(FVStatisticsRequest msg, FVClassifier fvClassifier, FVSlicer fvSlicer);
+	public void sliceFromController(FVStatisticsRequest msg, WorkerSwitch fvClassifier, OriginalSwitch fvSlicer);
 
-	/*public void sliceFromController(List<OFStatistics> approvedStats, FVClassifier fvClassifier,
-			FVSlicer fvSlicer) throws StatDisallowedException;*/
+	/*public void sliceFromController(List<OFStatistics> approvedStats, WorkerSwitch fvClassifier,
+			OriginalSwitch fvSlicer) throws StatDisallowedException;*/
 }

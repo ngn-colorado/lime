@@ -1,19 +1,19 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFFeaturesRequest;
 
 public class FVFeaturesRequest extends OFFeaturesRequest implements
 		Classifiable, Slicable {
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.translateXidAndSend(this, fvClassifier, fvSlicer);
 	}
 	

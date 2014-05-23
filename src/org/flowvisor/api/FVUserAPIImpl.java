@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.flowvisor.FlowVisor;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.BracketParse;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
@@ -42,7 +43,7 @@ import org.flowvisor.log.LogLevel;
 import org.flowvisor.log.SendRecvDropStats;
 import org.flowvisor.ofswitch.TopologyController;
 import org.flowvisor.resources.SlicerLimits;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFFeaturesReply;
 import org.openflow.protocol.OFPhysicalPort;
 import org.openflow.util.HexString;
@@ -345,8 +346,8 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		 */
 		// only list a device is we have a features reply for it
 		for (FVEventHandler handler : fv.getHandlersCopy()) {
-			if (handler instanceof FVClassifier) {
-				OFFeaturesReply featuresReply = ((FVClassifier) handler)
+			if (handler instanceof WorkerSwitch) {
+				OFFeaturesReply featuresReply = ((WorkerSwitch) handler)
 						.getSwitchInfo();
 				if (featuresReply != null) {
 					dpidStr = FlowSpaceUtil.dpidToString(featuresReply
@@ -374,22 +375,22 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 			throws DPIDNotFound {
 		Map<String, String> map = new HashMap<String, String>();
 		long dpid = HexString.toLong(dpidStr);
-		FVClassifier fvClassifier = null;
+		WorkerSwitch WorkerSwitch = null;
 		for (FVEventHandler handler : FlowVisor.getInstance().getHandlersCopy()) {
-			if (handler instanceof FVClassifier) {
-				OFFeaturesReply featuresReply = ((FVClassifier) handler)
+			if (handler instanceof WorkerSwitch) {
+				OFFeaturesReply featuresReply = ((WorkerSwitch) handler)
 						.getSwitchInfo();
 				if (featuresReply != null
 						&& featuresReply.getDatapathId() == dpid) {
-					fvClassifier = (FVClassifier) handler;
+					WorkerSwitch = (WorkerSwitch) handler;
 					break;
 				}
 			}
 		}
-		if (fvClassifier == null)
+		if (WorkerSwitch == null)
 			throw new DPIDNotFound("dpid does not exist: " + dpidStr + " ::"
 					+ String.valueOf(dpid));
-		OFFeaturesReply config = fvClassifier.getSwitchInfo();
+		OFFeaturesReply config = WorkerSwitch.getSwitchInfo();
 		map.put("dpid", FlowSpaceUtil.dpidToString(dpid));
 		if (config != null) {
 			map.put("nPorts", String.valueOf(config.getPorts().size()));
@@ -412,7 +413,7 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		} else {
 			FVLog.log(LogLevel.WARN, null, "null config for: " + dpidStr);
 		}
-		map.put("remote", String.valueOf(fvClassifier.getConnectionName()));
+		map.put("remote", String.valueOf(WorkerSwitch.getConnectionName()));
 		return map;
 	}
 
@@ -518,13 +519,13 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (!classifier.isIdentified()) // only print switches have have
 					// been identified
 					continue;
 				dpid = classifier.getDPID();
-				FVSlicer fvSlicer = classifier.getSlicerByName(sliceName);
+				OriginalSwitch fvSlicer = classifier.getSlicerByName(sliceName);
 				if (fvSlicer != null) {
 					map.put("connection_" + connection++,
 							FlowSpaceUtil.dpidToString(dpid) + "-->"
@@ -610,12 +611,12 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 			throw new SliceNotFound("Slice does not exist: " + sliceName);
 		}
 
-		FVSlicer fvSlicer = null;
+		OriginalSwitch fvSlicer = null;
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (!classifier.isIdentified()) // only print switches have have
 					// been identified
 					continue;
@@ -639,8 +640,8 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (classifier.getDPID() == dpid)
 					return classifier.getStats().combinedString();
 			}
@@ -657,8 +658,8 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (dpid == classifier.getDPID() || dpid == FlowEntry.ALL_DPIDS) {
 					synchronized (classifier) {
 						for (Iterator<FlowDBEntry> it2 = classifier.getFlowDB()
@@ -680,7 +681,7 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 			String sliceName, String dpidStr) throws DPIDNotFound,
 			SliceNotFound, PermissionDeniedException {
 		long dpid = FlowSpaceUtil.parseDPID(dpidStr);
-		FVSlicer fvSlicer = lookupSlicer(sliceName, dpid);
+		OriginalSwitch fvSlicer = lookupSlicer(sliceName, dpid);
 		Map<String, List<Map<String, String>>> ret = new HashMap<String, List<Map<String, String>>>();
 		FlowRewriteDB flowRewriteDB = fvSlicer.getFlowRewriteDB();
 		synchronized (flowRewriteDB) {
@@ -707,13 +708,13 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 	 * @throws SliceNotFound
 	 */
 
-	private FVSlicer lookupSlicer(String sliceName, long dpid)
+	private OriginalSwitch lookupSlicer(String sliceName, long dpid)
 			throws DPIDNotFound, SliceNotFound {
 
-		FVClassifier fvClassifier = lookupClassifier(dpid); // throws dpid not
+		WorkerSwitch WorkerSwitch = lookupClassifier(dpid); // throws dpid not
 															// found
-		synchronized (fvClassifier) {
-			FVSlicer fvSlicer = fvClassifier.getSlicerByName(sliceName);
+		synchronized (WorkerSwitch) {
+			OriginalSwitch fvSlicer = WorkerSwitch.getSlicerByName(sliceName);
 			if (fvSlicer == null)
 				throw new SliceNotFound(sliceName);
 			return fvSlicer;
@@ -721,18 +722,18 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 	}
 
 	/**
-	 * Returns a valid fvClassifier
+	 * Returns a valid WorkerSwitch
 	 *
 	 * @param dpid
 	 * @return never null
 	 * @throws DPIDNotFound
 	 */
-	private FVClassifier lookupClassifier(long dpid) throws DPIDNotFound {
+	private WorkerSwitch lookupClassifier(long dpid) throws DPIDNotFound {
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (dpid == classifier.getDPID())
 					return classifier;
 			}
@@ -740,13 +741,13 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		throw new DPIDNotFound("No such switch: " + dpid);
 	}
 	
-	private List<FVClassifier> getAllClassifiers() {
-		List<FVClassifier> list = new LinkedList<FVClassifier>();
+	private List<WorkerSwitch> getAllClassifiers() {
+		List<WorkerSwitch> list = new LinkedList<WorkerSwitch>();
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				list.add(classifier);
 			}
 		}
@@ -758,8 +759,8 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
 			FVEventHandler eventHandler = it.next();
-			if (eventHandler instanceof FVClassifier) {
-				FVClassifier classifier = (FVClassifier) eventHandler;
+			if (eventHandler instanceof WorkerSwitch) {
+				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				return classifier.getSlicerLimits();
 			}
 		}
@@ -904,7 +905,7 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 			throw new PermissionDeniedException("User " + user
 					+ " does not have perms to set the flow mod limit for slice " + sliceName);
 		int limit = Integer.parseInt(rate);
-		for (FVClassifier classifier : getAllClassifiers()) {
+		for (WorkerSwitch classifier : getAllClassifiers()) {
 			try {
 				SwitchImpl.getProxy().setRateLimit(sliceName, classifier.getDPID(), limit);
 			} catch (ConfigError e) {

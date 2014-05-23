@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.util.LRULinkedHashMap;
 
 /**
@@ -40,7 +40,7 @@ public class CookieTranslator {
 		return cookieMap.get(cookie);
 	}
 
-	public long translate(Long cookie, FVSlicer fvSlicer) {
+	public long translate(Long cookie, OriginalSwitch fvSlicer) {
 		long ret = this.nextID++;
 		if (nextID < MIN_COOKIE)
 			nextID = MIN_COOKIE;

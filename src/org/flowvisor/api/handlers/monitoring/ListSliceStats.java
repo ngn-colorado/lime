@@ -7,7 +7,7 @@ import org.flowvisor.api.handlers.HandlerUtils;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.exceptions.MissingRequiredField;
 import org.flowvisor.log.SendRecvDropStats;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
@@ -25,7 +25,7 @@ public class ListSliceStats implements ApiHandler<Map<String, Object>> {
 			if (!HandlerUtils.sliceExists(sliceName))
 				return new JSONRPC2Response(new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
 						cmdName() + ": slice does not exist : " + sliceName), 0);
-			FVSlicer slicer = HandlerUtils.getSlicerByName(sliceName);
+			OriginalSwitch slicer = HandlerUtils.getSlicerByName(sliceName);
 			if (slicer == null)
 				return new JSONRPC2Response(new JSONRPC2Error(JSONRPC2Error.INTERNAL_ERROR.getCode(), 
 						cmdName() + ": " + SendRecvDropStats.NO_STATS_AVAILABLE_MSG + " : " + sliceName), 0);

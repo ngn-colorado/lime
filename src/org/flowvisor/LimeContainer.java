@@ -5,8 +5,8 @@ import java.util.Map;
 
 import net.minidev.json.JSONObject;
 
-import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.flowvisor.slicer.LimeMsgData;
 import org.openflow.util.LRULinkedHashMap;
 
@@ -34,7 +34,7 @@ public class LimeContainer {
 	public static final String MainSlice = "slice1"; 
 
 	// all switches in the network and connecting LIME 
-	private static HashMap<Long, FVClassifier> allWorkingSwitches = new HashMap<>();
+	private static HashMap<Long, WorkerSwitch> allWorkingSwitches = new HashMap<>();
 	
 	// list of original showing switches to OF controller to always use them to map to the controller
 	private static HashMap<Long, LimeSwitch> originalSwitchContainer = new HashMap<>();
@@ -52,9 +52,9 @@ public class LimeContainer {
 	private static HashMap<Integer, Long> xIDMapper = new HashMap<>(); // to map message to the classifier
 	
 	// list of all slicers created
-	private static HashMap<Long, FVSlicer> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, FVSlicer> 
+	private static HashMap<Long, OriginalSwitch> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, OriginalSwitch> 
 
-	public static HashMap<Long, FVClassifier> getAllWorkingSwitches(){
+	public static HashMap<Long, WorkerSwitch> getAllWorkingSwitches(){
 		return allWorkingSwitches;
 	}
 
@@ -86,7 +86,7 @@ public class LimeContainer {
 		cloneSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 	
-	public static synchronized void addWorkingSwitch(long swId, FVClassifier swClassifier){
+	public static synchronized void addWorkingSwitch(long swId, WorkerSwitch swClassifier){
 		System.out.println("MURAD: LIMEContainer, Added working switch " + swId);
 		allWorkingSwitches.put(swId, swClassifier);
 	}	
@@ -132,11 +132,11 @@ public class LimeContainer {
 		}
 	}
 
-	public static synchronized void addSlicer(long sName, FVSlicer fvSlicer){
+	public static synchronized void addSlicer(long sName, OriginalSwitch fvSlicer){
 		allSlicers.put(sName, fvSlicer);
 
 	}
-	public static synchronized HashMap<Long, FVSlicer> getAllSlicers(){
+	public static synchronized HashMap<Long, OriginalSwitch> getAllSlicers(){
 		return allSlicers;
 	}
 	
@@ -149,7 +149,7 @@ public class LimeContainer {
 	 * @param msg
 	 * @param fvClassifier
 	 */
-	/*private static synchronized int translateXid(int buffer_id, FVClassifier fvClassifier){
+	/*private static synchronized int translateXid(int buffer_id, WorkerSwitch fvClassifier){
 		int ret = nextID++;
 		if (nextID < MIN_XID)
 			nextID = MIN_XID;

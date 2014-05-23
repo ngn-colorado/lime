@@ -1,10 +1,10 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.statistics.SlicableStatistic;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFError.OFBadRequestCode;
 import org.openflow.protocol.OFStatisticsMessageBase;
 import org.openflow.protocol.OFStatisticsRequest;
@@ -16,13 +16,13 @@ public class FVStatisticsRequest extends OFStatisticsRequest implements
 	
 	
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVLog.log(LogLevel.WARN, fvClassifier, "dropping unexpected msg: "
 				+ this);
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		if (this.statisticType == OFStatisticsType.DESC
 				|| this.statisticType == OFStatisticsType.TABLE
 				|| this.statisticType == OFStatisticsType.VENDOR) {

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.flowvisor.api.APIAuth;
 import org.flowvisor.api.APIUserCred;
 import org.flowvisor.api.handlers.*;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
 import org.flowvisor.config.InvalidDropPolicy;
@@ -65,7 +65,7 @@ public class AddSlice implements ApiHandler<Map<String, Object>> {
 			SliceImpl.getProxy().createSlice(sliceName, list[1], ctrlPort, 
 					dropPolicy, password, APIAuth.getSalt(), adminInfo, APIUserCred.getUserName(),
 					lldpOptIn, maxFM.intValue(), 1, FlowMap.type.FEDERATED.ordinal() );
-			for (FVClassifier classifier : HandlerUtils.getAllClassifiers())
+			for (WorkerSwitch classifier : HandlerUtils.getAllClassifiers())
 				SwitchImpl.getProxy().setRateLimit(sliceName, classifier.getDPID(), rate.intValue());
 			SliceImpl.getProxy().setAdminStatus(sliceName, status);
 			

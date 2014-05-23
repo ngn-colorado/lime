@@ -2,13 +2,13 @@ package org.flowvisor.message;
 
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.statistics.ClassifiableStatistic;
 import org.flowvisor.message.statistics.FVDescriptionStatistics;
 import org.flowvisor.ofswitch.TopologyConnection;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFStatisticsMessageBase;
 import org.openflow.protocol.OFStatisticsReply;
 import org.openflow.protocol.statistics.OFDescriptionStatistics;
@@ -18,7 +18,7 @@ public class FVStatisticsReply extends OFStatisticsReply implements
 		Classifiable, Slicable, TopologyControllable, SanityCheckable {
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {	
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {	
 		
 		if (this.getStatistics().size() < 1) {
 			FVLog.log(LogLevel.WARN, fvClassifier, "Dropping empty stats reply: ", this);
@@ -33,7 +33,7 @@ public class FVStatisticsReply extends OFStatisticsReply implements
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		// should never get stats replies from controller
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}

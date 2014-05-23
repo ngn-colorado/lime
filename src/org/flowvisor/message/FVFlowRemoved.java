@@ -6,14 +6,14 @@ import java.util.Set;
 
 import org.flowvisor.classifier.CookiePair;
 import org.flowvisor.classifier.CookieTranslator;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.flows.FlowEntry;
 import org.flowvisor.flows.FlowMap;
 import org.flowvisor.flows.SliceAction;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.openflow.protocol.FVMatch;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
@@ -33,7 +33,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	 * have expired
 	 */
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		
 		FlowMap flowSpace = fvClassifier.getSwitchFlowMap();
 		Set<String> slicesToUpdate = new HashSet<String>();
@@ -68,7 +68,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		// forward this msg to each of them
 		FVLog.log(LogLevel.DEBUG, fvClassifier, slicesToUpdate.toString());
 		for (String slice : slicesToUpdate) {
-			FVSlicer fvSlicer = fvClassifier.getSlicerByName(slice);
+			OriginalSwitch fvSlicer = fvClassifier.getSlicerByName(slice);
 			if (fvSlicer == null) {
 				FVLog.log(LogLevel.CRIT, fvClassifier,
 						"inconsistent state: missing fvSliver entry for: "
@@ -84,7 +84,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 	
@@ -93,7 +93,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		return this;
 	}
 	
-	private CookiePair untanslateCookie(FVClassifier fvClassifier) {
+	private CookiePair untanslateCookie(WorkerSwitch fvClassifier) {
 		CookieTranslator cookieTrans = fvClassifier.getCookieTranslator();
 		CookiePair pair = cookieTrans.untranslateAndRemove(this.cookie);
 		if (pair == null) {

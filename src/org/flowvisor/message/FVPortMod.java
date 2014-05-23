@@ -1,9 +1,9 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFPhysicalPort;
 import org.openflow.protocol.OFPortMod;
 import org.openflow.protocol.OFError.OFPortModFailedCode;
@@ -16,9 +16,9 @@ public class FVPortMod extends OFPortMod implements Classifiable, Slicable {
 	 * FIXME: decide if port_mod's can come *up* from switch?
 	 */
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVLog.log(LogLevel.DEBUG, fvClassifier, "recv from switch: " + this);	
-		for (FVSlicer fvSlicer : fvClassifier.getSlicers())
+		for (OriginalSwitch fvSlicer : fvClassifier.getSlicers())
 			if (fvSlicer.portInSlice(this.portNumber))
 				fvSlicer.sendMsg(this, fvClassifier);
 	}
@@ -29,7 +29,7 @@ public class FVPortMod extends OFPortMod implements Classifiable, Slicable {
 	 * administratrively bringing down a port!
 	 */
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		// First, check if this port is in the slice
 		if (!fvSlicer.portInSlice(this.portNumber)) {
 			fvSlicer.sendMsg(FVMessageUtil.makeErrorMsg(

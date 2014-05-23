@@ -1,10 +1,10 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.ofswitch.TopologyConnection;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFPortStatus;
 import org.openflow.util.HexString;
 
@@ -19,7 +19,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 		Slicable, TopologyControllable {
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		Short port = Short.valueOf(this.getDesc().getPortNumber());
 		byte reason = this.getReason();
 		
@@ -54,7 +54,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 		}
 
 		if (updateSlicers) {
-			for (FVSlicer fvSlicer : fvClassifier.getSlicers()) {
+			for (OriginalSwitch fvSlicer : fvClassifier.getSlicers()) {
 				/*
 				 * Ugly call to update flowspace when using a linear flowspace
 				 * this WILL go when the linear flowspace goes.
@@ -63,7 +63,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 			}
 		}
 
-		for (FVSlicer fvSlicer : fvClassifier.getSlicers()) {
+		for (OriginalSwitch fvSlicer : fvClassifier.getSlicers()) {
 			if (fvSlicer.portInSlice(port)) {
 				fvSlicer.sendMsg(this, fvClassifier);
 			}
@@ -71,7 +71,7 @@ public class FVPortStatus extends OFPortStatus implements Classifiable,
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 

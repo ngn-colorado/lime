@@ -1,12 +1,12 @@
 package org.flowvisor.classifier;
 
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFMessage;
 
 public class XidPairWithMessage extends XidPair {
 
 	OFMessage msg;
-	FVSlicer fvSlicer;
+	OriginalSwitch fvSlicer;
 
 	public XidPairWithMessage(XidPair xidPair, OFMessage ofMessage) {
 		super(xidPair.xid, xidPair.sliceName);
@@ -17,12 +17,12 @@ public class XidPairWithMessage extends XidPair {
 		return msg;
 	}
 
-	public void setSlicer(FVSlicer slicer) {
+	public void setSlicer(OriginalSwitch slicer) {
 		this.fvSlicer = slicer;
 		
 	}
 
-	public FVSlicer getSlicer() {
+	public OriginalSwitch getSlicer() {
 		return fvSlicer;
 	}
 	

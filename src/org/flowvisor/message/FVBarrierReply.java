@@ -3,8 +3,8 @@
  */
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.slicer.OriginalSwitch;
 
 /**
  * @author capveg
@@ -17,10 +17,10 @@ public class FVBarrierReply extends org.openflow.protocol.OFBarrierReply
 	 * (non-Javadoc)
 	 *
 	 * @seeorg.flowvisor.message.Classifiable#classifyFromSwitch(org.flowvisor.
-	 * classifier.FVClassifier)
+	 * classifier.WorkerSwitch)
 	 */
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVMessageUtil.untranslateXidAndSend(this, fvClassifier);
 	}
 
@@ -29,10 +29,10 @@ public class FVBarrierReply extends org.openflow.protocol.OFBarrierReply
 	 *
 	 * @see
 	 * org.flowvisor.message.Slicable#sliceFromController(org.flowvisor.classifier
-	 * .FVClassifier, org.flowvisor.slicer.FVSlicer)
+	 * .WorkerSwitch, org.flowvisor.slicer.OriginalSwitch)
 	 */
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 

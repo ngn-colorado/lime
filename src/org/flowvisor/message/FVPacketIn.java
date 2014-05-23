@@ -8,7 +8,7 @@ import java.util.List;
 import org.flowvisor.FlowVisor;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.api.LinkAdvertisement;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
 import org.flowvisor.flows.FlowEntry;
@@ -20,7 +20,7 @@ import org.flowvisor.message.lldp.LLDPUtil;
 import org.flowvisor.ofswitch.DPIDandPort;
 import org.flowvisor.ofswitch.TopologyConnection;
 import org.flowvisor.openflow.protocol.FVMatch;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.flowvisor.slicer.LimeMsgTranslator;
 import org.openflow.protocol.OFFeaturesReply;
 import org.openflow.protocol.OFFlowMod;
@@ -52,7 +52,7 @@ TopologyControllable {
 	 */
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		// handle LLDP as a special (hackish) case
 		if (LLDPUtil.handleLLDPFromSwitch(this, fvClassifier)){
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
@@ -60,9 +60,9 @@ TopologyControllable {
 		}
 		//System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " Data-lenght: " + this.packetData.length + " and Packet-data: " + this.toVerboseString());
 		
-		FVSlicer fvSlicer;
+		OriginalSwitch fvSlicer;
 		if(fvClassifier.getDuplicateSwitch() != -1){
-			FVClassifier duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
+			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
 			if(fvClassifier.isActive()){
 				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
 			}
@@ -93,7 +93,7 @@ TopologyControllable {
 		
 	}
 
-	private void lookupByFlowSpace(FVClassifier fvClassifier) {
+	private void lookupByFlowSpace(WorkerSwitch fvClassifier) {
 		SliceAction sliceAction;
 		int perms;
 		// grab single matching rule: only one because it's a point in flowspace
@@ -114,7 +114,7 @@ TopologyControllable {
 			if ((perms & (SliceAction.READ | SliceAction.WRITE)) != 0) {
 				// lookup slice and send msg to them
 				// TODO record buffer id for later validation
-				FVSlicer fvSlicer = fvClassifier.getSlicerByName(sliceAction
+				OriginalSwitch fvSlicer = fvClassifier.getSlicerByName(sliceAction
 						.getSliceName());
 				if (fvSlicer == null) {
 					FVLog.log(LogLevel.WARN, fvClassifier,
@@ -163,7 +163,7 @@ TopologyControllable {
 	 * @param idleTimeout
 	 */
 
-	private void sendDropRule(FVClassifier fvClassifier, FlowEntry flowEntry,
+	private void sendDropRule(WorkerSwitch fvClassifier, FlowEntry flowEntry,
 			String sliceName, short hardTimeout, short idleTimeout) {
 		FVFlowMod flowMod = (FVFlowMod) FlowVisor.getInstance().getFactory()
 				.getMessage(OFType.FLOW_MOD);
@@ -216,7 +216,7 @@ TopologyControllable {
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 

@@ -1,18 +1,18 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.slicer.OriginalSwitch;
 
 public class FVEchoReply extends org.openflow.protocol.OFEchoReply implements
 		Slicable, Classifiable {
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		fvSlicer.registerPong();
 	}
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		fvClassifier.registerPong();
 	}
 	

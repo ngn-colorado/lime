@@ -5,9 +5,9 @@ package org.flowvisor.message.actions;
 
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.exceptions.ActionDisallowedException;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
 
@@ -35,6 +35,6 @@ public interface SlicableAction {
 	 */
 
 	public void slice(List<OFAction> approvedActions, OFMatch match,
-			FVClassifier fvClassifier, FVSlicer fvSlicer)
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer)
 			throws ActionDisallowedException;
 }

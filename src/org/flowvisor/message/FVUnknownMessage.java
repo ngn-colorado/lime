@@ -2,10 +2,10 @@ package org.flowvisor.message;
 
 import java.nio.ByteBuffer;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFMessage;
 import org.openflow.util.U32;
 import org.openflow.util.U8;
@@ -45,13 +45,13 @@ public class FVUnknownMessage extends OFMessage implements Classifiable,
 	}
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVLog.log(LogLevel.WARN, fvClassifier,
 				"tried to classify UNKNOWN OF message: giving up");
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVLog.log(LogLevel.WARN, fvSlicer,
 				"tried to slice UNKNOWN OF message: giving up");
 	}

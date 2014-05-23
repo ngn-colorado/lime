@@ -14,7 +14,7 @@ import org.flowvisor.exceptions.MissingRequiredField;
 import org.flowvisor.flows.FlowDBEntry;
 import org.flowvisor.flows.FlowRewriteDB;
 import org.flowvisor.flows.FlowSpaceUtil;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
@@ -36,7 +36,7 @@ public class ListDatapathFlowRewriteDB implements ApiHandler<Map<String, Object>
 
 			
 			
-			FVSlicer fvSlicer = HandlerUtils.getClassifierByDPID(dpid).getSlicerByName(sliceName);
+			OriginalSwitch fvSlicer = HandlerUtils.getClassifierByDPID(dpid).getSlicerByName(sliceName);
 			Map<String, List<Map<String, Object>>> ret = new HashMap<String, List<Map<String, Object>>>();
 			FlowRewriteDB flowRewriteDB = fvSlicer.getFlowRewriteDB();
 			synchronized (flowRewriteDB) {

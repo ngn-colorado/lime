@@ -1,14 +1,14 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFSetConfig;
 import org.openflow.util.U16;
 
 public class FVSetConfig extends OFSetConfig implements Classifiable, Slicable {
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
 	}
 
@@ -25,7 +25,7 @@ public class FVSetConfig extends OFSetConfig implements Classifiable, Slicable {
 	 *
 	 */
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		short missSendLength = this.getMissSendLength();
 		fvSlicer.setMissSendLength(missSendLength);
 		// check to see if this is a larger missLen param then previously asked

@@ -3,11 +3,11 @@ package org.flowvisor.message.actions;
 import java.util.List;
 import java.util.Set;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.exceptions.ActionDisallowedException;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFError.OFBadActionCode;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPort;
@@ -27,7 +27,7 @@ public class FVActionOutput extends OFActionOutput implements SlicableAction,
 
 	@Override
 	public void slice(List<OFAction> approvedActions, OFMatch match,
-			FVClassifier fvClassifier, FVSlicer fvSlicer)
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer)
 			throws ActionDisallowedException {
 		if ((port >= 0)
 				|| // physical port
@@ -61,7 +61,7 @@ public class FVActionOutput extends OFActionOutput implements SlicableAction,
 	}
 
 	private void expandPort(List<OFAction> approvedActions, OFMatch match,
-			FVSlicer fvSlicer, FVClassifier fvClassifier) {
+			OriginalSwitch fvSlicer, WorkerSwitch fvClassifier) {
 		// potential short cut; if sending to all and all ports are allowed;
 		// just approve
 		if ((port == OFPort.OFPP_ALL.getValue())
@@ -119,8 +119,8 @@ public class FVActionOutput extends OFActionOutput implements SlicableAction,
 
 	}
 
-	private void turnOffOutOfSliceFloodBits(FVSlicer fvSlicer,
-			FVClassifier fvClassifier) {
+	private void turnOffOutOfSliceFloodBits(OriginalSwitch fvSlicer,
+			WorkerSwitch fvClassifier) {
 		FVLog.log(LogLevel.ALERT, fvClassifier,
 				"Would be turning off flooding ports for slice "
 						+ fvSlicer.getSliceName() + " but its NOT IMPLEMENTED");

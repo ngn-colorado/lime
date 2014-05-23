@@ -3,9 +3,9 @@
  */
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.ofswitch.TopologyConnection;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 
 /**
  * @author capveg
@@ -18,10 +18,10 @@ public class FVHello extends org.openflow.protocol.OFHello implements
 	 * (non-Javadoc)
 	 *
 	 * @seeorg.flowvisor.message.Classifiable#classifyFromSwitch(org.flowvisor.
-	 * classifier.FVClassifier)
+	 * classifier.WorkerSwitch)
 	 */
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
 		// silently drop all Hello msgs
 	}
 
@@ -30,10 +30,10 @@ public class FVHello extends org.openflow.protocol.OFHello implements
 	 *
 	 * @see
 	 * org.flowvisor.message.Slicable#sliceFromController(org.flowvisor.classifier
-	 * .FVClassifier, org.flowvisor.slicer.FVSlicer)
+	 * .WorkerSwitch, org.flowvisor.slicer.OriginalSwitch)
 	 */
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		// silently drop all Hello msgs
 	}
 

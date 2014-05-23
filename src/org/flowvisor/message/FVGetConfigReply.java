@@ -1,17 +1,17 @@
 package org.flowvisor.message;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFGetConfigReply;
 
 public class FVGetConfigReply extends OFGetConfigReply implements Classifiable,
 		Slicable {
 
 	@Override
-	public void classifyFromSwitch(FVClassifier fvClassifier) {
-		FVSlicer fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
+	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
 		if (fvSlicer == null) {
 			FVLog.log(LogLevel.WARN, fvClassifier,
 					"dropping unclassifiable xid in GetConfigReply: " + this);
@@ -22,7 +22,7 @@ public class FVGetConfigReply extends OFGetConfigReply implements Classifiable,
 	}
 
 	@Override
-	public void sliceFromController(FVClassifier fvClassifier, FVSlicer fvSlicer) {
+	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 	

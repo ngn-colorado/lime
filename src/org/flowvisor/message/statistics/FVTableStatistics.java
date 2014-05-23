@@ -3,13 +3,13 @@ package org.flowvisor.message.statistics;
 import java.util.HashMap;
 import java.util.List;
 
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.FVMessageUtil;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
-import org.flowvisor.slicer.FVSlicer;
+import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.protocol.statistics.OFTableStatistics;
 import org.openflow.util.HexString;
@@ -21,9 +21,9 @@ public class FVTableStatistics extends OFTableStatistics implements
 
 	@Override
 	public void classifyFromSwitch(FVStatisticsReply msg,
-			FVClassifier fvClassifier) {
+			WorkerSwitch fvClassifier) {
 		//statsMap = toMap(msg);
-		FVSlicer fvSlicer = FVMessageUtil.untranslateXid(msg, fvClassifier);
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(msg, fvClassifier);
 		if (fvSlicer ==  null) {
 			FVLog.log(LogLevel.WARN, fvClassifier, "Dropping unclassifiable message: ", msg);
 			return;
@@ -39,7 +39,7 @@ public class FVTableStatistics extends OFTableStatistics implements
 
 	@Override
 	public void sliceFromController(FVStatisticsRequest msg,
-			FVClassifier fvClassifier, FVSlicer fvSlicer) {
+			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		FVLog.log(LogLevel.WARN, fvClassifier, "dropping unexpected msg: "
 				+ msg);
 		

@@ -7,7 +7,7 @@ import org.flowvisor.api.APIAuth;
 import org.flowvisor.api.APIUserCred;
 import org.flowvisor.api.handlers.ApiHandler;
 import org.flowvisor.api.handlers.HandlerUtils;
-import org.flowvisor.classifier.FVClassifier;
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
 import org.flowvisor.config.FlowSpaceImpl;
@@ -95,7 +95,7 @@ public class UpdateSlice implements ApiHandler<Map<String, Object>> {
 	private void updateRate(String sliceName, Number rate) throws ConfigError {
 		if (rate == null)
 			return;
-		for (FVClassifier classifier : HandlerUtils.getAllClassifiers())
+		for (WorkerSwitch classifier : HandlerUtils.getAllClassifiers())
 			SwitchImpl.getProxy().setRateLimit(sliceName, classifier.getDPID(), rate.intValue());
 		
 	}
