@@ -28,7 +28,7 @@ Classifiable, Slicable, Cloneable {
 
 	private HashMap<String,FVFlowMod> sliceModMap = new HashMap<String,FVFlowMod>();;
 	private FVMatch mat;
-
+	private short originalOutputPort = -1; // in case we edit flowmod while migrating, we need to to know the original out port to return it later
 	private HashMap<Integer,Integer> priorityMap = new HashMap<Integer,Integer>();
 	@Override
 	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
@@ -36,13 +36,6 @@ Classifiable, Slicable, Cloneable {
 	}
 
 	/**
-	 * FlowMod slicing
-	 *
-	 * 1) make sure all actions are ok
-	 *
-	 * 2) expand this FlowMod to the intersection of things in the given match
-	 * and the slice's flowspace
-	 * 
 	 * @author Murad
 	 * since controller only talks with active
 		is active been cloned?
@@ -57,6 +50,14 @@ Classifiable, Slicable, Cloneable {
 				send to active
 	 */
 
+	public void setOriginalOutputPort(short port){
+		this.originalOutputPort = port;
+	}
+	
+	public short getOriginalPort(){
+		return this.originalOutputPort;
+	}
+	
 	@Override
 	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		//System.out.println("MURAD: FV_MOD, buf_id: " + this.bufferId + " Packet-data: " + this.toString());
@@ -72,10 +73,10 @@ Classifiable, Slicable, Cloneable {
 				sendFlowMod(duplicateWorkerSwitch,-1, originalBufferId);
 			}
 			else{
-				fvClassifier.sendMsg(this, fvSlicer); // no need to modify it
+				fvClassifier.handleFlowMod(this); // no need to modify it
 			}
 		}
-		
+
 		else{
 			// we need to send to sender the original bufer_id and to duplicate buffer_if of -1
 			LimeMsgTranslator translator = fvSlicer.getLimeMsgTranslator();
@@ -99,7 +100,7 @@ Classifiable, Slicable, Cloneable {
 					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}
 				else{
-					fvClassifier.sendMsg(this, fvSlicer); // no need to modify it
+					fvClassifier.handleFlowMod(this);
 				}	
 			}
 		}
@@ -119,7 +120,7 @@ Classifiable, Slicable, Cloneable {
 		OFAction action;
 		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
 		this.setFlags((short) (this.getFlags() | OFFlowMod.OFPFF_SEND_FLOW_REM));
-		
+
 		for(int i = 0; i<this.getActions().size(); i++ ){
 			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
@@ -132,31 +133,14 @@ Classifiable, Slicable, Cloneable {
 						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
 							this.setBufferId(bufferId);
 						}
-						fvClassifier.sendMsg(this, fvClassifier);
-						
-						switch(this.command){
-						case OFFlowMod.OFPFC_ADD:
-							
-							break;
-						case OFFlowMod.OFPFC_DELETE:
-							break;
-						case OFFlowMod.OFPFC_DELETE_STRICT:
-							break;
-						case OFFlowMod.OFPFC_MODIFY:
-							break;
-						case OFFlowMod.OFPFC_MODIFY_STRICT:
-							break;
-						}
-											
-						
-						if (!fvClassifier.isActive()){  // then this is a clone switch and we need to save this flowmod to temp flow mod and real flowmod table
-							fvClassifier.addLimeFlowRule(originalPort, this.clone());
-						}
-						
+						this.setOriginalOutputPort(originalPort);
+						fvClassifier.handleFlowMod(this);
+
 						// return the packet back as we received in this method
 						this.setBufferId(originalBufferId);
 						((OFActionOutput) action).setPort(originalPort);
 						this.getActions().remove(i);  // removing vlan tag
+						this.setOriginalOutputPort((short) -1);
 						return; //Assuming that there is only one output port...	
 					}
 				}
@@ -166,13 +150,15 @@ Classifiable, Slicable, Cloneable {
 		if (originalBufferId != -1){ 
 			this.setBufferId(bufferId);
 		}
-		
-		
-		fvClassifier.sendMsg(this, fvClassifier);	
-		
+
+
+		fvClassifier.handleFlowMod(this);
+
 		//return everything in place in case we want to use this method more than once
 		this.setBufferId(originalBufferId);
-		if(originalPort != -1){
+		
+		// Murad, I don't think we will need the below if statement 
+		/*if(originalPort != -1){
 			OFAction action2;
 			for(int i = 0; i<this.getActions().size(); i++ ){
 				action2 = this.getActions().get(i);
@@ -183,12 +169,10 @@ Classifiable, Slicable, Cloneable {
 					}
 				}
 			}
-		}
-		
-		
+		}*/
 	}
 
-	
+
 	private Integer getNewPriority(int oldPriority, Integer intersectPrio, OriginalSwitch fvSlicer){
 		if(oldPriority > 65535){
 			FVLog.log(LogLevel.CRIT, null, "The range of priority is between 0 & 65535");

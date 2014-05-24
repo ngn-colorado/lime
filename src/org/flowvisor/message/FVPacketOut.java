@@ -197,7 +197,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		duplicateWorkerSwitch.sendMsg(fvFlowMod, duplicateWorkerSwitch);
 
 		// return the original port 
-		if (!duplicateWorkerSwitch.isActive()){  // then this is a clone switch and we need to save this flowmod
+		/*if (!duplicateWorkerSwitch.isActive()){  // then this is a clone switch and we need to save this flowmod
 			if(originalPort != -1){
 				for (OFAction action : fvFlowMod.getActions()){
 					if(action instanceof OFActionOutput){
@@ -209,7 +209,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 					}
 				}
 			}
-		}
+		}*/
 	}
 
 

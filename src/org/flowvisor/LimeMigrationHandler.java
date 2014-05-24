@@ -93,11 +93,12 @@ public class LimeMigrationHandler {
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
 					activeSwitch.setDuplicateSwitch(cloneSwID);
-					activeSwitch.ereaseFlowTable();
 					// setup clone switch
 					cloneSwitch.setDuplicateSwitch(activeSwID);
 					// copy FlowMod table from active to switch and push it the switch
-					cloneSwitch.insertFlowRuleTableAndSend(activeSwitch.getFlowRuleTable(), ghostPort);  //FIXME we may need to clone this
+					cloneSwitch.insertFlowRuleTableAndSendModified(activeSwitch, ghostPort);  //FIXME we may need to clone this
+					
+					
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");

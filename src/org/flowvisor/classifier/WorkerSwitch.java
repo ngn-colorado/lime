@@ -114,7 +114,8 @@ SwitchChangedListener {
 	private boolean isActive = false;
 	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
 	private HashMap<Short, PortInfo> activePorts;
-	private LimitedQueue<OFFlowMod> flowRulesTable;
+	//private LimitedQueue<OFFlowMod> flowRulesTable;
+	private LimeFlowTable flowTable;
 	//private HashMap<Short, ArrayList<OFFlowMod>> limeFlowTable;  // contains FlowMods added during migration to be
 	// reomved later iff the port is changed from the original flowmod sent from controller
 	//MURAD variables end
@@ -157,10 +158,11 @@ SwitchChangedListener {
 
 	public WorkerSwitch(FVEventLoop loop, SocketChannel sock) {
 		this.loop = loop;
+		this.flowTable = new LimeFlowTable(this);
 		this.switchName = "unidentified:" + sock.toString();
 		this.factory = new FVMessageFactory();
 		this.stats = new SendRecvDropStats();
-		this.flowRulesTable = new LimitedQueue<>(20);
+		//this.flowRulesTable = new LimitedQueue<>(20);
 		try {
 			this.msgStream = new FVMessageAsyncStream(sock, this.factory, this,
 					this.stats);
@@ -1351,14 +1353,19 @@ SwitchChangedListener {
 		duplicateSwitch = swId;
 	}
 
-	
-	public synchronized void insertFlowRuleTableAndSend(LimitedQueue<OFFlowMod> newFlowRulesTable, short ghostPort){
-		for (OFFlowMod fm : newFlowRulesTable){
-			flowRulesTable.add(fm.clone());
-		}
+	/**
+	 * Copying flowTable from duplicate switch when migration is about to happen
+	 * Modify flowmod with action output to empty port
+	 * @param ActiveSwitch
+	 * @param ghostPort
+	 */
+	public synchronized void insertFlowRuleTableAndSendModified(WorkerSwitch ActiveSwitch, short ghostPort){
+		this.flowTable.copyFromAnotherLimeFlowTable(ActiveSwitch.flowTable);
 		OFAction action;
 		short originalPort;
-		for (OFFlowMod flowMod : flowRulesTable){
+		
+		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
+			FVFlowMod flowMod = entry.getValue();
 			for(int i = 0; i<flowMod.getActions().size(); i++ ){
 				action = flowMod.getActions().get(i);
 				if(action instanceof OFActionOutput){
@@ -1368,16 +1375,17 @@ SwitchChangedListener {
 							OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
 							flowMod.getActions().add(i, addedVlanAction);
 							((OFActionOutput) action).setPort(ghostPort);
+							flowMod.setOriginalOutputPort(originalPort);
 							break; //Assuming that there is only one output port...	
 						}
 					}
 				}
 			}
-			sendMsg(flowMod, this);
+			handleFlowMod(flowMod);
 		}
 	}
 
-	public synchronized void addFlowRule(FVFlowMod flowMod){
+	/*public synchronized void addFlowRule(FVFlowMod flowMod){
 		flowRulesTable.add(flowMod);
 	}
 
@@ -1395,6 +1403,18 @@ SwitchChangedListener {
 				
 				
 			}
+		}
+	}*/
+	
+	/**
+	 * Check type of FlowMod and if it should be add/modyfied/deleted 
+	 * If so, send to switch
+	 * @param fm
+	 */
+	public synchronized void handleFlowMod(FVFlowMod fm){
+		if(flowTable.handleFlowMods(fm)){
+			// send fm to switch
+			this.sendMsg(fm, this);
 		}
 	}
 	
