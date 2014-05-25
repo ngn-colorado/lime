@@ -31,7 +31,7 @@ public class LimeContainer {
 	static LRULinkedHashMap<Integer, LimeMsgData> buffer_idMap  = new LRULinkedHashMap<Integer, LimeMsgData>(INIT_SIZE, MAX_SIZE);
 	
 
-	public static final String MainSlice = "slice1"; 
+	public static final String OriginalSwitch = "originalSwitch"; 
 
 	// all switches in the network and connecting LIME 
 	private static HashMap<Long, WorkerSwitch> allWorkingSwitches = new HashMap<>();
@@ -40,7 +40,7 @@ public class LimeContainer {
 	private static HashMap<Long, LimeSwitch> originalSwitchContainer = new HashMap<>();
 
 	// list of active switches.
-	private static HashMap<Long, LimeSwitch> activeSwitchContainer = new HashMap<>();
+	//private static HashMap<Long, LimeSwitch> activeSwitchContainer = new HashMap<>();
 		
 	// list of clone switches. those must be received my the time migration happens. And they must have ghost port identified.
 	private static HashMap<Long, LimeSwitch> cloneSwitchContainer = new HashMap<>();
@@ -49,8 +49,6 @@ public class LimeContainer {
 
 	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
 
-	private static HashMap<Integer, Long> xIDMapper = new HashMap<>(); // to map message to the classifier
-	
 	// list of all slicers created
 	private static HashMap<Long, OriginalSwitch> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, OriginalSwitch> 
 
@@ -70,13 +68,13 @@ public class LimeContainer {
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 	
-	public static HashMap<Long, LimeSwitch>  getActiveSwitchContainer(){
+	/*public static HashMap<Long, LimeSwitch>  getActiveSwitchContainer(){
 		return activeSwitchContainer;
 	}
 	
 	static void addActiveSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		activeSwitchContainer.put(swID, new LimeSwitch(portTable));
-	}
+	}*/
 	
 	public static HashMap<Long, LimeSwitch>  getCloneSwitchContainer(){
 		return cloneSwitchContainer;

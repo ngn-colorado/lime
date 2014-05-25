@@ -61,14 +61,14 @@ TopologyControllable {
 		//System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " Data-lenght: " + this.packetData.length + " and Packet-data: " + this.toVerboseString());
 		
 		OriginalSwitch fvSlicer;
-		if(fvClassifier.getDuplicateSwitch() != -1){
+		if(fvClassifier.getDuplicateSwitch() != null){
 			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
 			if(fvClassifier.isActive()){
-				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
+				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.OriginalSwitch);
 			}
 			else{ 
 				if(duplicateVFClassifier.isActive()){
-					fvSlicer = duplicateVFClassifier.getSlicerByName(LimeContainer.MainSlice);
+					fvSlicer = duplicateVFClassifier.getSlicerByName(LimeContainer.OriginalSwitch);
 					fvClassifier = duplicateVFClassifier;
 				}
 				else{
@@ -79,7 +79,7 @@ TopologyControllable {
 		}
 		else{
 			if(fvClassifier.isActive()){
-				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.MainSlice);
+				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.OriginalSwitch);
 			}
 			else{
 				// ignore packet, we only forward to controller from active switches when no migration is happening 

@@ -94,7 +94,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 			LimeMsgTranslator translator = fvSlicer.getLimeMsgTranslator();
 			LimeMsgData pair = translator.untranslate(this.bufferId);
 			if (pair != null){
-				if(fvClassifier.getDuplicateSwitch() != -1){
+				if(fvClassifier.getDuplicateSwitch() != null){
 					WorkerSwitch senderWorkerSwitch; //, cloneWorkerSwitch;
 					senderWorkerSwitch = pair.getClassifier();
 					//WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(senderWorkerSwitch.getDuplicateSwitch());
@@ -106,7 +106,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 				}
 			}
 			else{ //TODO is this possible to happen??
-				if(fvClassifier.getDuplicateSwitch() != -1){
+				if(fvClassifier.getDuplicateSwitch() != null){
 					sendPacketOut(fvClassifier, originalBufferId, originalBufferId); // its in cloning process so we need to modify the action
 				}
 				else{

@@ -16,6 +16,13 @@ import org.flowvisor.classifier.WorkerSwitch;
  *
  */
 public class LimeMigrationHandler {
+	private int cloneSwitchCounter;
+	
+	public LimeMigrationHandler(){
+		cloneSwitchCounter = 0;
+	}
+	
+	
 	/**
 	 * Make sure that all required active and clone switches and their ports are available
 	 * @throws InterruptedException
@@ -24,6 +31,7 @@ public class LimeMigrationHandler {
 		System.out.println("MURAD: LimeMigration, inititlizing migration process");
 		// this should be received from operator, for testing, we just assume that we have them
 
+		//TODO the below code of setting up clone switches and their ports should not be hard coded but rather received from outside
 		// top switch only has two ports and they are connected to switches (SW_CONNECTED)
 		HashMap<Short, PortInfo> portTable1 = new HashMap<>();
 		portTable1.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
@@ -99,9 +107,9 @@ public class LimeMigrationHandler {
 
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
-					activeSwitch.setDuplicateSwitch(cloneSwID);
+					activeSwitch.setDuplicateSwitch(cloneSwitch);
 					// setup clone switch
-					cloneSwitch.setDuplicateSwitch(activeSwID);
+					cloneSwitch.setDuplicateSwitch(activeSwitch);
 					// copy FlowMod table from active to switch and push it the switch
 					cloneSwitch.insertFlowRuleTableAndSendModified(activeSwitch, ghostPort);  //FIXME we may need to clone this
 					
@@ -121,7 +129,27 @@ public class LimeMigrationHandler {
 		System.out.println("Initialization was seccuful..");
 	}
 
-	private void updatePort(WorkerSwitch workerSwitch, short port, PortType pType){
-
+	public synchronized void switchDoneMigrating(WorkerSwitch cloneSwitch, WorkerSwitch activeSwitch){
+		cloneSwitchCounter ++;
+		// edit original switch to map to this clone switch now
+		activeSwitch.getSlicerByName(LimeContainer.OriginalSwitch).setActiveSwitch(cloneSwitch);
+		// make activeSwitch true for clone switch
+		cloneSwitch.makeActive();
+		// clear duplicate switch field
+		cloneSwitch.setDuplicateSwitch(null);
+		// change mapping from active to original switch in lime container
+		long oSwID = LimeContainer.getActiveToOriginalSwitchMap().get(activeSwitch.getDPID());
+		LimeContainer.getActiveToOriginalSwitchMap().remove(activeSwitch.getDPID());
+		LimeContainer.getActiveToOriginalSwitchMap().put(cloneSwitch.getDPID(), oSwID);
+		
+		// remove ghost port
+		// this will happen automatically when OVX remove port
+		
+		// check switch counter
+		if (cloneSwitchCounter == LimeContainer.getCloneSwitchContainer().size()){
+			// send to ovx to delete all old active switches
+			LimeContainer.getCloneSwitchContainer().clear();
+			LimeContainer.getActiveToCloneSwitchMap().clear();
+		}
 	}
 }

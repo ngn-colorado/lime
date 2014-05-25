@@ -114,7 +114,7 @@ SwitchChangedListener {
 	private int connectedHostPortsCounter;
 	//private boolean isCloned = false;
 	private boolean isActive = false;
-	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
+	private WorkerSwitch duplicateSwitch;  
 	private HashMap<Short, PortInfo> activePorts;
 	//private LimitedQueue<OFFlowMod> flowRulesTable;
 	private LimeFlowTable flowTable;
@@ -159,6 +159,7 @@ SwitchChangedListener {
 	// OFPP_FLOOD
 
 	public WorkerSwitch(FVEventLoop loop, SocketChannel sock) {
+		this.duplicateSwitch = null;  
 		this.connectedHostPorts = new HashSet<Short>();
 		this.loop = loop;
 		this.flowTable = new LimeFlowTable(this);
@@ -284,11 +285,11 @@ SwitchChangedListener {
 				return;
 			}
 			else{
-				if(this.getDuplicateSwitch() != -1){	
+				if(this.getDuplicateSwitch() != null){	
 					// check if it is ghost port
 					// get cloned switch and its table
 					LimeSwitch cloneSwitch;
-					cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+					cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch.getDPID()); // this should never be null
 					if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
 						if(pInfo.getType().equals(PortType.GHOST)){ // do we need this if statement, since clone switch is identical to active switch? 
 							this.activePorts.put(phyPort.getPortNumber(), pInfo);
@@ -302,8 +303,8 @@ SwitchChangedListener {
 			}
 		}
 
-		if(duplicateSwitch != -1){
-			LimeSwitch cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+		if(duplicateSwitch != null){
+			LimeSwitch cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch.getDPID()); // this should never be null
 			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
 
 				if(pInfo.getType().equals(PortType.EMPTY)){
@@ -317,6 +318,7 @@ SwitchChangedListener {
 					if (connectedHostPorts.size() == connectedHostPortsCounter){
 						// all needed ports are connected!! 
 						// notify LimeMigration handler with the good news
+						
 
 					}
 					// check if 
@@ -349,7 +351,7 @@ SwitchChangedListener {
 
 		PortInfo pInfo;
 		if (isActive){	
-			if(duplicateSwitch != -1){
+			if(duplicateSwitch != null){
 				if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 					if(pInfo.getType().equals(PortType.H_CONNECTED)){ // then this for sure is a cloning port removing, we still need this port
 						this.activePorts.get(phyPort.getPortNumber()).setType(PortType.EMPTY);
@@ -363,14 +365,15 @@ SwitchChangedListener {
 			}
 			else{
 				// TODO what if active switch wants to add/remove port that in original switch? Should we trigger error?
+				// this also can be ghost port removal at the end of the migration
 				this.activePorts.remove(phyPort.getPortNumber());
 				return;
 			}
 		}
 
-		if(duplicateSwitch != -1){ // if we are here, then this is a clone switch
+		if(duplicateSwitch != null){ // if we are here, then this is a clone switch
 			LimeSwitch cloneSwitch;
-			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch.getDPID()); // this should never be null
 			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
 				// trigger error!! for now, we shouldn't remove any ports from clone switch during migration
 			}
@@ -564,48 +567,6 @@ SwitchChangedListener {
 		this.keepAlive.scheduleNextCheck();
 	}
 
-	/**
-	 * Something in the config has changed; figure out what and re-cache it
-	 *
-	 * @param e
-	 * 
-	 * update ash: this method is irrelevant now because the listeners update the 
-	 * values as they call the callback methods.
-	 */
-	/*private void updateConfig(ConfigUpdateEvent e) {
-		String config = e.getConfig();
-		FVLog.log(LogLevel.DEBUG, this, "got update: ", config);
-		if (config.equals(FVConfig.FLOWSPACE)) {
-			// update ourselves first
-			connectToControllers(); // re-figure out who we should connect to
-			// then tell everyone who depends on us (causality important :-)
-			for (OriginalSwitch fvSlicer : slicerMap.values())
-				this.loop.queueEvent(new ConfigUpdateEvent(e).setDst(fvSlicer));
-		} else if (config.equals(FVConfig.FLOW_TRACKING)) {
-			updateFlowTrackingConfig();
-		} else if (config.endsWith(FVConfig.FLOOD_PERM)) {
-			this.updateFloodPerms();
-		} else {
-			FVLog.log(LogLevel.WARN, this, "ignoring unknown config update: ",
-					e.getConfig());
-		}
-	}*/
-
-	/*
-	 * Set by callback in setFlowTracking below.
-	 */
-	/*private synchronized void updateFlowTrackingConfig() {
-		try {
-			if (FVConfig.getBoolean(FVConfig.FLOW_TRACKING))
-				this.flowDB = new LinearFlowDB(this);
-			else
-				this.flowDB = new NoopFlowDB();
-		} catch (ConfigError e) {
-			// default to flow tracking == off
-			this.flowDB = new NoopFlowDB();
-		}
-	}*/
-
 	void handleIOEvent(FVIOEvent e) {
 		int ops = e.getSelectionKey().readyOps();
 
@@ -796,11 +757,11 @@ SwitchChangedListener {
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 					makeActive();
 					// copy original lime switch ports 
-					if (!slicerMap.containsKey(LimeContainer.MainSlice)){
-						OriginalSwitch newSlicer = new OriginalSwitch(this.loop, this, LimeContainer.MainSlice);  
-						slicerMap.put(LimeContainer.MainSlice, newSlicer); // create new slicer in
-						newSlicer.init();
-						LimeContainer.addSlicer(getDPID(), newSlicer);
+					if (!slicerMap.containsKey(LimeContainer.OriginalSwitch)){
+						OriginalSwitch oSwitch = new OriginalSwitch(this.loop, this, LimeContainer.OriginalSwitch);  
+						slicerMap.put(LimeContainer.OriginalSwitch, oSwitch);
+						oSwitch.init();
+						LimeContainer.addSlicer(getDPID(), oSwitch);
 						System.out.println("MURAD: Creating slicer for switch: " + switchName);
 					}
 				}
@@ -1356,14 +1317,14 @@ SwitchChangedListener {
 
 	/**
 	 * Return duplicate switchID
-	 * @return switchID, -1 otherwise
+	 * @return {@link WorkerSwitch} or null if none is assigned to it
 	 */
-	public long getDuplicateSwitch(){
+	public WorkerSwitch getDuplicateSwitch(){
 		return duplicateSwitch;
 	}
 
-	public void setDuplicateSwitch(long swId){
-		duplicateSwitch = swId;
+	public void setDuplicateSwitch(WorkerSwitch dublicateSwitch){
+		duplicateSwitch = dublicateSwitch;
 	}
 
 	/**

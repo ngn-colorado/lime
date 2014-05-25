@@ -67,8 +67,8 @@ Classifiable, Slicable, Cloneable {
 
 		int originalBufferId = this.bufferId;
 		if(originalBufferId == -1){
-			if(fvClassifier.getDuplicateSwitch() != -1){
-				WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+			if(fvClassifier.getDuplicateSwitch() != null){
+				WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch().getDPID());
 				sendFlowMod(fvClassifier, -1, originalBufferId);
 				sendFlowMod(duplicateWorkerSwitch,-1, originalBufferId);
 			}
@@ -84,8 +84,8 @@ Classifiable, Slicable, Cloneable {
 			if (pair != null){
 				WorkerSwitch senderWorkerSwitch; //, cloneWorkerSwitch;
 				senderWorkerSwitch = pair.getClassifier();
-				if(senderWorkerSwitch.getDuplicateSwitch() != -1){
-					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(senderWorkerSwitch.getDuplicateSwitch());
+				if(senderWorkerSwitch.getDuplicateSwitch() != null){
+					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(senderWorkerSwitch.getDuplicateSwitch().getDPID());
 					sendFlowMod(senderWorkerSwitch, pair.getBuffer_id(), originalBufferId);
 					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}
@@ -94,8 +94,8 @@ Classifiable, Slicable, Cloneable {
 				}				
 			}
 			else{
-				if(fvClassifier.getDuplicateSwitch() != -1){
-					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
+				if(fvClassifier.getDuplicateSwitch() != null){
+					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch().getDPID());
 					sendFlowMod(fvClassifier, originalBufferId, originalBufferId);
 					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}

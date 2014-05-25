@@ -46,9 +46,9 @@ implements Classifiable, Slicable, TopologyControllable {
 			}
 		}
 		else{
-			if(fvClassifier.getDuplicateSwitch() != 0){
-				if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(fvClassifier.getDuplicateSwitch())){
-					this.datapathId = LimeContainer.getActiveToOriginalSwitchMap().get(fvClassifier.getDuplicateSwitch());
+			if(fvClassifier.getDuplicateSwitch() != null){
+				if (LimeContainer.getActiveToOriginalSwitchMap().containsKey(fvClassifier.getDuplicateSwitch().getDPID())){
+					this.datapathId = LimeContainer.getActiveToOriginalSwitchMap().get(fvClassifier.getDuplicateSwitch().getDPID());
 					fvSlicer.sendMsg(this, fvClassifier);
 				}
 				else{

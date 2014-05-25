@@ -75,8 +75,8 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 
 	private LimeMsgTranslator limeMsgTranslator;
 	public static final int MessagesPerRead = 50; // for performance tuning
-	String sliceName;
-	WorkerSwitch fvClassifier;
+	String switchName;  // this is original switch name, for now, all original switches have the same name "originalSwitch", we will enhance this later
+	WorkerSwitch activeSwitch;
 	FVEventLoop loop;
 	SocketChannel sock;
 	String hostname;
@@ -107,12 +107,12 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	protected OriginalSwitch() {}
 	// get OFPP_FLOOD'd
 
-	public OriginalSwitch(FVEventLoop loop, WorkerSwitch fvClassifier,
-			String sliceName) {
+	public OriginalSwitch(FVEventLoop loop, WorkerSwitch activeSwitch,
+			String thisSwitchName) {
 		this.limeMsgTranslator = new LimeMsgTranslator();
 		this.loop = loop;
-		this.fvClassifier = fvClassifier;
-		this.sliceName = sliceName;
+		this.activeSwitch = activeSwitch;
+		this.switchName = thisSwitchName;
 		this.isConnected = false;
 		this.msgStream = null;
 		this.missSendLength = 128; // openflow default (?) findout... TODO
@@ -123,7 +123,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 		this.allowedPorts = new HashMap<Short, Boolean>();
 		this.allowedBufferIDs = new LRULinkedHashMap<Integer, Integer>(10,
 				MAX_ALLOWED_BUFFER_IDS);
-		this.stats = SendRecvDropStats.createSharedStats(sliceName);
+		this.stats = SendRecvDropStats.createSharedStats(thisSwitchName);
 
 
 		FlowvisorImpl.addListener(this);//FVConfig.watch(this, FVConfig.FLOW_TRACKING);
@@ -160,15 +160,15 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 		//hostname = FVConfig.getSliceHost(sliceName); //MURAD-config
 		//port = FVConfig.getSlicePort(sliceName); //MURAD-config
 		//lldpOptIn = FVConfig.getLLDPSpam(sliceName); //MURAD-config
-		SliceImpl.addListener(sliceName, this);
+		SliceImpl.addListener(switchName, this);
 		this.updatePortList();  //MURAD
 		this.reconnect();
 		this.keepAlive = new OFKeepAlive(this, this, loop);
 		this.keepAlive.scheduleNextCheck();
-		fvClassifier.loadLimit(sliceName);
-		fvClassifier.loadRateLimit(sliceName);
+		activeSwitch.loadLimit(switchName);
+		activeSwitch.loadRateLimit(switchName);
 		try {
-			this.fmlimit = SliceImpl.getProxy().getMaxFlowMods(sliceName);
+			this.fmlimit = SliceImpl.getProxy().getMaxFlowMods(switchName);
 		} catch (ConfigError e) {
 			FVLog.log(LogLevel.WARN, this, "Global slice flow mod limit unreadable; disabling.");
 			this.fmlimit = -1;
@@ -176,7 +176,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	}
 
 	private FlowMap getLocalFlowSpace() {
-		FlowMap fm = this.fvClassifier.getSwitchFlowMap();
+		FlowMap fm = this.activeSwitch.getSwitchFlowMap();
 		switch (fm.getType()) {
 		case LINEAR:
 			return fm.clone();
@@ -199,13 +199,13 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 		/*Set<Short> ports = FlowSpaceUtil.getPortsBySlice(this.fvClassifier
 				.getSwitchInfo().getDatapathId(), this.sliceName,
 				this.localFlowSpace);*/
-		Set<Short> ports = this.fvClassifier.getOnlyConnectedPorts(); 
+		Set<Short> ports = this.activeSwitch.getOnlyConnectedPorts(); 
 		if (ports.contains(OFPort.OFPP_ALL.getValue())) {  //TODO MURAD do we need this for LIME?
 			// this switch has access to ALL PORTS; feed them in from the
 			// features request
 			ports.clear(); // remove the OFPP_ALL virtual port
 			this.allowAllPorts = true;
-			for (OFPhysicalPort phyPort : this.fvClassifier.getSwitchInfo()
+			for (OFPhysicalPort phyPort : this.activeSwitch.getSwitchInfo()
 					.getPorts())
 				ports.add(phyPort.getPortNumber());
 		}
@@ -213,7 +213,8 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 			//System.out.println("MURAD: FVSLICER 208, inside loop to add port: " + port + " to slicer ports");
 			//System.out.println("MURAD: Ports before adding: " + port);
 			LimeSwitch lSwitch;
-			if((lSwitch = LimeContainer.getOriginalSwitchContainer().get(this.fvClassifier.getDPID())) != null){ //TODO null pointer exception might happen here
+			lSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(this.activeSwitch.getDPID())); // this should never be null!
+			if(lSwitch != null){ //TODO null pointer exception might happen here
 				if(lSwitch.getPortTable().containsKey(port)){  
 					if (!allowedPorts.keySet().contains(port)) {
 						System.out.println("MURAD: Adding port: " + port + " to slicer ports");
@@ -266,7 +267,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	}
 
 	private OFPhysicalPort findPhyPort(Short port) {
-		for (OFPhysicalPort phyPort : this.fvClassifier.getSwitchInfo()
+		for (OFPhysicalPort phyPort : this.activeSwitch.getSwitchInfo()
 				.getPorts()) {
 			if (phyPort.getPortNumber() == port)
 				return phyPort;
@@ -404,8 +405,8 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	 */
 	@Override
 	public String getName() {
-		return new StringBuilder("slicer_").append(this.sliceName).append("_")
-				.append(fvClassifier.getSwitchName()).toString();
+		return new StringBuilder("orginal_switch_").append(this.switchName).append("_")
+				.append(activeSwitch.getSwitchName()).toString();
 	}
 
 
@@ -448,7 +449,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 		}
 		// tell the classifier to forget about us
 		if (unregisterClassifier)
-			fvClassifier.tearDownSlice(this.sliceName);
+			activeSwitch.tearDownSlice(this.switchName);
 
 		this.msgStream = null; // force this to GC, in case we have a memleak on
 		// "this"
@@ -457,14 +458,14 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 		TopologyController tc = TopologyController.getRunningInstance();
 		if (tc != null)
 			tc.sliceConnectionJustChanged(info, TopologyCallback.EventType.SLICE_DISCONNECTED);
-		SliceImpl.removeListener(sliceName, this);
+		SliceImpl.removeListener(switchName, this);
 		FlowvisorImpl.removeListener(this);
 	}
 
 	private HashMap<String, Object> getStatusInfo() {
 		HashMap<String, Object> info = new HashMap<String, Object>();
 		info.put("connection-status", this.isConnected());
-		info.put("slice-name", this.sliceName);
+		info.put("slice-name", this.switchName);
 		info.put("controller-host", this.hostname);
 		info.put("controller-port", this.port);
 		info.put("shutdown-status", this.isShutdown);
@@ -610,7 +611,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 				if (msg instanceof Slicable ) {
 					// mark this channel as still alive
 					this.keepAlive.registerPong();
-					if (msg.getType() != OFType.HELLO && !fvClassifier.isRateLimited(this.getSliceName())) {
+					if (msg.getType() != OFType.HELLO && !activeSwitch.isRateLimited(this.getSliceName())) {
 						FVLog.log(LogLevel.WARN, this,
 								"dropping msg because slice", this.getSliceName(), " is rate limited: ",
 								msg);
@@ -621,7 +622,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 					/*System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
 					System.out.println("MURAD: msg-data: " + msg.toString());
 					System.out.println("+++++++++++");*/
-					((Slicable) msg).sliceFromController(fvClassifier, this);
+					((Slicable) msg).sliceFromController(activeSwitch, this);
 
 				} else
 					FVLog.log(LogLevel.CRIT, this,
@@ -672,7 +673,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	}
 
 	public String getSliceName() {
-		return this.sliceName;
+		return this.switchName;
 	}
 
 	public boolean getFloodPortStatus(short port) {
@@ -804,10 +805,10 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 
 		if (in) {
 			this.flowRewriteDB = new LinearFlowRewriteDB(this,
-					this.sliceName, fvClassifier.getDPID());
+					this.switchName, activeSwitch.getDPID());
 		} else {
 			this.flowRewriteDB = new NoopFlowRewriteDB(this,
-					this.sliceName, fvClassifier.getDPID());
+					this.switchName, activeSwitch.getDPID());
 		}
 
 
@@ -844,30 +845,42 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	}
 
 	public void incrementFlowRules(){
-		fvClassifier.incrementFlowMod(sliceName);
-		fvClassifier.getSlicerLimits().incrementSliceFMCounter(sliceName);
+		activeSwitch.incrementFlowMod(switchName);
+		activeSwitch.getSlicerLimits().incrementSliceFMCounter(switchName);
 	}
 
 	public void decrementFlowRules(){
-		fvClassifier.decrementFlowMod(sliceName);
-		fvClassifier.getSlicerLimits().decrementSliceFMCounter(sliceName);
+		activeSwitch.decrementFlowMod(switchName);
+		activeSwitch.getSlicerLimits().decrementSliceFMCounter(switchName);
 	}
 
 	public boolean permitFlowMod() {
 		if (fmlimit == -1)
-			return true && fvClassifier.permitFlowMod(sliceName);
-		int currlimit = fvClassifier.getSlicerLimits().getSliceFMLimit(sliceName);
-		return ((currlimit < fmlimit) && (fvClassifier.permitFlowMod(sliceName)));
+			return true && activeSwitch.permitFlowMod(switchName);
+		int currlimit = activeSwitch.getSlicerLimits().getSliceFMLimit(switchName);
+		return ((currlimit < fmlimit) && (activeSwitch.permitFlowMod(switchName)));
 	}
 
 	public boolean isUp() {
-		return SliceImpl.getProxy().isSliceUp(this.sliceName);
+		return SliceImpl.getProxy().isSliceUp(this.switchName);
 	}
 
 	
 	// Murad methods
 	public LimeMsgTranslator getLimeMsgTranslator(){
 		return limeMsgTranslator;
+	}
+	
+	/**
+	 * Return the active switch that map to this original switch
+	 * @return active switch
+	 */
+	public WorkerSwitch getActiveSwitch(){
+		return this.activeSwitch;
+	}
+	
+	public void setActiveSwitch(WorkerSwitch newWorkerSwitch){
+		this.activeSwitch = newWorkerSwitch;
 	}
 
 }
