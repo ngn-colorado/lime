@@ -43,7 +43,7 @@ public class LimeFlowTable{
 
 
 	/** OVXSwitch tied to this table */
-	protected WorkerSwitch vswitch;
+	protected WorkerSwitch wswitch;
 
 	/** Map of FlowMods to physical cookies for vlinks*/
 	protected ConcurrentHashMap<Long, FVFlowMod> flowmodMap;
@@ -65,13 +65,13 @@ public class LimeFlowTable{
 	protected long lookupCount;
 	protected long matchCount;
 
-	public LimeFlowTable(WorkerSwitch vsw){
+	public LimeFlowTable(WorkerSwitch wsw){
 		this.flowmodMap = new ConcurrentHashMap<Long, FVFlowMod>();
 		this.cookieMap = new ConcurrentHashMap<Integer, Long>();
 		//this.portMap = new ConcurrentHashMap<Short, Set<Long>>();
 		this.cookieCounter = new AtomicInteger(1);
 		this.freeList = new LinkedList<Long>();
-		this.vswitch = vsw;
+		this.wswitch = wsw;
 
 		/* initialise stats*/
 		this.activeEntries = 0;
@@ -107,7 +107,7 @@ public class LimeFlowTable{
 	 * @return if the FlowMod needs to be sent south during de-virtualization.
 	 */
 	public boolean handleFlowMods(FVFlowMod fm) { 
-		System.out.println("MURAD:, LimeFlowTable-110, handling flowMod: " + fm.getCommand());
+		System.out.println("MURAD:, LimeFlowTable-110, switch " + wswitch.getName() + " handling flowMod: " + fm.getCommand());
 		switch (fm.getCommand()) {
 		case OFFlowMod.OFPFC_ADD:
 			return doFlowModAdd(fm);
