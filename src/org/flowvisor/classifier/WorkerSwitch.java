@@ -110,7 +110,9 @@ SwitchChangedListener {
 	String switchName;
 	boolean doneID;
 	//MURAD variables start
-	private boolean isCloned = false;
+	private Set<Short> connectedHostPorts; //ports that are connected to hosts.
+	private int connectedHostPortsCounter;
+	//private boolean isCloned = false;
 	private boolean isActive = false;
 	private long duplicateSwitch = -1;  // Assuming no switch will have -1 as an ID
 	private HashMap<Short, PortInfo> activePorts;
@@ -157,6 +159,7 @@ SwitchChangedListener {
 	// OFPP_FLOOD
 
 	public WorkerSwitch(FVEventLoop loop, SocketChannel sock) {
+		this.connectedHostPorts = new HashSet<Short>();
 		this.loop = loop;
 		this.flowTable = new LimeFlowTable(this);
 		this.switchName = "unidentified:" + sock.toString();
@@ -298,14 +301,27 @@ SwitchChangedListener {
 				return;
 			}
 		}
+
 		if(duplicateSwitch != -1){
-			LimeSwitch cloneSwitch;
-			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
+			LimeSwitch cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
 			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
-				this.activePorts.put(phyPort.getPortNumber(), pInfo);
-				if(pInfo.getType().equals(PortType.H_CONNECTED)){
+
+				if(pInfo.getType().equals(PortType.EMPTY)){
+					// change type from empty to h_connected
+					pInfo.setType(PortType.H_CONNECTED);
+					// update all flowmod of output of this port
+					updateFlowModOutputPort(phyPort.getPortNumber(), true);
+
 					// update connected port counter
+					connectedHostPorts.add(phyPort.getPortNumber());
+					if (connectedHostPorts.size() == connectedHostPortsCounter){
+						// all needed ports are connected!! 
+						// notify LimeMigration handler with the good news
+
+					}
+					// check if 
 				}
+				this.activePorts.put(phyPort.getPortNumber(), pInfo);
 				return;
 			}
 			else{
@@ -330,17 +346,14 @@ SwitchChangedListener {
 		if (!found)
 			FVLog.log(LogLevel.INFO, this,
 					"asked to remove non-existant port: ", phyPort);
-		
+
 		PortInfo pInfo;
 		if (isActive){	
 			if(duplicateSwitch != -1){
 				if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 					if(pInfo.getType().equals(PortType.H_CONNECTED)){ // then this for sure is a cloning port removing, we still need this port
 						this.activePorts.get(phyPort.getPortNumber()).setType(PortType.EMPTY);
-						// update flow-mod for this port
-						// remove them from limeFlow table
-						// add the update to switch flow table
-						
+						updateFlowModOutputPort(phyPort.getPortNumber(), false);
 						return;
 					}
 					else{
@@ -354,7 +367,7 @@ SwitchChangedListener {
 				return;
 			}
 		}
-		
+
 		if(duplicateSwitch != -1){ // if we are here, then this is a clone switch
 			LimeSwitch cloneSwitch;
 			cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch); // this should never be null
@@ -365,7 +378,7 @@ SwitchChangedListener {
 		this.activePorts.remove(phyPort.getPortNumber());
 	}
 
-	
+
 	public OriginalSwitch getSlicerByName(String sliceName) {
 		if (this.slicerMap == null)
 			return null; // race condition on shutdown
@@ -409,7 +422,7 @@ SwitchChangedListener {
 		fm.setOutPort(OFPort.OFPP_NONE);
 		fm.setBufferId(0xffffffff); // buffer to NONE
 		sendMsg(fm, this);*/
-		
+
 		// request the switch's features
 		sendMsg(new OFFeaturesRequest(), this);
 		msgStream.flush();
@@ -1354,7 +1367,7 @@ SwitchChangedListener {
 	}
 
 	/**
-	 * Copying flowTable from duplicate switch when migration is about to happen
+	 * Copying flowTable from duplicate switch when migration is about to happen.
 	 * Modify flowmod with action output to empty port
 	 * @param ActiveSwitch
 	 * @param ghostPort
@@ -1363,7 +1376,7 @@ SwitchChangedListener {
 		this.flowTable.copyFromAnotherLimeFlowTable(ActiveSwitch.flowTable);
 		OFAction action;
 		short originalPort;
-		
+
 		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
 			FVFlowMod flowMod = entry.getValue();
 			for(int i = 0; i<flowMod.getActions().size(); i++ ){
@@ -1381,7 +1394,7 @@ SwitchChangedListener {
 					}
 				}
 			}
-			handleFlowMod(flowMod);
+			handleFlowModAndSend(flowMod);
 		}
 	}
 
@@ -1396,50 +1409,80 @@ SwitchChangedListener {
 	public synchronized void ereaseFlowTable(){
 		flowRulesTable.clear();
 	}
-	
+
 	public synchronized void findAndEditMatchedFlowRule(OFFlowMod fm){
 		for (OFFlowMod flowMod : flowRulesTable){
 			if (flowMod.equals(fm)){  // this is strict matching (considering priority and wildcars)
-				
-				
+
+
 			}
 		}
 	}*/
-	
+
 	/**
-	 * Check type of FlowMod and if it should be add/modyfied/deleted 
-	 * If so, send to switch
+	 * Check type of FlowMod and if it should be add/modyfied/deleted, send flowMod to switch 
 	 * @param fm
 	 */
-	public synchronized void handleFlowMod(FVFlowMod fm){
+	public synchronized void handleFlowModAndSend(FVFlowMod fm){
 		if(flowTable.handleFlowMods(fm)){
 			// send fm to switch
 			this.sendMsg(fm, this);
 		}
 	}
-	
-	/*public void addLimeFlowRule(short port, OFFlowMod flowMod){
-		if (limeFlowTable.containsKey(port)){
-			limeFlowTable.get(port).add(flowMod);
+
+	/**
+	 * When port changes its status from EMPTY to H_CONNECTED or vice versa,
+	 * we need to modify all flowMod with output to this port and send them to switch
+	 * @param port that changed
+	 * @param fromGhostToOriginal to change from port to ghost port or vice versa
+	 */
+	private synchronized void updateFlowModOutputPort(short port, boolean fromGhostToOriginal){
+		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
+			FVFlowMod updatedflowMod = (FVFlowMod) entry.getValue().clone();
+			OFAction action;
+			short ghostPort = this.getGhostPort();
+
+			if (updatedflowMod.getOriginalOutputPort() == port){
+				if(fromGhostToOriginal){
+					int outoutActionIndex = 0;
+					for(int i = 0; i<updatedflowMod.getActions().size(); i++ ){
+						action = updatedflowMod.getActions().get(i);
+						if(action instanceof OFActionOutput){
+							if (((OFActionOutput) action).getPort() == ghostPort){
+								outoutActionIndex = i;
+								((OFActionOutput) action).setPort(port);
+								break;
+							}
+						}
+					}
+					if (outoutActionIndex != 0){
+						// remove vlan tag
+						updatedflowMod.getActions().remove(outoutActionIndex);
+					}
+					else{
+						// error
+					}
+				}
+				else{
+					for(int i = 0; i<updatedflowMod.getActions().size(); i++ ){
+						action = updatedflowMod.getActions().get(i);
+						if(action instanceof OFActionOutput){
+							if (((OFActionOutput) action).getPort() == port){
+								OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(port);
+								updatedflowMod.getActions().add(i, addedVlanAction);
+								((OFActionOutput) action).setPort(ghostPort);
+								updatedflowMod.setOriginalOutputPort(port);
+								break; //Assuming that there is only one output port...	
+							}
+						}
+					}
+				}
+				updatedflowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT);
+				flowTable.addFlowMod(updatedflowMod, entry.getKey());
+				this.sendMsg(updatedflowMod, this);			
+			}
 		}
-		else{
-			limeFlowTable.put(port, new ArrayList<OFFlowMod>());
-		}
 	}
-
-	public ArrayList<OFFlowMod> getLimeFlowListForPort(short port){
-		return limeFlowTable.get(port);
-	}
-
-	public void ereaseLimeFlowRuleListForPort(short port){
-		limeFlowTable.remove(port);
-	}
-
-	public void ereaseLimeFlowTable(){
-		limeFlowTable.clear();
-	}*/
-
-
 
 	/**
 	 * Get the port number that represent the Ghost port
@@ -1454,18 +1497,8 @@ SwitchChangedListener {
 		return -1;
 	}
 
-	private class LimitedQueue<E> extends LinkedList<E> {
-		private int limit;
-
-		public LimitedQueue(int limit) {
-			this.limit = limit;
-		}
-
-		@Override
-		public boolean add(E o) {
-			super.add(o);
-			while (size() > limit) { super.remove(); }
-			return true;
-		}
+	public void setConnectedHostCounter(int counter){
+		this.connectedHostPortsCounter = counter;
 	}
+
 }

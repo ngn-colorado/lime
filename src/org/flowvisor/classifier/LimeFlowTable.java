@@ -274,7 +274,7 @@ public class LimeFlowTable{
 		return cookie;
 	}
 
-	private long addFlowMod(final FVFlowMod flowmod, long cookie) {
+	public long addFlowMod(final FVFlowMod flowmod, long cookie) {
 		this.flowmodMap.put(cookie, flowmod);
 		this.cookieMap.put(flowmod.hashCode(), cookie);
 		return cookie;

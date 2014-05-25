@@ -69,19 +69,25 @@ public class LimeMigrationHandler {
 				short ghostPort = -1;
 				HashMap<Short, PortInfo> portTable = LimeContainer.getCloneSwitchContainer().get(cloneSwID).getPortTable();
 				cloneSwitch.setActivePorts(portTable);
-
+				int emptyPortsCounter = 0;
 				for (Map.Entry portEntry : portTable.entrySet()){
 					short portNo = (short) portEntry.getKey();
 					PortInfo pInfo = (PortInfo) portEntry.getValue();
 					if(activeSwitch.getActivePorts().containsKey(portNo)){
-						if(!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.H_CONNECTED) &&
-								!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ // we don't want to touch these ports that reflect original switch ports
+						if(!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.H_CONNECTED)){// we don't want to change these to empty ports
+							//&&!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ 
 							activeSwitch.getActivePorts().get(portNo).setType(pInfo.getType());
 						}
 						cloneSwitch.getActivePorts().get(portNo).setType(pInfo.getType());
 						if(pInfo.getType().equals(PortType.GHOST)){
 							ghostPort = portNo; // this should only happens once since we only have one ghost port
 						}
+						
+						if(pInfo.getType().equals(PortType.EMPTY)){
+							emptyPortsCounter ++;
+						}
+						
+						
 					}
 					else{
 						portMissing = true;
@@ -89,6 +95,7 @@ public class LimeMigrationHandler {
 						break;
 					}
 				}
+				cloneSwitch.setConnectedHostCounter(emptyPortsCounter);
 
 				if (!portMissing && ghostPort != -1){
 					// setup active switch

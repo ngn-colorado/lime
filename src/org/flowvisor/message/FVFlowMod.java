@@ -54,7 +54,7 @@ Classifiable, Slicable, Cloneable {
 		this.originalOutputPort = port;
 	}
 	
-	public short getOriginalPort(){
+	public short getOriginalOutputPort(){
 		return this.originalOutputPort;
 	}
 	
@@ -73,7 +73,7 @@ Classifiable, Slicable, Cloneable {
 				sendFlowMod(duplicateWorkerSwitch,-1, originalBufferId);
 			}
 			else{
-				fvClassifier.handleFlowMod(this); // no need to modify it
+				fvClassifier.handleFlowModAndSend(this); // no need to modify it
 			}
 		}
 
@@ -100,7 +100,7 @@ Classifiable, Slicable, Cloneable {
 					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}
 				else{
-					fvClassifier.handleFlowMod(this);
+					fvClassifier.handleFlowModAndSend(this);
 				}	
 			}
 		}
@@ -134,13 +134,13 @@ Classifiable, Slicable, Cloneable {
 							this.setBufferId(bufferId);
 						}
 						this.setOriginalOutputPort(originalPort);
-						fvClassifier.handleFlowMod(this);
+						fvClassifier.handleFlowModAndSend(this);
 
 						// return the packet back as we received in this method
 						this.setBufferId(originalBufferId);
 						((OFActionOutput) action).setPort(originalPort);
 						this.getActions().remove(i);  // removing vlan tag
-						this.setOriginalOutputPort((short) -1);
+						
 						return; //Assuming that there is only one output port...	
 					}
 				}
@@ -152,7 +152,7 @@ Classifiable, Slicable, Cloneable {
 		}
 
 
-		fvClassifier.handleFlowMod(this);
+		fvClassifier.handleFlowModAndSend(this);
 
 		//return everything in place in case we want to use this method more than once
 		this.setBufferId(originalBufferId);
