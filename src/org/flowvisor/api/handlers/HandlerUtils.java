@@ -166,7 +166,7 @@ public class HandlerUtils {
 	}
 	
 	
-	public static OriginalSwitch getSlicerByName(String sliceName) {
+	public static OriginalSwitch getOriginalSwitchByName(String sliceName) {
 		OriginalSwitch fvSlicer = null;
 		for (Iterator<FVEventHandler> it = FlowVisor.getInstance()
 				.getHandlersCopy().iterator(); it.hasNext();) {
@@ -175,7 +175,7 @@ public class HandlerUtils {
 				WorkerSwitch classifier = (WorkerSwitch) eventHandler;
 				if (!classifier.isIdentified()) 
 					continue;
-				fvSlicer = classifier.getSlicerByName(sliceName);
+				fvSlicer = classifier.getOriginalSwitchByName(sliceName);
 				if (fvSlicer != null) {
 					break;
 				}

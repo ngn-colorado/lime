@@ -74,7 +74,7 @@ public class FVMessageUtil {
 			return null;
 		msg.setXid(pair.getXid());
 		String sliceName = pair.getSliceName();
-		return fvClassifier.getSlicerByName(sliceName);
+		return fvClassifier.getOriginalSwitchByName(sliceName);
 	}
 	 
 	
@@ -85,7 +85,7 @@ public class FVMessageUtil {
 		 XidPairWithMessage pair = xidTranslator.untranslate(msg.getXid());
 		 if (pair == null)
 			 return null;
-		 pair.setSlicer( fvClassifier.getSlicerByName(pair.getSliceName()));
+		 pair.setSlicer( fvClassifier.getOriginalSwitchByName(pair.getSliceName()));
 		 return pair;
 	 }
 

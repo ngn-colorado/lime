@@ -118,12 +118,11 @@ SwitchChangedListener {
 	private HashMap<Short, PortInfo> activePorts;
 	//private LimitedQueue<OFFlowMod> flowRulesTable;
 	private LimeFlowTable flowTable;
-	//private HashMap<Short, ArrayList<OFFlowMod>> limeFlowTable;  // contains FlowMods added during migration to be
 	// reomved later iff the port is changed from the original flowmod sent from controller
 	//MURAD variables end
 	FVMessageAsyncStream msgStream;
 	OFFeaturesReply switchInfo;
-	ConcurrentHashMap<String, OriginalSwitch> slicerMap;
+	ConcurrentHashMap<String, OriginalSwitch> originalSwitchMap;  // TODO since every active switch map to only one original switch, we have to change this to be one single object, no need for hashMap
 	XidTranslator xidTranslator;
 	CookieTranslator cookieTranslator;
 	short missSendLength;
@@ -178,7 +177,7 @@ SwitchChangedListener {
 		this.switchInfo = null;
 		this.doneID = false;
 		this.floodPermsSlice = ""; // disabled, at first
-		this.slicerMap = new ConcurrentHashMap<String, OriginalSwitch>();
+		this.originalSwitchMap = new ConcurrentHashMap<String, OriginalSwitch>();
 		this.xidTranslator = new XidTranslatorWithMessage();
 		this.cookieTranslator = new CookieTranslator();
 		this.missSendLength = 128;
@@ -382,11 +381,11 @@ SwitchChangedListener {
 	}
 
 
-	public OriginalSwitch getSlicerByName(String sliceName) {
-		if (this.slicerMap == null)
+	public OriginalSwitch getOriginalSwitchByName(String originalSwitchName) {
+		if (this.originalSwitchMap == null)
 			return null; // race condition on shutdown
-		synchronized (slicerMap) {
-			return slicerMap.get(sliceName);
+		synchronized (originalSwitchMap) {
+			return originalSwitchMap.get(originalSwitchName);
 		}
 	}
 
@@ -634,8 +633,8 @@ SwitchChangedListener {
 		try {
 			this.sock.close();
 			// shutdown each of the connections to the controllers
-			Map<String, OriginalSwitch> tmpMap = slicerMap;
-			slicerMap = null; // to prevent tearDown(slice) corruption
+			Map<String, OriginalSwitch> tmpMap = originalSwitchMap;
+			originalSwitchMap = null; // to prevent tearDown(slice) corruption
 			for (OriginalSwitch fvSlicer : tmpMap.values())
 				fvSlicer.closeDown(false);
 		} catch (IOException e) {
@@ -757,9 +756,9 @@ SwitchChangedListener {
 				if(LimeContainer.getActiveToOriginalSwitchMap().containsKey(getDPID())){
 					makeActive();
 					// copy original lime switch ports 
-					if (!slicerMap.containsKey(LimeContainer.OriginalSwitch)){
+					if (!originalSwitchMap.containsKey(LimeContainer.OriginalSwitch)){
 						OriginalSwitch oSwitch = new OriginalSwitch(this.loop, this, LimeContainer.OriginalSwitch);  
-						slicerMap.put(LimeContainer.OriginalSwitch, oSwitch);
+						originalSwitchMap.put(LimeContainer.OriginalSwitch, oSwitch);
 						oSwitch.init();
 						LimeContainer.addSlicer(getDPID(), oSwitch);
 						System.out.println("MURAD: Creating slicer for switch: " + switchName);
@@ -820,14 +819,14 @@ SwitchChangedListener {
 	}
 
 	/**
-	 * Called by OriginalSwitch to tell us to forget about them
+	 * Tear down Original Switch that this worker switch map to
 	 *
-	 * @param sliceName
+	 * @param Orignal Switch
 	 */
-	public void tearDownSlice(String sliceName) {
-		if (slicerMap != null) {
-			slicerMap.remove(sliceName);
-			FVLog.log(LogLevel.DEBUG, this, "tore down slice " + sliceName
+	public void tearDownOriginalSwitch(String originalSwitchName) {
+		if (originalSwitchMap != null) {
+			originalSwitchMap.remove(originalSwitchName);
+			FVLog.log(LogLevel.DEBUG, this, "tore down slice " + originalSwitchName
 					+ " on request");
 		}
 	}
@@ -889,7 +888,7 @@ SwitchChangedListener {
 
 	public Collection<OriginalSwitch> getSlicers() {
 		// TODO: figure out if this is a copy and could have SYNCH issues
-		return slicerMap.values();
+		return originalSwitchMap.values();
 	}
 
 	@Override
@@ -941,7 +940,7 @@ SwitchChangedListener {
 		// update ourselves first
 		connectToControllers(in); // re-figure out who we should connect to
 		// then tell everyone who depends on us (causality important :-)
-		for (OriginalSwitch fvSlicer : slicerMap.values())
+		for (OriginalSwitch fvSlicer : originalSwitchMap.values())
 			fvSlicer.updateFlowSpace();
 	}
 

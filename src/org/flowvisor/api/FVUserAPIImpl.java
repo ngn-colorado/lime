@@ -525,7 +525,7 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 					// been identified
 					continue;
 				dpid = classifier.getDPID();
-				OriginalSwitch fvSlicer = classifier.getSlicerByName(sliceName);
+				OriginalSwitch fvSlicer = classifier.getOriginalSwitchByName(sliceName);
 				if (fvSlicer != null) {
 					map.put("connection_" + connection++,
 							FlowSpaceUtil.dpidToString(dpid) + "-->"
@@ -620,7 +620,7 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 				if (!classifier.isIdentified()) // only print switches have have
 					// been identified
 					continue;
-				fvSlicer = classifier.getSlicerByName(sliceName);
+				fvSlicer = classifier.getOriginalSwitchByName(sliceName);
 				if (fvSlicer != null) {
 					break;
 				}
@@ -714,7 +714,7 @@ public class FVUserAPIImpl /*extends BasicJSONRPCService*/ implements FVUserAPI 
 		WorkerSwitch WorkerSwitch = lookupClassifier(dpid); // throws dpid not
 															// found
 		synchronized (WorkerSwitch) {
-			OriginalSwitch fvSlicer = WorkerSwitch.getSlicerByName(sliceName);
+			OriginalSwitch fvSlicer = WorkerSwitch.getOriginalSwitchByName(sliceName);
 			if (fvSlicer == null)
 				throw new SliceNotFound(sliceName);
 			return fvSlicer;

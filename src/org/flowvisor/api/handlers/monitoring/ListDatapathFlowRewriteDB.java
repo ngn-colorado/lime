@@ -36,7 +36,7 @@ public class ListDatapathFlowRewriteDB implements ApiHandler<Map<String, Object>
 
 			
 			
-			OriginalSwitch fvSlicer = HandlerUtils.getClassifierByDPID(dpid).getSlicerByName(sliceName);
+			OriginalSwitch fvSlicer = HandlerUtils.getClassifierByDPID(dpid).getOriginalSwitchByName(sliceName);
 			Map<String, List<Map<String, Object>>> ret = new HashMap<String, List<Map<String, Object>>>();
 			FlowRewriteDB flowRewriteDB = fvSlicer.getFlowRewriteDB();
 			synchronized (flowRewriteDB) {

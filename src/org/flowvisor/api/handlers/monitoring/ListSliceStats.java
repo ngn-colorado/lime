@@ -25,7 +25,7 @@ public class ListSliceStats implements ApiHandler<Map<String, Object>> {
 			if (!HandlerUtils.sliceExists(sliceName))
 				return new JSONRPC2Response(new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
 						cmdName() + ": slice does not exist : " + sliceName), 0);
-			OriginalSwitch slicer = HandlerUtils.getSlicerByName(sliceName);
+			OriginalSwitch slicer = HandlerUtils.getOriginalSwitchByName(sliceName);
 			if (slicer == null)
 				return new JSONRPC2Response(new JSONRPC2Error(JSONRPC2Error.INTERNAL_ERROR.getCode(), 
 						cmdName() + ": " + SendRecvDropStats.NO_STATS_AVAILABLE_MSG + " : " + sliceName), 0);

@@ -27,7 +27,7 @@ public class ListSliceHealth implements ApiHandler<Map<String, Object>> {
 		HashMap<String, Object> retvals = new HashMap<String, Object>();
 		try {
 			String sliceName = HandlerUtils.<String>fetchField(SLICENAME, params, true, null);
-			OriginalSwitch slicer = HandlerUtils.getSlicerByName(sliceName);
+			OriginalSwitch slicer = HandlerUtils.getOriginalSwitchByName(sliceName);
 			retvals.put(CONNECTED, slicer.isConnected());
 			retvals.put(CONNCOUNT, slicer.getConnectCount());
 			retvals.put(FSENTRIES, HandlerUtils.getSliceLimits().getSliceFMLimit(sliceName)); 
@@ -54,7 +54,7 @@ public class ListSliceHealth implements ApiHandler<Map<String, Object>> {
 	private List<String> getConnectedDpid(String sliceName) {
 		List<String> list = new LinkedList<String>();
 		for (WorkerSwitch classifier : HandlerUtils.getAllClassifiers())
-			if (classifier.getSlicerByName(sliceName) != null && classifier.isIdentified())
+			if (classifier.getOriginalSwitchByName(sliceName) != null && classifier.isIdentified())
 				list.add(FlowSpaceUtil.dpidToString(classifier.getDPID()));
 		
 		return list;

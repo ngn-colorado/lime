@@ -64,11 +64,11 @@ TopologyControllable {
 		if(fvClassifier.getDuplicateSwitch() != null){
 			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
 			if(fvClassifier.isActive()){
-				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.OriginalSwitch);
+				fvSlicer = fvClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
 			else{ 
 				if(duplicateVFClassifier.isActive()){
-					fvSlicer = duplicateVFClassifier.getSlicerByName(LimeContainer.OriginalSwitch);
+					fvSlicer = duplicateVFClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 					fvClassifier = duplicateVFClassifier;
 				}
 				else{
@@ -79,7 +79,7 @@ TopologyControllable {
 		}
 		else{
 			if(fvClassifier.isActive()){
-				fvSlicer = fvClassifier.getSlicerByName(LimeContainer.OriginalSwitch);
+				fvSlicer = fvClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
 			else{
 				// ignore packet, we only forward to controller from active switches when no migration is happening 
@@ -114,7 +114,7 @@ TopologyControllable {
 			if ((perms & (SliceAction.READ | SliceAction.WRITE)) != 0) {
 				// lookup slice and send msg to them
 				// TODO record buffer id for later validation
-				OriginalSwitch fvSlicer = fvClassifier.getSlicerByName(sliceAction
+				OriginalSwitch fvSlicer = fvClassifier.getOriginalSwitchByName(sliceAction
 						.getSliceName());
 				if (fvSlicer == null) {
 					FVLog.log(LogLevel.WARN, fvClassifier,

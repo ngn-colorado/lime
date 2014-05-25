@@ -68,7 +68,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		// forward this msg to each of them
 		FVLog.log(LogLevel.DEBUG, fvClassifier, slicesToUpdate.toString());
 		for (String slice : slicesToUpdate) {
-			OriginalSwitch fvSlicer = fvClassifier.getSlicerByName(slice);
+			OriginalSwitch fvSlicer = fvClassifier.getOriginalSwitchByName(slice);
 			if (fvSlicer == null) {
 				FVLog.log(LogLevel.CRIT, fvClassifier,
 						"inconsistent state: missing fvSliver entry for: "

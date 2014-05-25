@@ -134,7 +134,7 @@ public class LLDPUtil {
 			return false;
 		LLDPTrailer trailer = LLDPTrailer.getTrailer(pi);
 		if (trailer != null) {
-			OriginalSwitch fvSlicer = fvClassifier.getSlicerByName(trailer
+			OriginalSwitch fvSlicer = fvClassifier.getOriginalSwitchByName(trailer
 					.getSliceName());
 			if (fvSlicer != null) {
 				if (fvSlicer.isConnected()) {

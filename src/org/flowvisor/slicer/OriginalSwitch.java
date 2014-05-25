@@ -449,7 +449,7 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 		}
 		// tell the classifier to forget about us
 		if (unregisterClassifier)
-			activeSwitch.tearDownSlice(this.switchName);
+			activeSwitch.tearDownOriginalSwitch(this.switchName);
 
 		this.msgStream = null; // force this to GC, in case we have a memleak on
 		// "this"

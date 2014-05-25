@@ -38,10 +38,13 @@ public class LimeMigrationHandler {
 		portTable1.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
 		portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
 		LimeContainer.addCloneSwitch(4, portTable1);
-		LimeContainer.insertActiveToCloneSwitchMap(46200400562356228L-3, 46200400562356228L);
-		System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);
-
-		for(long j=46200400562356229L; j<46200400562356231L; j++){
+		//LimeContainer.insertActiveToCloneSwitchMap(46200400562356228L-3, 46200400562356228L);
+		//System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);
+		LimeContainer.insertActiveToCloneSwitchMap(4-3, 4);
+		System.out.println("MURAD: Clone Top-level Switch: " + 4);
+		
+		//for(long j=46200400562356229L; j<46200400562356231L; j++){
+		for(long j=5; j<7; j++){
 			portTable1 = new HashMap<>();
 			for(short i= 1; i<3; i++){
 				portTable1.put(i, new PortInfo(PortType.EMPTY, null, null));
@@ -132,7 +135,8 @@ public class LimeMigrationHandler {
 	public synchronized void switchDoneMigrating(WorkerSwitch cloneSwitch, WorkerSwitch activeSwitch){
 		cloneSwitchCounter ++;
 		// edit original switch to map to this clone switch now
-		activeSwitch.getSlicerByName(LimeContainer.OriginalSwitch).setActiveSwitch(cloneSwitch);
+		activeSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch).setActiveSwitch(cloneSwitch);
+		activeSwitch.tearDownOriginalSwitch(LimeContainer.OriginalSwitch);
 		// make activeSwitch true for clone switch
 		cloneSwitch.makeActive();
 		// clear duplicate switch field
