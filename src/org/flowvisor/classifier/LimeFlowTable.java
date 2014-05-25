@@ -107,6 +107,7 @@ public class LimeFlowTable{
 	 * @return if the FlowMod needs to be sent south during de-virtualization.
 	 */
 	public boolean handleFlowMods(FVFlowMod fm) { 
+		System.out.println("MURAD:, LimeFlowTable-110, handling flowMod: " + fm.getCommand());
 		switch (fm.getCommand()) {
 		case OFFlowMod.OFPFC_ADD:
 			return doFlowModAdd(fm);
