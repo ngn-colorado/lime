@@ -40,7 +40,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		
 		OriginalSwitch fvSlicer;
 		if(wSwitch.getDuplicateSwitch() != null){
-			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(wSwitch.getDuplicateSwitch());
+			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(wSwitch.getDuplicateSwitch().getDPID());
 			if(wSwitch.isActive()){
 				fvSlicer = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
