@@ -138,7 +138,7 @@ public class LimeFlowTable{
 			FVFlowMod fm = entry.getValue();
 			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
 			fe.setFlowMod(fm);
-			int overlap = fe.compare(flowRemoved.getMatch(), true);
+			int overlap = fe.compare(flowRemoved.getMatch(), false);
 			System.out.println("MURAD:, LimeFlowTable, compare type: " + overlap);
 			if (overlap == LimeFlowEntry.EQUAL) {
 				this.cookieMap.remove(flowRemoved.hashCode());
