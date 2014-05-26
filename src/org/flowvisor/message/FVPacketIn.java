@@ -58,7 +58,7 @@ TopologyControllable {
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
-		System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getName() + " Data-lenght: ");// + this.packetData.length + " and Packet-data: " + this.toVerboseString());
+		//System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getName() + " Data-lenght: ");// + this.packetData.length + " and Packet-data: " + this.toVerboseString());
 		
 		OriginalSwitch fvSlicer;
 		if(fvClassifier.getDuplicateSwitch() != null){
@@ -89,7 +89,7 @@ TopologyControllable {
 		}
 		LimeMsgTranslator buffIdTranslator = fvSlicer.getLimeMsgTranslator();
 		this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier, new OFMatch().loadFromPacket(this.packetData, this.inPort)));
-		System.out.println("MURAD: FVPacketIn, sending to controller from sw: " + fvClassifier.getName());
+		//System.out.println("MURAD: FVPacketIn, sending to controller from sw: " + fvClassifier.getName());
 		fvSlicer.sendMsg(this, fvClassifier);
 		
 	}
