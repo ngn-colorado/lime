@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.flowvisor.LimeContainer;
 import org.flowvisor.classifier.CookiePair;
 import org.flowvisor.classifier.CookieTranslator;
 import org.flowvisor.classifier.WorkerSwitch;
@@ -13,6 +14,7 @@ import org.flowvisor.flows.SliceAction;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
 import org.flowvisor.openflow.protocol.FVMatch;
+import org.flowvisor.slicer.LimeMsgTranslator;
 import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMatch;
@@ -33,17 +35,53 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	 * have expired
 	 */
 	@Override
-	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
-		System.out.println("MURAD: FVFlowRamoder-37, Recv florRemove type: " + this.getReason().name() + " from sw " + fvClassifier.getName());
-		FlowMap flowSpace = fvClassifier.getSwitchFlowMap();
+	public void classifyFromSwitch(WorkerSwitch wSwitch) {
+		System.out.println("MURAD: FVFlowRamoder-37, Recv florRemove type: " + this.getReason().name() + " from sw " + wSwitch.getName());
+		
+		OriginalSwitch fvSlicer;
+		if(wSwitch.getDuplicateSwitch() != null){
+			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(wSwitch.getDuplicateSwitch());
+			if(wSwitch.isActive()){
+				fvSlicer = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+			}
+			else{ 
+				if(duplicateVFClassifier.isActive()){
+					fvSlicer = duplicateVFClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+					wSwitch = duplicateVFClassifier;
+				}
+				else{
+					// ignore msg, we don't know this witch
+					return;
+				}
+			}
+		}
+		else{
+			if(wSwitch.isActive()){
+				fvSlicer = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+			}
+			else{
+				// ignore packet, we only forward to controller from active switches when no migration is happening 
+				FVMessageUtil.dropUnexpectedMesg(this, wSwitch);
+				return;
+			}
+		}
+		
+		wSwitch.handleFlowModRemove(this, fvSlicer);	
+		
+		/*FlowMap flowSpace = wSwitch.getSwitchFlowMap();
 		Set<String> slicesToUpdate = new HashSet<String>();
 		
-		String sliceName = fvClassifier.getFlowDB().processFlowRemoved(this,
-				fvClassifier.getDPID());
+		String sliceName = wSwitch.getFlowDB().processFlowRemoved(this,
+				wSwitch.getDPID());
 		
-		CookiePair pair = untanslateCookie(fvClassifier);
+		CookiePair pair = untanslateCookie(wSwitch);
 		
-		//FVLog.log(LogLevel.DEBUG, fvClassifier, slicerFromCookie);
+		//FVLog.log(LogLevel.DEBUG, wSwitch, slicerFromCookie);
+		
+		
+		
+		
+		
 		
 		if (sliceName != null)
 			slicesToUpdate.add(sliceName);
@@ -53,7 +91,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 			// flow tracking either disabled or broken
 			// just fall back to everyone who *could* have inserted this flow
 			List<FlowEntry> flowEntries = flowSpace.matches(
-					fvClassifier.getDPID(), new FVMatch(getMatch()));
+					wSwitch.getDPID(), new FVMatch(getMatch()));
 			for (FlowEntry flowEntry : flowEntries) {
 				for (OFAction ofAction : flowEntry.getActionsList()) {
 					if (ofAction instanceof SliceAction) {
@@ -66,11 +104,11 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 			}
 		}
 		// forward this msg to each of them
-		FVLog.log(LogLevel.DEBUG, fvClassifier, slicesToUpdate.toString());
+		FVLog.log(LogLevel.DEBUG, wSwitch, slicesToUpdate.toString());
 		for (String slice : slicesToUpdate) {
-			OriginalSwitch fvSlicer = fvClassifier.getOriginalSwitchByName(slice);
+			OriginalSwitch fvSlicer = wSwitch.getOriginalSwitchByName(slice);
 			if (fvSlicer == null) {
-				FVLog.log(LogLevel.CRIT, fvClassifier,
+				FVLog.log(LogLevel.CRIT, wSwitch,
 						"inconsistent state: missing fvSliver entry for: "
 								+ slice);
 				continue;
@@ -79,12 +117,13 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 			fvSlicer.getFlowRewriteDB().processFlowRemoved(this);
 			if (pair != null)
 				this.setCookie(pair.getCookie());
-			fvSlicer.sendMsg(this, fvClassifier);
-		}
+			fvSlicer.sendMsg(this, wSwitch);
+		}*/
+		
 	}
 
 	@Override
-	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
+	public void sliceFromController(WorkerSwitch wSwitch, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 	
@@ -93,8 +132,8 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		return this;
 	}
 	
-	private CookiePair untanslateCookie(WorkerSwitch fvClassifier) {
-		CookieTranslator cookieTrans = fvClassifier.getCookieTranslator();
+	private CookiePair untanslateCookie(WorkerSwitch wSwitch) {
+		CookieTranslator cookieTrans = wSwitch.getCookieTranslator();
 		CookiePair pair = cookieTrans.untranslateAndRemove(this.cookie);
 		if (pair == null) {
 			return null;

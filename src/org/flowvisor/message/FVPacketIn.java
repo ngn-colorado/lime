@@ -62,7 +62,7 @@ TopologyControllable {
 		
 		OriginalSwitch fvSlicer;
 		if(fvClassifier.getDuplicateSwitch() != null){
-			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier);
+			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch());
 			if(fvClassifier.isActive()){
 				fvSlicer = fvClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}

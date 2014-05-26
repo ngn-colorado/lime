@@ -60,6 +60,7 @@ import org.flowvisor.log.SendRecvDropStats.FVStatsType;
 import org.flowvisor.message.Classifiable;
 import org.flowvisor.message.FVError;
 import org.flowvisor.message.FVFlowMod;
+import org.flowvisor.message.FVFlowRemoved;
 import org.flowvisor.message.FVMessageFactory;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
@@ -948,11 +949,11 @@ SwitchChangedListener {
 	public void setFlowTracking(Boolean in) {
 		this.flowTracking  = in;
 		if (in){
-			System.out.println("MURAD:, WorkerSwitch-951, FlowTracking type: LinearFlowDB");
+			//System.out.println("MURAD:, WorkerSwitch-951, FlowTracking type: LinearFlowDB");
 			this.flowDB = new LinearFlowDB(this);
 		}
 		else{
-			System.out.println("MURAD:, WorkerSwitch-951, FlowTracking type: NoOpFlowDB");
+			//System.out.println("MURAD:, WorkerSwitch-951, FlowTracking type: NoOpFlowDB");
 			this.flowDB = new NoopFlowDB();
 		}
 	}
@@ -1394,6 +1395,19 @@ SwitchChangedListener {
 		}
 	}
 
+	/**
+	 * Check to see any match in worker switch flow table's for FlowRemove received from this worker switch
+	 * If FlowMod match found, send FlowRemove to controller through mapped original switch 
+	 * @param fr FlowRemoved received from worker switch
+	 * @param oSwitch Original Switch that this worker switch map to 
+	 */
+	public synchronized void handleFlowModRemove(FVFlowRemoved fr, OriginalSwitch oSwitch){
+		if(flowTable.handleFlowRemoved(fr)){
+			// send fm to controller
+			oSwitch.sendMsg(fr, this);
+		}
+	}
+	
 	/**
 	 * When port changes its status from EMPTY to H_CONNECTED or vice versa,
 	 * we need to modify all flowMod with output to this port and send them to switch

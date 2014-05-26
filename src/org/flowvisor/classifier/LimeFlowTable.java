@@ -128,10 +128,8 @@ public class LimeFlowTable{
 		}
 	}
 
-	public void processFlowRemoved(OFFlowRemoved flowRemoved) {
-		String sliceName = null;
+	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
-		LimeFlowEntry fe = new LimeFlowEntry();
 		while(itr.hasNext()) {
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
@@ -140,9 +138,10 @@ public class LimeFlowTable{
 					&& fm.getCookie() == flowRemoved.getCookie()) {
 				this.cookieMap.remove(fm.hashCode());
 				itr.remove();
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 

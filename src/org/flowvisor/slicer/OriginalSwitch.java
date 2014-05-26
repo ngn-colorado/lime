@@ -804,11 +804,11 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	public void setFlowTracking(Boolean in) {
 
 		if (in) {
-			System.out.println("MURAD:, OriginalSwitch-807, FlowTracking type: LinearFlowRewriteDB");
+			//System.out.println("MURAD:, OriginalSwitch-807, FlowTracking type: LinearFlowRewriteDB");
 			this.flowRewriteDB = new LinearFlowRewriteDB(this,
 					this.switchName, activeSwitch.getDPID());
 		} else {
-			System.out.println("MURAD:, OriginalSwitch-811, FlowTracking type: NoOpFlowRewriteDB");
+			//System.out.println("MURAD:, OriginalSwitch-811, FlowTracking type: NoOpFlowRewriteDB");
 			this.flowRewriteDB = new NoopFlowRewriteDB(this,
 					this.switchName, activeSwitch.getDPID());
 		}
