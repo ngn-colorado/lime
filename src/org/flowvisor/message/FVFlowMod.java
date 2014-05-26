@@ -61,6 +61,8 @@ Classifiable, Slicable, Cloneable {
 	@Override
 	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
 		//System.out.println("MURAD: FV_MOD, buf_id: " + this.bufferId + " Packet-data: " + this.toString());
+		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
+		this.setFlags((short) (this.getFlags() | OFFlowMod.OFPFF_SEND_FLOW_REM));
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
 		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
 		translateCookie(fvClassifier, fvSlicer);
@@ -118,9 +120,7 @@ Classifiable, Slicable, Cloneable {
 	private void sendFlowMod(WorkerSwitch fvClassifier, int bufferId, int originalBufferId){
 		short originalPort = -1;
 		OFAction action;
-		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
-		this.setFlags((short) (this.getFlags() | OFFlowMod.OFPFF_SEND_FLOW_REM));
-
+	
 		for(int i = 0; i<this.getActions().size(); i++ ){
 			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
