@@ -130,12 +130,26 @@ public class LimeFlowTable{
 
 	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
-		System.out.println("MURAD:, LimeFlowTable-134, trying to handle FlowRemove");
-		System.out.println("MURAD:, Flow to be Removed " + flowRemoved.toString());
+		System.out.println("MURAD:, LimeFlowTable, trying to handle FlowRemove for " + flowRemoved.toString());
+		LimeFlowEntry fe = new LimeFlowEntry();
 		while(itr.hasNext()) {
+			
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
 			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
+			fe.setFlowMod(fm);
+			int overlap = fe.compare(flowRemoved.getMatch(), true);
+			System.out.println("MURAD:, LimeFlowTable, compare type: " + overlap);
+			if (overlap == LimeFlowEntry.EQUAL) {
+				this.cookieMap.remove(flowRemoved.hashCode());
+				System.out.println("MURAD:, LimeFlowTable, removing flow in cookie " + entry.getKey());
+				itr.remove();
+				return true;
+			}
+			
+			/*FVFlowMod fm = entry.getValue();
+			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
+			
 			if (fm.getMatch().equals(flowRemoved.getMatch())
 					&& fm.getPriority() == flowRemoved.getPriority()){
 					//&& fm.getCookie() == flowRemoved.getCookie()) {
@@ -143,8 +157,9 @@ public class LimeFlowTable{
 				System.out.println("MURAD:, LimeFlowTable-140, removing flow in cookie " + entry.getKey());
 				itr.remove();
 				return true;
-			}
+			}*/
 		}
+		System.out.println("MURAD:-------");
 		return false;
 	}
 
