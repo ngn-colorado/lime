@@ -239,9 +239,9 @@ public class LimeFlowTable{
 		}
 		/*make a new cookie, add FlowMod*/
 		long newc = this.getCookie();
-		System.out.println("MURAD:, LimeFlowTable-238, adding new FlowMod " + newc);
+		System.out.println("MURAD:, LimeFlowTable-238, adding new FlowMod " + fm.getMatch() + " with cookie " + newc);
 		this.addFlowMod((FVFlowMod) fm.clone(), newc);
-
+		System.out.println("MURAD:, LimeFlowTable-238, checking cloned FlowMod " + fm.getMatch() + " with cookie " + newc);
 		return true;
 	}
 
