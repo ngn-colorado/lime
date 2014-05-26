@@ -504,7 +504,7 @@ SwitchChangedListener {
 
 	@Override
 	public String getName() {
-		return "classifier-" + switchName;
+		return "switch-" + switchName;
 	}
 
 	@Override
@@ -947,10 +947,14 @@ SwitchChangedListener {
 	@Override
 	public void setFlowTracking(Boolean in) {
 		this.flowTracking  = in;
-		if (in)
+		if (in){
+			System.out.println("MURAD:, WorkerSwitch-951, FlowTracking type: LinearFlowDB");
 			this.flowDB = new LinearFlowDB(this);
-		else
-			this.flowDB = new NoopFlowDB();		
+		}
+		else{
+			System.out.println("MURAD:, WorkerSwitch-951, FlowTracking type: NoOpFlowDB");
+			this.flowDB = new NoopFlowDB();
+		}
 	}
 
 	@Override
