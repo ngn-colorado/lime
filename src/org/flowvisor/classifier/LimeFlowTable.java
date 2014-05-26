@@ -131,7 +131,7 @@ public class LimeFlowTable{
 	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
 		System.out.println("MURAD:, LimeFlowTable-134, trying to handle FlowRemove");
-		System.out.println("MURAD:, FlowRemoved " + flowRemoved.toString());
+		System.out.println("MURAD:, Flow to be Removed " + flowRemoved.toString());
 		while(itr.hasNext()) {
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
@@ -140,7 +140,7 @@ public class LimeFlowTable{
 					&& fm.getPriority() == flowRemoved.getPriority()){
 					//&& fm.getCookie() == flowRemoved.getCookie()) {
 				this.cookieMap.remove(fm.hashCode());
-				System.out.println("MURAD:, LimeFlowTable-140, FlorRemoving in cookie " + entry.getKey());
+				System.out.println("MURAD:, LimeFlowTable-140, removing flow in cookie " + entry.getKey());
 				itr.remove();
 				return true;
 			}
