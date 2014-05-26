@@ -292,7 +292,8 @@ public class FlowVisor {
 				System.err.println("MURAD: After Running FV");
 				
 			}  catch (NullPointerException e) {
-				System.out.println("MURAD: Startup failed : " + e);
+				System.out.println("MURAD: Startup failed : ");
+				 e.printStackTrace();
 				System.exit(1);
 			} catch (Throwable e) {
 				e.printStackTrace();
