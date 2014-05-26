@@ -29,8 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.flowvisor.exceptions.ActionDisallowedException;
+import org.flowvisor.flows.FlowDBEntry;
+import org.flowvisor.log.FVLog;
+import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.FVFlowMod;
 import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFError.OFFlowModFailedCode;
@@ -59,7 +63,7 @@ public class LimeFlowTable{
 
 	/** map to flowmods that were modified and previously their output was this port */
 	//private ConcurrentHashMap<Short, Set<Long>> portMap;
-	
+
 	/* statistics per specs */
 	protected int activeEntries;
 	protected long lookupCount;
@@ -124,10 +128,24 @@ public class LimeFlowTable{
 		}
 	}
 
-	public void returnOriginalGhostFlowMod(FVFlowMod fm, short originalPort){
-		
+	public void processFlowRemoved(OFFlowRemoved flowRemoved) {
+		String sliceName = null;
+		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
+		LimeFlowEntry fe = new LimeFlowEntry();
+		while(itr.hasNext()) {
+			Map.Entry<Long, FVFlowMod> entry = itr.next();
+			FVFlowMod fm = entry.getValue();
+			if (fm.getMatch().equals(flowRemoved.getMatch())
+					&& fm.getPriority() == flowRemoved.getPriority()
+					&& fm.getCookie() == flowRemoved.getCookie()) {
+				this.cookieMap.remove(fm.hashCode());
+				itr.remove();
+				break;
+			}
+		}
 	}
-	
+
+
 	/**
 	 * Delete an existing FlowEntry, expanding out a OFPFW_ALL delete
 	 * sent initially be a controller. If not, just check for entries, 
@@ -211,7 +229,7 @@ public class LimeFlowTable{
 				FVFlowMod old = this.flowmodMap.get(c);
 				this.cookieMap.remove(old.hashCode());
 				this.addFlowMod(fm, c);
-				
+
 				/*return cookie to pool and use the previous cookie*/
 				return true;
 			}
@@ -219,7 +237,7 @@ public class LimeFlowTable{
 		/*make a new cookie, add FlowMod*/
 		long newc = this.getCookie();
 		this.addFlowMod((FVFlowMod) fm.clone(), newc);
-		
+
 		return true;
 	}
 
