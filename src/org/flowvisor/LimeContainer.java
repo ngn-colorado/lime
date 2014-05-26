@@ -29,22 +29,22 @@ public class LimeContainer {
 	static final int MAX_SIZE = (1 << 14);
 	static int nextID  = MIN_XID;
 	static LRULinkedHashMap<Integer, LimeMsgData> buffer_idMap  = new LRULinkedHashMap<Integer, LimeMsgData>(INIT_SIZE, MAX_SIZE);
-	
+
 
 	public static final String OriginalSwitch = "originalSwitch"; 
 
 	// all switches in the network and connecting LIME 
 	private static HashMap<Long, WorkerSwitch> allWorkingSwitches = new HashMap<>();
-	
+
 	// list of original showing switches to OF controller to always use them to map to the controller
 	private static HashMap<Long, LimeSwitch> originalSwitchContainer = new HashMap<>();
 
 	// list of active switches.
 	//private static HashMap<Long, LimeSwitch> activeSwitchContainer = new HashMap<>();
-		
+
 	// list of clone switches. those must be received my the time migration happens. And they must have ghost port identified.
 	private static HashMap<Long, LimeSwitch> cloneSwitchContainer = new HashMap<>();
-		
+
 	private static HashMap<Long, Long> activeToOriginalSwitchMap = new HashMap<>();
 
 	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
@@ -63,27 +63,27 @@ public class LimeContainer {
 	public static HashMap<Long, LimeSwitch>  getOriginalSwitchContainer(){
 		return originalSwitchContainer;
 	}
-	
+
 	static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
-	
+
 	/*public static HashMap<Long, LimeSwitch>  getActiveSwitchContainer(){
 		return activeSwitchContainer;
 	}
-	
+
 	static void addActiveSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		activeSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}*/
-	
+
 	public static HashMap<Long, LimeSwitch>  getCloneSwitchContainer(){
 		return cloneSwitchContainer;
 	}
-	
+
 	static void addCloneSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		cloneSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
-	
+
 	public static synchronized void addWorkingSwitch(long swId, WorkerSwitch swClassifier){
 		System.out.println("MURAD: LIMEContainer, Added working switch " + swId);
 		allWorkingSwitches.put(swId, swClassifier);
@@ -95,18 +95,18 @@ public class LimeContainer {
 
 	public static synchronized void insertActiveToOriginalSwitchMap(long swActive, long swOriginal){
 		if(!originalSwitchContainer.containsKey(swOriginal)){ ////////////
-			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Active Switch " + swActive + " Original Switch " + swOriginal + " is not found");  // TODO through exception
+			System.out.println("MURAD: LimeContainer, ERROR!!!!!!!!!!!! Can't add Active Switch " + swActive + " because Original Switch " + swOriginal + " is not found");  // TODO through exception
 		}
 		else{
 			activeToOriginalSwitchMap.put(swActive, swOriginal);
 		}
 	}
-	
-	
+
+
 	public static synchronized HashMap<Long,Long> getActiveToCloneSwitchMap(){
 		return activeToCloneSwitchMap;
 	}
-	
+
 	/**
 	 * Return Active switch ID that map to this clone switch
 	 * @param cloneSwitchID
@@ -118,12 +118,15 @@ public class LimeContainer {
 				return (long)entry.getKey();
 		}
 		return -1;
-		
+
 	}
-	
+
 	static synchronized void insertActiveToCloneSwitchMap(long swActive, long swClone){
-		if((!activeToOriginalSwitchMap.containsKey(swActive)) || (!cloneSwitchContainer.containsKey(swClone))){ ////////////
-			System.out.println("MURAD: ERROR!!!!!!!!!!!! Can't add Clone Switch " + swClone + " and Active Switch " + swActive);  // TODO through exception
+		if(!activeToOriginalSwitchMap.containsKey(swActive)){
+			System.out.println("MURAD: LimeContainer, ERROR!!!!!!!!!!!! Can't fine active Switch " + swActive);  // TODO through exception
+		}
+		if(!cloneSwitchContainer.containsKey(swClone)){ ////////////
+			System.out.println("MURAD: LimeContainer, ERROR!!!!!!! can't find clone switch " +swClone);
 		}
 		else{
 			activeToCloneSwitchMap.put(swActive, swClone);
@@ -137,9 +140,9 @@ public class LimeContainer {
 	public static synchronized HashMap<Long, OriginalSwitch> getAllSlicers(){
 		return allSlicers;
 	}
-	
+
 	static synchronized void insertActiveToCloneSwitchMap(JSONObject map){
-		
+
 	}
 
 	/**
@@ -154,7 +157,7 @@ public class LimeContainer {
 		buffer_idMap.put(Integer.valueOf(ret), new LimeMsgBuffer_idPair(buffer_id, fvClassifier.getDPID()));
 		return ret;
 	}*/
-	
+
 	/**
 	 * Untranslate and delete
 	 * @param xid
