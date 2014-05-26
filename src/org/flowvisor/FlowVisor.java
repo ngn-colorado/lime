@@ -287,9 +287,10 @@ public class FlowVisor {
 					// Set temp file for config checkpointing.
 					fv.configFile = "/tmp/flowisor";
 
-
+				System.err.println("MURAD: Running FV");
 				fv.run(); 
-
+				System.err.println("MURAD: After Running FV");
+				
 			}  catch (NullPointerException e) {
 				System.err.println("MURAD: Startup failed : " + e.getMessage());
 				System.exit(1);
