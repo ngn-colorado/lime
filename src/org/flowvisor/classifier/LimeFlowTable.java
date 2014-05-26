@@ -130,10 +130,12 @@ public class LimeFlowTable{
 
 	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
+		System.out.println("MURAD:, LimeFlowTable-134, trying to handle FlowRemove");
+		System.out.println("MURAD:, FlowRemoved " + flowRemoved.toString());
 		while(itr.hasNext()) {
-			System.out.println("MURAD:, LimeFlowTable-134, trying to handle FlowRemove");
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
+			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
 			if (fm.getMatch().equals(flowRemoved.getMatch())
 					&& fm.getPriority() == flowRemoved.getPriority()){
 					//&& fm.getCookie() == flowRemoved.getCookie()) {

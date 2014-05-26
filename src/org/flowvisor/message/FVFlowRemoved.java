@@ -36,7 +36,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	 */
 	@Override
 	public void classifyFromSwitch(WorkerSwitch wSwitch) {
-		System.out.println("MURAD: FVFlowRamoder-37, Recv florRemove type: " + this.getReason().name() + " from sw " + wSwitch.getName());
+		//System.out.println("MURAD: FVFlowRamoder-37, Recv florRemove type: " + this.getReason().name() + " from sw " + wSwitch.getName());
 		
 		OriginalSwitch fvSlicer;
 		if(wSwitch.getDuplicateSwitch() != null){
