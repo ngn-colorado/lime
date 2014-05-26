@@ -135,8 +135,8 @@ public class LimeFlowTable{
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
 			if (fm.getMatch().equals(flowRemoved.getMatch())
-					&& fm.getPriority() == flowRemoved.getPriority()
-					&& fm.getCookie() == flowRemoved.getCookie()) {
+					&& fm.getPriority() == flowRemoved.getPriority()){
+					//&& fm.getCookie() == flowRemoved.getCookie()) {
 				this.cookieMap.remove(fm.hashCode());
 				System.out.println("MURAD:, LimeFlowTable-140, FlorRemoving in cookie " + entry.getKey());
 				itr.remove();
