@@ -178,6 +178,7 @@ public class LimeFlowTable{
 				fe.setFlowMod(entry.getValue());
 				int overlap = fe.compare(fm.getMatch(), strict);
 				if (overlap == LimeFlowEntry.EQUAL) {
+					System.out.println("MURAD:, LimeFlowTable-181, deleting FlowMod with cookie " + entry.getKey());
 					this.cookieMap.remove(entry.getValue().hashCode());
 					itr.remove();
 					foundMatch = true;
@@ -241,7 +242,6 @@ public class LimeFlowTable{
 		long newc = this.getCookie();
 		System.out.println("MURAD:, LimeFlowTable-238, adding new FlowMod " + fm.getMatch() + " with cookie " + newc);
 		this.addFlowMod((FVFlowMod) fm.clone(), newc);
-		System.out.println("MURAD:, LimeFlowTable-238, checking cloned FlowMod " + fm.getMatch() + " with cookie " + newc);
 		return true;
 	}
 
