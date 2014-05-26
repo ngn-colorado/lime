@@ -138,26 +138,17 @@ public class LimeFlowTable{
 			FVFlowMod fm = entry.getValue();
 			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
 			fe.setFlowMod(fm);
-			int overlap = fe.compare(flowRemoved.getMatch(), false);
+			int overlap = fe.compare(flowRemoved.getMatch(), true);
 			System.out.println("MURAD:, LimeFlowTable, compare type: " + overlap);
-			if (overlap == LimeFlowEntry.EQUAL) {
-				this.cookieMap.remove(flowRemoved.hashCode());
-				System.out.println("MURAD:, LimeFlowTable, removing flow in cookie " + entry.getKey());
-				itr.remove();
-				return true;
+			if (overlap == LimeFlowEntry.EQUAL || overlap == LimeFlowEntry.INTERSECT) {
+				if((fm.getPriority() == flowRemoved.getPriority()) && fm.getCookie() == flowRemoved.getCookie()){
+					this.cookieMap.remove(flowRemoved.hashCode());
+					System.out.println("MURAD:, LimeFlowTable, removing flow in cookie " + entry.getKey());
+					itr.remove();
+					return true;
+				}
+				
 			}
-			
-			/*FVFlowMod fm = entry.getValue();
-			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
-			
-			if (fm.getMatch().equals(flowRemoved.getMatch())
-					&& fm.getPriority() == flowRemoved.getPriority()){
-					//&& fm.getCookie() == flowRemoved.getCookie()) {
-				this.cookieMap.remove(fm.hashCode());
-				System.out.println("MURAD:, LimeFlowTable-140, removing flow in cookie " + entry.getKey());
-				itr.remove();
-				return true;
-			}*/
 		}
 		System.out.println("MURAD:-------");
 		return false;
