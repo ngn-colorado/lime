@@ -130,16 +130,12 @@ public class LimeFlowTable{
 
 	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
-		System.out.println("MURAD:, LimeFlowTable, trying to handle FlowRemove for " + flowRemoved.toString());
 		LimeFlowEntry fe = new LimeFlowEntry();
 		while(itr.hasNext()) {
-			
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
-			System.out.println("MURAD:, FlowEntry to Compare " + fm.toString());
 			fe.setFlowMod(fm);
 			int overlap = fe.compare(flowRemoved.getMatch(), true);
-			System.out.println("MURAD:, LimeFlowTable, compare type: " + overlap);
 			if (overlap == LimeFlowEntry.EQUAL || overlap == LimeFlowEntry.INTERSECT) {
 				if((fm.getPriority() == flowRemoved.getPriority()) && fm.getCookie() == flowRemoved.getCookie()){
 					this.cookieMap.remove(flowRemoved.hashCode());
@@ -168,7 +164,6 @@ public class LimeFlowTable{
 		if (this.flowmodMap.isEmpty()) {
 			return false;
 		}
-		System.out.println("MURAD:, LimeFlowTable-181, trying to deleting FlowMod");
 		/* fetch our vswitches */
 		boolean foundMatch = false;
 		/* expand wildcard delete, remove all entries pertaining just to this tenant */
