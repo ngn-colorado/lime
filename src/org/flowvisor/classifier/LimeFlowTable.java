@@ -131,6 +131,7 @@ public class LimeFlowTable{
 	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
 		while(itr.hasNext()) {
+			System.out.println("MURAD:, LimeFlowTable-134, trying to handle FlowRemove");
 			Map.Entry<Long, FVFlowMod> entry = itr.next();
 			FVFlowMod fm = entry.getValue();
 			if (fm.getMatch().equals(flowRemoved.getMatch())
