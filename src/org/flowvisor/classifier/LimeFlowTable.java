@@ -162,10 +162,12 @@ public class LimeFlowTable{
 		if (this.flowmodMap.isEmpty()) {
 			return false;
 		}
+		System.out.println("MURAD:, LimeFlowTable-181, trying to deleting FlowMod");
 		/* fetch our vswitches */
 		boolean foundMatch = false;
 		/* expand wildcard delete, remove all entries pertaining just to this tenant */
 		if (fm.getMatch().getWildcards() == OFMatch.OFPFW_ALL) {
+			System.out.println("MURAD:, LimeFlowTable-169, deleting flowmod. wildcards clearing...");
 			this.flowmodMap.clear();
 			this.cookieMap.clear();
 			return true;
