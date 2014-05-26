@@ -58,7 +58,7 @@ TopologyControllable {
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
-		//System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getDPID() + " Data-lenght: " + this.packetData.length + " and Packet-data: " + this.toVerboseString());
+		System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getName() + " Data-lenght: ");// + this.packetData.length + " and Packet-data: " + this.toVerboseString());
 		
 		OriginalSwitch fvSlicer;
 		if(fvClassifier.getDuplicateSwitch() != null){
