@@ -137,6 +137,7 @@ public class LimeFlowTable{
 					&& fm.getPriority() == flowRemoved.getPriority()
 					&& fm.getCookie() == flowRemoved.getCookie()) {
 				this.cookieMap.remove(fm.hashCode());
+				System.out.println("MURAD:, LimeFlowTable-140, FlorRemoving in cookie " + entry.getKey());
 				itr.remove();
 				return true;
 			}
@@ -228,13 +229,14 @@ public class LimeFlowTable{
 				FVFlowMod old = this.flowmodMap.get(c);
 				this.cookieMap.remove(old.hashCode());
 				this.addFlowMod(fm, c);
-
+				System.out.println("MURAD:, LimeFlowTable-231, modyfing FlowMod with cookie " + c);
 				/*return cookie to pool and use the previous cookie*/
 				return true;
 			}
 		}
 		/*make a new cookie, add FlowMod*/
 		long newc = this.getCookie();
+		System.out.println("MURAD:, LimeFlowTable-238, adding new FlowMod " + newc);
 		this.addFlowMod((FVFlowMod) fm.clone(), newc);
 
 		return true;
@@ -330,7 +332,7 @@ public class LimeFlowTable{
 			// none in queue - generate new cookie
 			// TODO double-check that there's no duplicate in flowmod map.
 			final int cookie = this.cookieCounter.getAndIncrement();
-			return 1;//(long) this.vswitch.getTenantId() << 32 | cookie;  //FIXME Murad
+			return cookie;//(long) this.vswitch.getTenantId() << 32 | cookie;  //FIXME Murad
 		}
 	}
 
