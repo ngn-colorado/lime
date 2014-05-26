@@ -34,7 +34,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	 */
 	@Override
 	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
-		
+		System.out.println("MURAD: FVFlowRamoder-37, Recv florRemove type: " + this.getReason().name() + " from sw " + fvClassifier.getName());
 		FlowMap flowSpace = fvClassifier.getSwitchFlowMap();
 		Set<String> slicesToUpdate = new HashSet<String>();
 		

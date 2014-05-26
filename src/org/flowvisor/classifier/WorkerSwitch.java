@@ -901,9 +901,9 @@ SwitchChangedListener {
 		return stats;
 	}
 
-	public void setFlowDB(FlowDB flowDB) {
+	/*public void setFlowDB(FlowDB flowDB) {
 		this.flowDB = flowDB;
-	}
+	}*/
 
 	public FlowDB getFlowDB() {
 		return flowDB;
