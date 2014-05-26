@@ -37,9 +37,10 @@ public class LimeMigrationHandler {
 		portTable1.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
 		portTable1.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
 		portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
-		LimeContainer.addCloneSwitch(4, portTable1);
+		LimeContainer.addCloneSwitch(46200400562356228L, portTable1);
 		LimeContainer.insertActiveToCloneSwitchMap(46200400562356228L-3, 46200400562356228L);
 		System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);
+		//LimeContainer.addCloneSwitch(4, portTable1);
 		//LimeContainer.insertActiveToCloneSwitchMap(4-3, 4);
 		//System.out.println("MURAD: Clone Top-level Switch: " + 4);
 		
