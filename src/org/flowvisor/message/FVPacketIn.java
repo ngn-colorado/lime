@@ -89,6 +89,7 @@ TopologyControllable {
 		}
 		LimeMsgTranslator buffIdTranslator = fvSlicer.getLimeMsgTranslator();
 		this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier, new OFMatch().loadFromPacket(this.packetData, this.inPort)));
+		System.out.println("MURAD: FVPacketIn, sending to controller from sw: " + fvClassifier.getName());
 		fvSlicer.sendMsg(this, fvClassifier);
 		
 	}

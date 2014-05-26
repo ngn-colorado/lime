@@ -81,7 +81,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		}
 		// look at the original class to see how the matching is happening to use it later
 
-		//System.out.println("MURAD: FVPacket_OUT, buf_id: " + this.bufferId + " xid: " + this.getXid() +" Packet-data: " + this.toVerboseString());
+		System.out.println("MURAD: FVPacket_OUT, buf_id: " + this.bufferId + " xid: " + this.getXid() +" Packet-data: " + this.toVerboseString());
 
 
 
@@ -162,56 +162,6 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 		fvClassifier.sendMsg(this, fvClassifier);
 		this.setBufferId(originalBufferId);
 	}
-
-
-	/**
-	 * Create FlowMod with same actions and matches from PacketOput and send to only duplicate WorkerSwitch
-	 * Set bufferId to -1
-	 * if switch is clone, then save original actions list to its table
-	 * @param fvClassifier
-	 * @param clone
-	 * @param fvSlicer
-	 * @param bufferId
-	 * @param originalBufferId
-	 */
-	private void sendFlowMod(WorkerSwitch duplicateWorkerSwitch){
-		short originalPort = -1;
-		FVFlowMod fvFlowMod = new FVFlowMod();
-		fvFlowMod.setCommand(FVFlowMod.OFPFC_ADD);
-		fvFlowMod.setMatch(new OFMatch().loadFromPacket(this.packetData, this.inPort));
-		fvFlowMod.setActions(this.getActions());
-		fvFlowMod.setBufferId(-1);
-
-		for (OFAction action : fvFlowMod.getActions()){
-			if(action instanceof OFActionOutput){
-				if(duplicateWorkerSwitch.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
-					if (duplicateWorkerSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
-						originalPort = ((OFActionOutput) action).getPort();
-						((OFActionOutput) action).setPort(duplicateWorkerSwitch.getGhostPort());
-						break; //Assuming that there is only one output port...	
-					}
-				}
-			}
-		}
-
-		duplicateWorkerSwitch.sendMsg(fvFlowMod, duplicateWorkerSwitch);
-
-		// return the original port 
-		/*if (!duplicateWorkerSwitch.isActive()){  // then this is a clone switch and we need to save this flowmod
-			if(originalPort != -1){
-				for (OFAction action : fvFlowMod.getActions()){
-					if(action instanceof OFActionOutput){
-						if(((OFActionOutput) action).getPort() == duplicateWorkerSwitch.getGhostPort()){
-							((OFActionOutput) action).setPort(originalPort);
-							duplicateWorkerSwitch.addLimeFlowRule(originalPort, fvFlowMod.clone());
-							break;
-						}
-					}
-				}
-			}
-		}*/
-	}
-
 
 
 	// convenience function that Derickso doesn't want in main openflow.jar
