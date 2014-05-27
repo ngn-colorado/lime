@@ -33,3 +33,19 @@ py net.addLink(net.get('s1'), net.get('s4'),3,3)
 py net.addLink(net.get('s2'), net.get('s5'),4,4)
 
 py s1.attach('s1-eth3')
+
+
+
+///
+py h1_s8.deleteIntfs()
+//py s8.detach('s8-eth2')
+py net.addLink(net.get('s10'), net.get('h1_s8'))  // this will create extra interface for s10 (s10_eth4)
+py h1_s8.setMAC('00:00:00:00:08:02', 'h1_s8-eth1')
+py net.get('h1_s8').cmd('ifconfig h1_s8-eth1 10.3')
+
+py s10.attach('s10-eth4')
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 10.3')
+
+python ovxctl.py -n createPort 1 00:00:00:00:00:00:0a:00 4   // create port 4 in 00:a4:23:05:00:00:00:03
+
+python ovxctl.py -n connectHost 1 00:a4:23:05:00:00:00:03 4 00:00:00:00:03:02  // 4 or previous shut down port?
