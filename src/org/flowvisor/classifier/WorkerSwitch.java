@@ -1278,6 +1278,10 @@ SwitchChangedListener {
 		return activePorts;
 	}
 
+	/**
+	 * We only need ports identified by original switch table
+	 * @return connected ports to switches and hosts
+	 */
 	public Set<Short> getOnlyConnectedPorts(){
 		Set<Short> ports = new HashSet<>();
 		for (Map.Entry entry : activePorts.entrySet()){

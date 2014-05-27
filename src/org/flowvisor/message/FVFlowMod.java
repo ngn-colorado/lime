@@ -95,7 +95,7 @@ Classifiable, Slicable, Cloneable {
 					sendFlowMod(senderWorkerSwitch, pair.getBuffer_id(), originalBufferId);
 				}				
 			}
-			else{
+			else{ //TODO do we need to send this unknown FlowMod ?
 				if(fvClassifier.getDuplicateSwitch() != null){
 					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch().getDPID());
 					sendFlowMod(fvClassifier, originalBufferId, originalBufferId);
