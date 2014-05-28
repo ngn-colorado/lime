@@ -192,17 +192,22 @@ public class FlowVisor {
 		//LimeContainer.insertActiveToOriginalSwitchMap(46200400562356225L, 46200400562356225L);
 		//System.out.println("MURAD: Original Top-level Switch: " + 46200400562356225L);
 		
-		LimeContainer.addOriginalSwitch(1, portTable);
+		/*LimeContainer.addOriginalSwitch(1, portTable);
 		LimeContainer.insertActiveToOriginalSwitchMap(1, 1);
-		System.out.println("MURAD: Original Top-level Switch: " + 1);
+		System.out.println("MURAD: Original Top-level Switch: " + 1);*/
+		
+		LimeContainer.addOriginalSwitch(256, portTable);
+		LimeContainer.insertActiveToOriginalSwitchMap(256, 256);
+		System.out.println("MURAD: Original Top-level Switch: " + 256);
 		
 		//for(long j=46200400562356226L; j<46200400562356228L; j++){
-		for(long j=2; j<4; j++){	
+		//for(long j=2; j<4; j++){
+		for(long j=512; j<769; j=j+256){	
 			portTable = new HashMap<>();
-			for(short i= 1; i<3; i++){
+			for(short i= 2; i<4; i++){
 				portTable.put(i, new PortInfo(PortType.H_CONNECTED, null, null));
 			}
-			portTable.put((short) 3, new PortInfo(PortType.SW_CONNECTED, null, null));
+			portTable.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
 			
 			
 			LimeContainer.addOriginalSwitch(j, portTable);
