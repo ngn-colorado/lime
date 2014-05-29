@@ -279,7 +279,7 @@ SwitchChangedListener {
 		LimeSwitch origSwitch;
 		PortInfo pInfo;
 		
-		if(this.getDuplicateSwitch() != null){
+		if(this.getDuplicateSwitch() == null){
 			if (isActive){
 				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID())); // this should never be null!
 				if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
