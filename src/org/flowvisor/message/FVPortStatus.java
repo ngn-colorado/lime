@@ -64,7 +64,7 @@ Slicable, TopologyControllable {
 		}
 		
 		// during migration we don't want the controller to know about port changes 
-		if(workerSwitch.getDuplicateSwitch() != null){
+		if(workerSwitch.getDuplicateSwitch() == null){
 			for (OriginalSwitch originalSwitch : workerSwitch.getSlicers()) {
 				if (originalSwitch.portInSlice(port)) {
 
