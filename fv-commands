@@ -35,6 +35,16 @@ py net.addLink(net.get('s2'), net.get('s5'),4,4)
 py s1.attach('s1-eth3')
 
 
+// best so far for ovx testbed // attaching clone switch to second interface in hosts even before cloning start
+// in mininet script
+xterm h1_s8 h2_s8   
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 10.2') 
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 down')
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 hw ether 00:00:00:00:08:02')
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 up')
+
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth0 down') // in mininet CLI
+python ovxctl.py -n startPort 1 00:a4:23:05:00:00:00:03 2
 
 /// ovx testbed
 py h2_s8.deleteIntfs()
@@ -50,10 +60,13 @@ py h2_s2.setMAC('00:00:00:00:02:02', 'h2_s2-eth1')
 py net.get('h2_s2').cmd('ifconfig h2_s2-eth1 10.2')
 py s3.attach('s3-eth2')
 
-
-
 python ovxctl.py -n createPort 1 00:00:00:00:00:00:0a:00 4   // create port 4 in 00:a4:23:05:00:00:00:03
 python ovxctl.py -n startPort 1 00:a4:23:05:00:00:00:03 4
+<<<<<<< HEAD
 python ovxctl.py -n connectHost 1 00:a4:23:05:00:00:00:03 4 00:00:00:00:08:02  // 4 or previous shut down port?
+=======
+python ovxctl.py -n connectHost 1 00:a4:23:05:00:00:00:03 4 00:00:00:00:08:02
+
+>>>>>>> c3ae3f76286c512d045384175d6222e52e03b0c4
 
 py net.get('h2_s8').cmd('ifconfig h1_s8-eth1 10.3')
