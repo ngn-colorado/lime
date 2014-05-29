@@ -16,63 +16,67 @@ import org.openflow.util.HexString;
  */
 
 public class FVPortStatus extends OFPortStatus implements Classifiable,
-		Slicable, TopologyControllable {
+Slicable, TopologyControllable {
 
 	@Override
-	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch workerSwitch) {
 		Short port = Short.valueOf(this.getDesc().getPortNumber());
 		byte reason = this.getReason();
-		
+
 		boolean updateSlicers = false;
 
 		if (reason == OFPortReason.OFPPR_ADD.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically adding port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
-			
-			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically adding port "
+			System.out.println("MURAD: FVPortStatus, sw: " + workerSwitch.getSwitchName() + " dynamically adding port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+
+			FVLog.log(LogLevel.INFO, workerSwitch, "dynamically adding port "
 					+ port);
-			fvClassifier.addPort(this.getDesc()); // new port dynamically added
+			workerSwitch.addPort(this.getDesc(), true); // new port dynamically added
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_DELETE.ordinal()) {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + "dynamically removing port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
-			FVLog.log(LogLevel.INFO, fvClassifier, "dynamically removing port "
+			System.out.println("MURAD: FVPortStatus, sw: " + workerSwitch.getSwitchName() + "dynamically removing port " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+			FVLog.log(LogLevel.INFO, workerSwitch, "dynamically removing port "
 					+ port);
-			fvClassifier.removePort(this.getDesc());
+			workerSwitch.removePort(this.getDesc());
 			updateSlicers = true;
 		} else if (reason == OFPortReason.OFPPR_MODIFY.ordinal()) {
 			// replace/update the port definition
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically modifying port "+ this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
-			FVLog.log(LogLevel.INFO, fvClassifier, "modifying port " + port);
-			//fvClassifier.removePort(this.getDesc());
+			System.out.println("MURAD: FVPortStatus, sw: " + workerSwitch.getSwitchName() + " dynamically modifying port "+ this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+			FVLog.log(LogLevel.INFO, workerSwitch, "modifying port " + port);
+			//workerSwitch.removePort(this.getDesc());
 			/*
 			 * ash: addPort actually removes the port first.
 			 */
-			fvClassifier.addPort(this.getDesc());
+			workerSwitch.addPort(this.getDesc(), false);
 		} else {
-			System.out.println("MURAD: FVPortStatus, sw: " + fvClassifier.getSwitchName() + " dynamically unknown reason " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
-			FVLog.log(LogLevel.CRIT, fvClassifier, "unknown reason " + reason
+			System.out.println("MURAD: FVPortStatus, sw: " + workerSwitch.getSwitchName() + " dynamically unknown reason " + this.getDesc().getPortNumber() + " because its state " + this.getDesc().getState() );
+			FVLog.log(LogLevel.CRIT, workerSwitch, "unknown reason " + reason
 					+ " in port_status msg: " + this);
 		}
 
 		if (updateSlicers) {
-			for (OriginalSwitch fvSlicer : fvClassifier.getSlicers()) {
+			for (OriginalSwitch originalSwitch : workerSwitch.getSlicers()) {
 				/*
 				 * Ugly call to update flowspace when using a linear flowspace
 				 * this WILL go when the linear flowspace goes.
 				 */
-				fvSlicer.updateFlowSpace();
+				originalSwitch.updateFlowSpace();
 			}
 		}
+		
+		// during migration we don't want the controller to know about port changes 
+		if(workerSwitch.getDuplicateSwitch() != null){
+			for (OriginalSwitch originalSwitch : workerSwitch.getSlicers()) {
+				if (originalSwitch.portInSlice(port)) {
 
-		for (OriginalSwitch fvSlicer : fvClassifier.getSlicers()) {
-			if (fvSlicer.portInSlice(port)) {
-				fvSlicer.sendMsg(this, fvClassifier);
+					originalSwitch.sendMsg(this, workerSwitch);
+				}
 			}
 		}
 	}
 
 	@Override
-	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
-		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
+	public void sliceFromController(WorkerSwitch workerSwitch, OriginalSwitch originalSwitch) {
+		FVMessageUtil.dropUnexpectedMesg(this, originalSwitch);
 	}
 
 	/**
