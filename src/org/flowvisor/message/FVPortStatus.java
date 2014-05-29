@@ -1,5 +1,8 @@
 package org.flowvisor.message;
 
+import org.flowvisor.LimeContainer;
+import org.flowvisor.LimeSwitch;
+import org.flowvisor.PortInfo;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
@@ -64,11 +67,16 @@ Slicable, TopologyControllable {
 		}
 		
 		// during migration we don't want the controller to know about port changes 
-		if(workerSwitch.getDuplicateSwitch() == null){
-			for (OriginalSwitch originalSwitch : workerSwitch.getSlicers()) {
-				if (originalSwitch.portInSlice(port)) {
+		if((workerSwitch.isActive()) && (workerSwitch.getDuplicateSwitch() == null)){
+			// if this adding port not specified in the original switch table, then don't tell controller about it
+			LimeSwitch origSwitch;
+			origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(workerSwitch.getDPID()));
+			if(origSwitch.getPortTable().get(this.getDesc().getPortNumber()) != null){
+				for (OriginalSwitch originalSwitch : workerSwitch.getSlicers()) {
+					if (originalSwitch.portInSlice(port)) {
 
-					originalSwitch.sendMsg(this, workerSwitch);
+						originalSwitch.sendMsg(this, workerSwitch);
+					}
 				}
 			}
 		}
