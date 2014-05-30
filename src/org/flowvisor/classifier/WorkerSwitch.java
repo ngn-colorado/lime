@@ -1412,10 +1412,11 @@ SwitchChangedListener {
 	 * @param fm
 	 */
 	public synchronized void handleFlowModAndSend(FVFlowMod fm){
-		if(flowTable.handleFlowMods(fm)){
+		this.sendMsg(fm, this);
+		/*if(flowTable.handleFlowMods(fm)){
 			// send fm to switch
-			this.sendMsg(fm, this);
-		}
+			
+		}*/
 	}
 
 	/**
@@ -1425,10 +1426,11 @@ SwitchChangedListener {
 	 * @param oSwitch Original Switch that this worker switch map to 
 	 */
 	public synchronized void handleFlowModRemove(FVFlowRemoved fr, OriginalSwitch oSwitch){
-		if(flowTable.handleFlowRemoved(fr)){
+		oSwitch.sendMsg(fr, this);
+		/*if(flowTable.handleFlowRemoved(fr)){
 			// send fm to controller
-			oSwitch.sendMsg(fr, this);
-		}
+			
+		}*/
 	}
 	
 	/**
