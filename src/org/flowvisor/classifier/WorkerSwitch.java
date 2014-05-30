@@ -1412,6 +1412,7 @@ SwitchChangedListener {
 	 * @param fm
 	 */
 	public synchronized void handleFlowModAndSend(FVFlowMod fm){
+		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + fm.toString());
 		this.sendMsg(fm, this);
 		/*if(flowTable.handleFlowMods(fm)){
 			// send fm to switch
