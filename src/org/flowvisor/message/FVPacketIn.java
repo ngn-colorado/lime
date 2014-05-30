@@ -55,7 +55,7 @@ TopologyControllable {
 	public void classifyFromSwitch(WorkerSwitch workerSwitch) {
 		// handle LLDP as a special (hackish) case
 		if (LLDPUtil.handleLLDPFromSwitch(this, workerSwitch)){
-			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
+			System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
 		//System.out.println("MURAD: FVPacketIn, from sw: " + workerSwitch.getName() + " Data-lenght: ");// + this.packetData.length + " and Packet-data: " + this.toVerboseString());
