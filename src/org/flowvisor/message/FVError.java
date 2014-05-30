@@ -23,10 +23,17 @@ public class FVError extends org.openflow.protocol.OFError implements
 	 * classifier.WorkerSwitch)
 	 */
 	@Override
-	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
-		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(this, fvClassifier);
+	public void classifyFromSwitch(WorkerSwitch workerSwitch) {
+		System.out.println("MURAD:, FVError, from " + workerSwitch.getName());
+		if (this.errorType == (short) OFErrorType.OFPET_BAD_ACTION.ordinal()){
+			System.out.println("MURAD:, FVError, because its bad action");
+		}
+		if (this.errorType == (short) OFErrorType.OFPET_FLOW_MOD_FAILED.ordinal()) {
+			System.out.println("MURAD:, FVError, because FLOW MOD failed");
+		}
+		OriginalSwitch fvSlicer = FVMessageUtil.untranslateXid(this, workerSwitch);
 		if (fvSlicer == null) {
-			FVLog.log(LogLevel.WARN, fvClassifier,
+			FVLog.log(LogLevel.WARN, workerSwitch,
 					"dropping msg with unknown xid: " + this);
 			return;
 		}
@@ -34,7 +41,7 @@ public class FVError extends org.openflow.protocol.OFError implements
 				|| this.errorType == (short) OFErrorType.OFPET_FLOW_MOD_FAILED.ordinal()) {
 			fvSlicer.decrementFlowRules();
 		}
-		fvSlicer.sendMsg(this, fvClassifier);
+		fvSlicer.sendMsg(this, workerSwitch);
 	};
 
 	/*
@@ -45,7 +52,7 @@ public class FVError extends org.openflow.protocol.OFError implements
 	 * .WorkerSwitch, org.flowvisor.slicer.OriginalSwitch)
 	 */
 	@Override
-	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
+	public void sliceFromController(WorkerSwitch workerSwitch, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 
