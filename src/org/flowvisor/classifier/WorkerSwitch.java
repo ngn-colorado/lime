@@ -1482,6 +1482,13 @@ SwitchChangedListener {
 				this.sendMsg(updatedflowMod, this);			
 			}
 		}
+		
+		// finally, we create a new FlowMod with times of zero to handle any packets coming from ghost port without asking controller since controller should not 
+		// know about the ghost port
+		if(!fromGhostToOriginal){
+			OFFlowMod ghostFlowMod = new OFFlowMod();
+			
+		}
 	}
 
 	/**
