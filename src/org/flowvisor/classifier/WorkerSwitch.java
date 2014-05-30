@@ -1,5 +1,6 @@
 package org.flowvisor.classifier;
 
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -334,7 +335,7 @@ SwitchChangedListener {
 					if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 						if(pInfo.getType().equals(PortType.EMPTY)){ // then this for sure is a cloning port removing, we still need this port
 							this.activePorts.get(phyPort.getPortNumber()).setType(PortType.H_CONNECTED);
-							System.out.println("MURAD: WorkerSwitch, changing port " +  phyPort.getPortNumber() + " from EMPTY to H_CONNECTED");
+							System.out.println("MURAD: WorkerSwitch, " + this.getName() + " changing port " +  phyPort.getPortNumber() + " from EMPTY to H_CONNECTED");
 							updateFlowModOutputPort(phyPort.getPortNumber(), true);
 							return;
 						}
@@ -1437,11 +1438,11 @@ SwitchChangedListener {
 	 * @param fromGhostToOriginal to change from port to ghost port or vice versa
 	 */
 	private synchronized void updateFlowModOutputPort(short port, boolean fromGhostToOriginal){
+		short ghostPort = this.getGhostPort();
+		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " updatingFlowModOutpitport");
 		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
 			FVFlowMod updatedflowMod = (FVFlowMod) entry.getValue().clone();
 			OFAction action;
-			short ghostPort = this.getGhostPort();
-
 			if (updatedflowMod.getOriginalOutputPort() == port){
 				if(fromGhostToOriginal){
 					int outoutActionIndex = 0;
@@ -1485,9 +1486,18 @@ SwitchChangedListener {
 		
 		// finally, we create a new FlowMod with times of zero to handle any packets coming from ghost port without asking controller since controller should not 
 		// know about the ghost port
-		if(!fromGhostToOriginal){
-			OFFlowMod ghostFlowMod = new OFFlowMod();
-			
+		if(fromGhostToOriginal){
+			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port);
+			FVFlowMod ghostFlowMod = new FVFlowMod();
+			OFMatch match = new OFMatch();
+			match.setDataLayerVirtualLan(port);
+			match.setInputPort(ghostPort);
+			List<OFAction> actionList = new ArrayList<OFAction>();
+			actionList.add(new OFActionStripVirtualLan());
+			actionList.add(new OFActionOutput(port));
+			ghostFlowMod.setMatch(match);
+			ghostFlowMod.setActions(actionList);
+			this.sendMsg(ghostFlowMod, this);
 		}
 	}
 
