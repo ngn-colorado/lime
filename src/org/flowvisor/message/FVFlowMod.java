@@ -60,7 +60,7 @@ Classifiable, Slicable, Cloneable {
 	
 	@Override
 	public void sliceFromController(WorkerSwitch workerSwitch, OriginalSwitch fvSlicer) {
-		//System.out.println("MURAD: FV_MOD, buf_id: " + this.bufferId + " Packet-data: " + this.toString());
+		System.out.println("MURAD: FV_MOD, receieved: " + this.toString());
 		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
 		this.setFlags((short) (this.getFlags() | OFFlowMod.OFPFF_SEND_FLOW_REM));
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
