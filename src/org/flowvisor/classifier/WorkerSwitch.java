@@ -330,7 +330,7 @@ SwitchChangedListener {
 				if (reasonIsAdd){  // clone switch should not add any ports in this stage 
 					return;
 				}
-				if(phyPort.getState() == 512){  // port UP
+				if(phyPort.getState() == 512 || phyPort.getState() == 1){  // port UP
 					if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 						if(pInfo.getType().equals(PortType.EMPTY)){ // then this for sure is a cloning port removing, we still need this port
 							this.activePorts.get(phyPort.getPortNumber()).setType(PortType.H_CONNECTED);
