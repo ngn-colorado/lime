@@ -46,20 +46,10 @@ xterm h1_s8 h2_s8
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth0 down') // in mininet CLI
 python ovxctl.py -n startPort 1 00:a4:23:05:00:00:00:05 2
 
+// lime only testbed
+py net.get('h2_s2').cmd('ifconfig h2_s2-eth0 down')
+py net.get('h2_s2').cmd('ifconfig h2_s2-eth1 up')
 
-/// ovx testbed
-py h2_s8.deleteIntfs()
-py net.addLink(net.get('s10'), net.get('h2_s8'))  // this will create extra interface for s10 (s10_eth4)
-py h2_s8.setMAC('00:00:00:00:08:02', 'h2_s8-eth1')
-py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 10.4')
-py s10.attach('s10-eth4')
-
-///lime only testbed
-py h2_s2.deleteIntfs()    // port 2
-py net.addLink(net.get('s3'), net.get('h2_s2')) 
-py h2_s2.setMAC('00:00:00:00:02:02', 'h2_s2-eth1')
-py net.get('h2_s2').cmd('ifconfig h2_s2-eth1 10.2')
-py s3.attach('s3-eth2')
 
 python ovxctl.py -n createPort 1 00:00:00:00:00:00:0a:00 4   // create port 4 in 00:a4:23:05:00:00:00:03
 python ovxctl.py -n startPort 1 00:a4:23:05:00:00:00:03 4
