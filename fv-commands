@@ -37,14 +37,15 @@ py s1.attach('s1-eth3')
 
 // best so far for ovx testbed // attaching clone switch to second interface in hosts even before cloning start
 // in mininet script
-xterm h1_s8 h2_s8   
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 10.2') 
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 down')
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 hw ether 00:00:00:00:08:02')
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 up')
 
+xterm h1_s8 h2_s8   
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth0 down') // in mininet CLI
-py net.get('h2_s8').cmd('ifconfig h2_s8-eth0 down')
+python ovxctl.py -n startPort 1 00:a4:23:05:00:00:00:05 2
+
 
 /// ovx testbed
 py h2_s8.deleteIntfs()
