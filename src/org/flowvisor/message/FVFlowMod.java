@@ -31,8 +31,8 @@ Classifiable, Slicable, Cloneable {
 	private short originalOutputPort = -1; // in case we edit flowmod while migrating, we need to to know the original out port to return it later
 	private HashMap<Integer,Integer> priorityMap = new HashMap<Integer,Integer>();
 	@Override
-	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
-		FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
+	public void classifyFromSwitch(WorkerSwitch workerSwitch) {
+		FVMessageUtil.dropUnexpectedMesg(this, workerSwitch);
 	}
 
 	/**
@@ -59,23 +59,23 @@ Classifiable, Slicable, Cloneable {
 	}
 	
 	@Override
-	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
+	public void sliceFromController(WorkerSwitch workerSwitch, OriginalSwitch fvSlicer) {
 		//System.out.println("MURAD: FV_MOD, buf_id: " + this.bufferId + " Packet-data: " + this.toString());
 		// we always want to set OFPFF_SEND_FLOW_REM flag, but without changing the other two flags
 		this.setFlags((short) (this.getFlags() | OFFlowMod.OFPFF_SEND_FLOW_REM));
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "recv from controller: ", this);
-		FVMessageUtil.translateXid(this, fvClassifier, fvSlicer);
-		translateCookie(fvClassifier, fvSlicer);
+		FVMessageUtil.translateXid(this, workerSwitch, fvSlicer);
+		translateCookie(workerSwitch, fvSlicer);
 
 		int originalBufferId = this.bufferId;
 		if(originalBufferId == -1){
-			if(fvClassifier.getDuplicateSwitch() != null){
-				WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch().getDPID());
-				sendFlowMod(fvClassifier, -1, originalBufferId);
+			if(workerSwitch.getDuplicateSwitch() != null){
+				WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(workerSwitch.getDuplicateSwitch().getDPID());
+				sendFlowMod(workerSwitch, -1, originalBufferId);
 				sendFlowMod(duplicateWorkerSwitch,-1, originalBufferId);
 			}
 			else{
-				fvClassifier.handleFlowModAndSend(this); // no need to modify it
+				workerSwitch.handleFlowModAndSend(this); // no need to modify it
 			}
 		}
 
@@ -96,13 +96,13 @@ Classifiable, Slicable, Cloneable {
 				}				
 			}
 			else{ //TODO do we need to send this unknown FlowMod ?
-				if(fvClassifier.getDuplicateSwitch() != null){
-					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch().getDPID());
-					sendFlowMod(fvClassifier, originalBufferId, originalBufferId);
+				if(workerSwitch.getDuplicateSwitch() != null){
+					WorkerSwitch duplicateWorkerSwitch = LimeContainer.getAllWorkingSwitches().get(workerSwitch.getDuplicateSwitch().getDPID());
+					sendFlowMod(workerSwitch, originalBufferId, originalBufferId);
 					sendFlowMod(duplicateWorkerSwitch, -1, -1);
 				}
 				else{
-					fvClassifier.handleFlowModAndSend(this);
+					workerSwitch.handleFlowModAndSend(this);
 				}	
 			}
 		}
@@ -110,31 +110,31 @@ Classifiable, Slicable, Cloneable {
 
 	/**
 	 * Send packet after modifying port and buffer id and return sitting to what was in the origin 
-	 * @param fvClassifier
+	 * @param workerSwitch
 	 * @param sender
 	 * @param clone
 	 * @param fvSlicer
 	 * @param bufferId
 	 * @param originalBufferId
 	 */
-	private void sendFlowMod(WorkerSwitch fvClassifier, int bufferId, int originalBufferId){
+	private void sendFlowMod(WorkerSwitch workerSwitch, int bufferId, int originalBufferId){
 		short originalPort = -1;
 		OFAction action;
 	
 		for(int i = 0; i<this.getActions().size(); i++ ){
 			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
-				if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
-					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
+				if(workerSwitch.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+					if (workerSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
 						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
 						this.getActions().add(i, addedVlanAction);
-						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
+						((OFActionOutput) action).setPort(workerSwitch.getGhostPort());
 						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
 							this.setBufferId(bufferId);
 						}
 						this.setOriginalOutputPort(originalPort);
-						fvClassifier.handleFlowModAndSend(this);
+						workerSwitch.handleFlowModAndSend(this);
 
 						// return the packet back as we received in this method
 						this.setBufferId(originalBufferId);
@@ -152,7 +152,7 @@ Classifiable, Slicable, Cloneable {
 		}
 
 
-		fvClassifier.handleFlowModAndSend(this);
+		workerSwitch.handleFlowModAndSend(this);
 
 		//return everything in place in case we want to use this method more than once
 		this.setBufferId(originalBufferId);
@@ -163,7 +163,7 @@ Classifiable, Slicable, Cloneable {
 			for(int i = 0; i<this.getActions().size(); i++ ){
 				action2 = this.getActions().get(i);
 				if(action2 instanceof OFActionOutput){
-					if(((OFActionOutput) action2).getPort() == fvClassifier.getGhostPort()){
+					if(((OFActionOutput) action2).getPort() == workerSwitch.getGhostPort()){
 						((OFActionOutput) action2).setPort(originalPort);
 						break;
 					}
@@ -236,8 +236,8 @@ Classifiable, Slicable, Cloneable {
 	}
 
 
-	private void translateCookie(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
-		CookieTranslator cookieTrans = fvClassifier.getCookieTranslator();
+	private void translateCookie(WorkerSwitch workerSwitch, OriginalSwitch fvSlicer) {
+		CookieTranslator cookieTrans = workerSwitch.getCookieTranslator();
 		long newCookie = cookieTrans.translate(this.cookie, fvSlicer);
 		this.setCookie(newCookie);
 		FVLog.log(LogLevel.DEBUG,null,"translateCookie newCookie:",newCookie);
