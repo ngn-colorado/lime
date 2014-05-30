@@ -111,12 +111,14 @@ public class LimeFlowTable{
 	 * @return if the FlowMod needs to be sent south during de-virtualization.
 	 */
 	public boolean handleFlowMods(FVFlowMod fm) { 
-		System.out.println("MURAD:, LimeFlowTable-110, switch " + wswitch.getName() + " handling flowMod: " + fm.getCommand());
+		
 		switch (fm.getCommand()) {
 		case OFFlowMod.OFPFC_ADD:
+			System.out.println("MURAD:, LimeFlowTable, switch " + wswitch.getName() + " handling FLOW_ADD");
 			return doFlowModAdd(fm);
 		case OFFlowMod.OFPFC_MODIFY:
 		case OFFlowMod.OFPFC_MODIFY_STRICT:
+			System.out.println("MURAD:, LimeFlowTable, switch " + wswitch.getName() + " handling FLOW_MODIFY");
 			return doFlowModModify(fm);
 		case OFFlowMod.OFPFC_DELETE:
 			return doFlowModDelete(fm, false);
@@ -140,7 +142,7 @@ public class LimeFlowTable{
 			if (overlap == LimeFlowEntry.EQUAL || overlap == LimeFlowEntry.INTERSECT) {
 				if((fm.getPriority() == flowRemoved.getPriority()) && fm.getCookie() == flowRemoved.getCookie()){
 					this.cookieMap.remove(flowRemoved.hashCode());
-					System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " removing flow in cookie " + entry.getKey());
+					System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " removing flow");
 					itr.remove();
 					return true;
 				}
@@ -237,7 +239,7 @@ public class LimeFlowTable{
 				FVFlowMod old = this.flowmodMap.get(c);
 				this.cookieMap.remove(old.hashCode());
 				this.addFlowMod(fm, c);
-				System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " modyfing FlowMod with cookie " + c);
+				System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " modyfing FlowMod with new entry match: " + fm.getMatch() + " and action: " + fm.getActions());
 				/*return cookie to pool and use the previous cookie*/
 				return true;
 			}

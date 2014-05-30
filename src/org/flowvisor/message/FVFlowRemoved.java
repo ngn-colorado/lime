@@ -35,7 +35,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	 * have expired
 	 */
 	@Override
-	public void classifyFromSwitch(WorkerSwitch wSwitch) {		
+	public void classifyFromSwitch(WorkerSwitch wSwitch){
 		OriginalSwitch originalSwitch;
 		if(wSwitch.getDuplicateSwitch() != null){
 			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(wSwitch.getDuplicateSwitch().getDPID());

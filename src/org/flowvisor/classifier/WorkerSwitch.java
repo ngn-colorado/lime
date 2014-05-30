@@ -334,6 +334,7 @@ SwitchChangedListener {
 					if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
 						if(pInfo.getType().equals(PortType.EMPTY)){ // then this for sure is a cloning port removing, we still need this port
 							this.activePorts.get(phyPort.getPortNumber()).setType(PortType.H_CONNECTED);
+							System.out.println("MURAD: WorkerSwitch, changing port " +  phyPort.getPortNumber() + " from EMPTY to H_CONNECTED");
 							updateFlowModOutputPort(phyPort.getPortNumber(), true);
 							return;
 						}
