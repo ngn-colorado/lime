@@ -44,7 +44,7 @@ py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 hw ether 00:00:00:00:08:02')
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth1 up')
 
 py net.get('h2_s8').cmd('ifconfig h2_s8-eth0 down') // in mininet CLI
-python ovxctl.py -n startPort 1 00:a4:23:05:00:00:00:03 2
+py net.get('h2_s8').cmd('ifconfig h2_s8-eth0 down')
 
 /// ovx testbed
 py h2_s8.deleteIntfs()

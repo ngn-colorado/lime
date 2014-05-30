@@ -262,7 +262,7 @@ SwitchChangedListener {
 		return this.activePorts.containsKey(port);
 	}
 
-	public void addPort(OFPhysicalPort phyPort) {
+	public void addPort(OFPhysicalPort phyPort, boolean reasonIsAdd) {
 		//System.out.println("MURAD: WorkerSwitch, adding port " + phyPort.getPortNumber());
 		for (Iterator<OFPhysicalPort> it = switchInfo.getPorts().iterator(); it
 				.hasNext();) {
@@ -278,61 +278,78 @@ SwitchChangedListener {
 
 		LimeSwitch origSwitch;
 		PortInfo pInfo;
-		if (isActive){
-			origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID())); // this should never be null!
-			if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
-				this.activePorts.put(phyPort.getPortNumber(), pInfo);
-				return;
+		
+		if(this.getDuplicateSwitch() == null){
+			if (isActive){
+				origSwitch = LimeContainer.getOriginalSwitchContainer().get(LimeContainer.getActiveToOriginalSwitchMap().get(getDPID())); // this should never be null!
+				if((pInfo = origSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
+					this.activePorts.put(phyPort.getPortNumber(), pInfo);
+					return;
+				}
 			}
-			else{
-				if(this.getDuplicateSwitch() != null){	
-					// check if it is ghost port
-					// get cloned switch and its table
+			pInfo = new PortInfo(PortType.UKNOWN, null, null);
+			this.activePorts.put(phyPort.getPortNumber(), pInfo);
+			return;
+		}
+		else{
+			if (isActive){
+				if (reasonIsAdd){  // we only add ghost port during migration
 					LimeSwitch cloneSwitch;
 					cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch.getDPID()); // this should never be null
 					if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
-						if(pInfo.getType().equals(PortType.GHOST)){ // do we need this if statement, since clone switch is identical to active switch? 
+						if(pInfo.getType().equals(PortType.GHOST)){ 
 							this.activePorts.put(phyPort.getPortNumber(), pInfo);
+							return;
+						}	
+					}
+					System.out.println("MURAD: WorkerSwitch, ERROR!! adding non-ghost port to active switch " + this.getName() + " during migration");
+					return;
+				}
+				else{
+					if(phyPort.getState() == 1){  // port DOWN
+						if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
+							if(pInfo.getType().equals(PortType.H_CONNECTED)){ // then this for sure is a cloning port removing, we still need this port
+								this.activePorts.get(phyPort.getPortNumber()).setType(PortType.EMPTY);
+								updateFlowModOutputPort(phyPort.getPortNumber(), false);
+								return;
+							}
+							else{
+								System.out.println("MURAD: WorkerSwitch, ERROR!! stopping non H_CONNECTED port to active switch " + this.getName() + " during migration");
+								return;
+							}
+						}
+					}
+					else{
+						System.out.println("MURAD: WorkerSwitch, ERROR!! modyfing (and not stopping) port to active switch " + this.getName() + " during migration");
+						return;
+					}
+				}
+				
+			}
+			else{ // this is a clone switch
+				if (reasonIsAdd){  // clone switch should not add any ports in this stage 
+					return;
+				}
+				if(phyPort.getState() == 512){  // port UP
+					if((pInfo = activePorts.get(phyPort.getPortNumber())) != null){
+						if(pInfo.getType().equals(PortType.EMPTY)){ // then this for sure is a cloning port removing, we still need this port
+							this.activePorts.get(phyPort.getPortNumber()).setType(PortType.H_CONNECTED);
+							updateFlowModOutputPort(phyPort.getPortNumber(), true);
+							return;
+						}
+						else{
+							System.out.println("MURAD: WorkerSwitch, ERROR!! starting non Empty port to clone switch " + this.getName() + " during migration");
 							return;
 						}
 					}
 				}
-				pInfo = new PortInfo(PortType.UKNOWN, null, null);
-				this.activePorts.put(phyPort.getPortNumber(), pInfo);
-				return;
-			}
-		}
-
-		if(duplicateSwitch != null){
-			LimeSwitch cloneSwitch = LimeContainer.getCloneSwitchContainer().get(duplicateSwitch.getDPID()); // this should never be null
-			if((pInfo = cloneSwitch.getPortTable().get(phyPort.getPortNumber())) != null){
-
-				if(pInfo.getType().equals(PortType.EMPTY)){
-					// change type from empty to h_connected
-					pInfo.setType(PortType.H_CONNECTED);
-					// update all flowmod of output of this port
-					updateFlowModOutputPort(phyPort.getPortNumber(), true);
-
-					// update connected port counter
-					connectedHostPorts.add(phyPort.getPortNumber());
-					if (connectedHostPorts.size() == connectedHostPortsCounter){
-						// all needed ports are connected!! 
-						// notify LimeMigration handler with the good news
-						
-
-					}
-					// check if 
+				else{
+					System.out.println("MURAD: WorkerSwitch, ERROR!! modyfing (and not starting) port to active switch " + this.getName() + " during migration");
+					return;
 				}
-				this.activePorts.put(phyPort.getPortNumber(), pInfo);
-				return;
-			}
-			else{
-				// TODO it is adding port we don't know about. ??
+				
 			}
 		}
-		// if we are here, then this is unknown switch
-		pInfo = new PortInfo(PortType.UKNOWN, null, null);
-		this.activePorts.put(phyPort.getPortNumber(), pInfo);
 	}
 
 	public void removePort(OFPhysicalPort phyPort) {

@@ -85,7 +85,7 @@ public class LimeMigrationHandler {
 				for (Map.Entry portEntry : portTable.entrySet()){
 					short portNo = (short) portEntry.getKey();
 					PortInfo pInfo = (PortInfo) portEntry.getValue();
-					if(activeSwitch.getActivePorts().containsKey(portNo)){
+					if(activeSwitch.getActivePorts().containsKey(portNo)){   //TODO need to check if clone switch has all the required ports
 						if(!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.H_CONNECTED)){// we don't want to change these to empty ports
 							//&&!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ 
 							activeSwitch.getActivePorts().get(portNo).setType(pInfo.getType());
