@@ -37,15 +37,15 @@ public class LimeMigrationHandler {
 		portTable1.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
 		portTable1.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
 		portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
-		LimeContainer.addCloneSwitch(46200400562356228L, portTable1);
+		/*LimeContainer.addCloneSwitch(46200400562356228L, portTable1);
 		LimeContainer.insertActiveToCloneSwitchMap(46200400562356228L-3, 46200400562356228L);
-		System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);
-		//LimeContainer.addCloneSwitch(4, portTable1);
-		//LimeContainer.insertActiveToCloneSwitchMap(4-3, 4);
-		//System.out.println("MURAD: Clone Top-level Switch: " + 4);
+		System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);*/
+		LimeContainer.addCloneSwitch(1024, portTable1);
+		LimeContainer.insertActiveToCloneSwitchMap(256, 1024);
+		System.out.println("MURAD: Clone Top-level Switch: " + 1024);
 		
-		for(long j=46200400562356229L; j<46200400562356231L; j++){
-		//for(long j=5; j<7; j++){
+		//for(long j=46200400562356229L; j<46200400562356231L; j++){
+		for(long j=1280; j<1537; j=j+256){
 			portTable1 = new HashMap<>();
 			for(short i= 1; i<3; i++){
 				portTable1.put(i, new PortInfo(PortType.EMPTY, null, null));
@@ -53,7 +53,7 @@ public class LimeMigrationHandler {
 			portTable1.put((short) 3, new PortInfo(PortType.SW_CONNECTED, null, null));
 			portTable1.put((short) 4, new PortInfo(PortType.GHOST, null, null));
 			LimeContainer.addCloneSwitch(j, portTable1);
-			LimeContainer.insertActiveToCloneSwitchMap(j-3, j);
+			LimeContainer.insertActiveToCloneSwitchMap(j-768, j);
 			System.out.println("MURAD: Clone Second-level Switch: " + j);
 		}
 
