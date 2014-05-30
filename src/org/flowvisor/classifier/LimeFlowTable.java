@@ -129,6 +129,7 @@ public class LimeFlowTable{
 	}
 
 	public boolean handleFlowRemoved(OFFlowRemoved flowRemoved) {
+		System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " handling flowRemove " + flowRemoved.toString());
 		Iterator<Map.Entry<Long, FVFlowMod>> itr = this.flowmodMap.entrySet().iterator();
 		LimeFlowEntry fe = new LimeFlowEntry();
 		while(itr.hasNext()) {
