@@ -139,7 +139,7 @@ public class LimeFlowTable{
 			if (overlap == LimeFlowEntry.EQUAL || overlap == LimeFlowEntry.INTERSECT) {
 				if((fm.getPriority() == flowRemoved.getPriority()) && fm.getCookie() == flowRemoved.getCookie()){
 					this.cookieMap.remove(flowRemoved.hashCode());
-					System.out.println("MURAD:, LimeFlowTable, removing flow in cookie " + entry.getKey());
+					System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " removing flow in cookie " + entry.getKey());
 					itr.remove();
 					return true;
 				}
@@ -168,7 +168,7 @@ public class LimeFlowTable{
 		boolean foundMatch = false;
 		/* expand wildcard delete, remove all entries pertaining just to this tenant */
 		if (fm.getMatch().getWildcards() == OFMatch.OFPFW_ALL) {
-			System.out.println("MURAD:, LimeFlowTable-169, deleting flowmod. wildcards clearing...");
+			System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " deleting flowmod. wildcards clearing...");
 			this.flowmodMap.clear();
 			this.cookieMap.clear();
 			return true;
@@ -181,7 +181,7 @@ public class LimeFlowTable{
 				fe.setFlowMod(entry.getValue());
 				int overlap = fe.compare(fm.getMatch(), strict);
 				if (overlap == LimeFlowEntry.EQUAL) {
-					System.out.println("MURAD:, LimeFlowTable-181, deleting FlowMod with cookie " + entry.getKey());
+					System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " deleting FlowMod with cookie " + entry.getKey());
 					this.cookieMap.remove(entry.getValue().hashCode());
 					itr.remove();
 					foundMatch = true;
@@ -236,14 +236,14 @@ public class LimeFlowTable{
 				FVFlowMod old = this.flowmodMap.get(c);
 				this.cookieMap.remove(old.hashCode());
 				this.addFlowMod(fm, c);
-				System.out.println("MURAD:, LimeFlowTable-231, modyfing FlowMod with cookie " + c);
+				System.out.println("MURAD:, LimeFlowTable, " + wswitch.getName() + " modyfing FlowMod with cookie " + c);
 				/*return cookie to pool and use the previous cookie*/
 				return true;
 			}
 		}
 		/*make a new cookie, add FlowMod*/
 		long newc = this.getCookie();
-		System.out.println("MURAD:, LimeFlowTable-238, adding new FlowMod " + fm.getMatch() + " with cookie " + newc);
+		System.out.println("MURAD:, LimeFlowTable-238, adding new FlowMod: match " + fm.getMatch() + " , action " + fm.getActions()+ "with cookie " + newc);
 		this.addFlowMod((FVFlowMod) fm.clone(), newc);
 		return true;
 	}
