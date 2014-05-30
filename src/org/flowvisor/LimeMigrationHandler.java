@@ -34,18 +34,18 @@ public class LimeMigrationHandler {
 		//TODO the below code of setting up clone switches and their ports should not be hard coded but rather received from outside
 		// top switch only has two ports and they are connected to switches (SW_CONNECTED)
 		HashMap<Short, PortInfo> portTable1 = new HashMap<>();
-		portTable1.put((short) 1, new PortInfo(PortType.SW_CONNECTED, null, null));
-		portTable1.put((short) 2, new PortInfo(PortType.SW_CONNECTED, null, null));
+		portTable1.put((short) 1, new PortInfo(PortType.EMPTY, null, null));
+		portTable1.put((short) 2, new PortInfo(PortType.EMPTY, null, null));
 		portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
 		/*LimeContainer.addCloneSwitch(46200400562356228L, portTable1);
 		LimeContainer.insertActiveToCloneSwitchMap(46200400562356228L-3, 46200400562356228L);
 		System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);*/
-		LimeContainer.addCloneSwitch(1024, portTable1);
-		LimeContainer.insertActiveToCloneSwitchMap(256, 1024);
-		System.out.println("MURAD: Clone Top-level Switch: " + 1024);
+		LimeContainer.addCloneSwitch(512, portTable1);
+		LimeContainer.insertActiveToCloneSwitchMap(256, 512);
+		System.out.println("MURAD: Clone Top-level Switch: " + 512);
 		
 		//for(long j=46200400562356229L; j<46200400562356231L; j++){
-		for(long j=1280; j<1537; j=j+256){
+		/*for(long j=1280; j<1537; j=j+256){
 			portTable1 = new HashMap<>();
 			for(short i= 1; i<3; i++){
 				portTable1.put(i, new PortInfo(PortType.EMPTY, null, null));
@@ -55,7 +55,7 @@ public class LimeMigrationHandler {
 			LimeContainer.addCloneSwitch(j, portTable1);
 			LimeContainer.insertActiveToCloneSwitchMap(j-768, j);
 			System.out.println("MURAD: Clone Second-level Switch: " + j);
-		}
+		}*/
 
 		// loop through classifier to make sure that all needed switches (active/cloned) are there
 		// make sure that all required ports are there from active-port table in active classifier 
