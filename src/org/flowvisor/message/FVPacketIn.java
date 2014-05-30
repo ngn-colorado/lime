@@ -69,7 +69,7 @@ TopologyControllable {
 			else{ 
 				if(duplicateVFClassifier.isActive()){
 					fvSlicer = duplicateVFClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
-					fvClassifier = duplicateVFClassifier;
+					//fvClassifier = duplicateVFClassifier;
 				}
 				else{
 					// ignore msg, we don't know this witch
