@@ -52,24 +52,24 @@ TopologyControllable {
 	 */
 
 	@Override
-	public void classifyFromSwitch(WorkerSwitch fvClassifier) {
+	public void classifyFromSwitch(WorkerSwitch workerSwitch) {
 		// handle LLDP as a special (hackish) case
-		if (LLDPUtil.handleLLDPFromSwitch(this, fvClassifier)){
+		if (LLDPUtil.handleLLDPFromSwitch(this, workerSwitch)){
 			//System.out.println("MURAD: Found LLDP Packet in Packet-In");
 			return;
 		}
-		//System.out.println("MURAD: FVPacketIn, from sw: " + fvClassifier.getName() + " Data-lenght: ");// + this.packetData.length + " and Packet-data: " + this.toVerboseString());
+		//System.out.println("MURAD: FVPacketIn, from sw: " + workerSwitch.getName() + " Data-lenght: ");// + this.packetData.length + " and Packet-data: " + this.toVerboseString());
 		
 		OriginalSwitch fvSlicer;
-		if(fvClassifier.getDuplicateSwitch() != null){
-			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(fvClassifier.getDuplicateSwitch().getDPID());
-			if(fvClassifier.isActive()){
-				fvSlicer = fvClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+		if(workerSwitch.getDuplicateSwitch() != null){
+			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(workerSwitch.getDuplicateSwitch().getDPID());
+			if(workerSwitch.isActive()){
+				fvSlicer = workerSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
 			else{ 
 				if(duplicateVFClassifier.isActive()){
 					fvSlicer = duplicateVFClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
-					//fvClassifier = duplicateVFClassifier;
+					//workerSwitch = duplicateVFClassifier;
 				}
 				else{
 					// ignore msg, we don't know this witch
@@ -78,32 +78,32 @@ TopologyControllable {
 			}
 		}
 		else{
-			if(fvClassifier.isActive()){
-				fvSlicer = fvClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+			if(workerSwitch.isActive()){
+				fvSlicer = workerSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
 			else{
 				// ignore packet, we only forward to controller from active switches when no migration is happening 
-				FVMessageUtil.dropUnexpectedMesg(this, fvClassifier);
+				FVMessageUtil.dropUnexpectedMesg(this, workerSwitch);
 				return;
 			}
 		}
 		LimeMsgTranslator buffIdTranslator = fvSlicer.getLimeMsgTranslator();
-		this.setBufferId(buffIdTranslator.translate(this.bufferId, fvClassifier, new OFMatch().loadFromPacket(this.packetData, this.inPort)));
-		System.out.println("MURAD: FVPacketIn, sending from sw: " + fvClassifier.getName() + " following P-In: " + this.toVerboseString());
-		System.out.println("MURAD: FVPacketIn,------------------");
-		fvSlicer.sendMsg(this, fvClassifier);
+		this.setBufferId(buffIdTranslator.translate(this.bufferId, workerSwitch, new OFMatch().loadFromPacket(this.packetData, this.inPort)));
+		//System.out.println("MURAD: FVPacketIn, sending from sw: " + workerSwitch.getName() + " following P-In: " + this.toVerboseString());
+		//System.out.println("MURAD: FVPacketIn,------------------");
+		fvSlicer.sendMsg(this, workerSwitch);
 		
 	}
 
-	private void lookupByFlowSpace(WorkerSwitch fvClassifier) {
+	private void lookupByFlowSpace(WorkerSwitch workerSwitch) {
 		SliceAction sliceAction;
 		int perms;
 		// grab single matching rule: only one because it's a point in flowspace
-		FlowEntry flowEntry = fvClassifier.getSwitchFlowMap().matches(
-				fvClassifier.getSwitchInfo().getDatapathId(), this.getInPort(),
+		FlowEntry flowEntry = workerSwitch.getSwitchFlowMap().matches(
+				workerSwitch.getSwitchInfo().getDatapathId(), this.getInPort(),
 				this.getPacketData());
 		if (flowEntry == null) {
-			FVLog.log(LogLevel.DEBUG, fvClassifier,
+			FVLog.log(LogLevel.DEBUG, workerSwitch,
 					"dropping unclassifiable msg: " + this.toVerboseString());
 			return;
 		}
@@ -116,10 +116,10 @@ TopologyControllable {
 			if ((perms & (SliceAction.READ | SliceAction.WRITE)) != 0) {
 				// lookup slice and send msg to them
 				// TODO record buffer id for later validation
-				OriginalSwitch fvSlicer = fvClassifier.getOriginalSwitchByName(sliceAction
+				OriginalSwitch fvSlicer = workerSwitch.getOriginalSwitchByName(sliceAction
 						.getSliceName());
 				if (fvSlicer == null) {
-					FVLog.log(LogLevel.WARN, fvClassifier,
+					FVLog.log(LogLevel.WARN, workerSwitch,
 							"tried to send msg to non-existant slice: "
 									+ sliceAction.getSliceName()
 									+ " corrupted flowspace?:: "
@@ -129,7 +129,7 @@ TopologyControllable {
 				if (fvSlicer.isConnected()) {
 					if ((perms & SliceAction.WRITE) != 0)
 						fvSlicer.setBufferIDAllowed(this.getBufferId());
-					fvSlicer.sendMsg(this, fvClassifier);
+					fvSlicer.sendMsg(this, workerSwitch);
 					/**
 					 * TODO : come back and decide if we should uncomment this
 					 * i.e., should a rule get squashed if it's only recipient
@@ -142,7 +142,7 @@ TopologyControllable {
 					// if ((perms & SliceAction.WRITE) != 0)
 					foundHome = true;
 				} else {
-					sendDropRule(fvClassifier, flowEntry, fvSlicer.getSliceName(), (short) 0, (short) 1);
+					sendDropRule(workerSwitch, flowEntry, fvSlicer.getSliceName(), (short) 0, (short) 1);
 				}
 				foundHome = true;
 			}
@@ -152,20 +152,20 @@ TopologyControllable {
 			 * default to adding a drop rule for unless we want to be flooded.
 			 */
 			if (!foundHome)
-				sendDropRule(fvClassifier, flowEntry, "exact", (short) 0, (short) 1);
+				sendDropRule(workerSwitch, flowEntry, "exact", (short) 0, (short) 1);
 		}
 	}
 
 	/**
 	 * Tell the classifier to drop packets that look like this
 	 *
-	 * @param fvClassifier
+	 * @param workerSwitch
 	 * @param flowEntry
 	 * @param hardTimeout
 	 * @param idleTimeout
 	 */
 
-	private void sendDropRule(WorkerSwitch fvClassifier, FlowEntry flowEntry,
+	private void sendDropRule(WorkerSwitch workerSwitch, FlowEntry flowEntry,
 			String sliceName, short hardTimeout, short idleTimeout) {
 		FVFlowMod flowMod = (FVFlowMod) FlowVisor.getInstance().getFactory()
 				.getMessage(OFType.FLOW_MOD);
@@ -179,7 +179,7 @@ TopologyControllable {
 		try {
 			drop_policy = FVConfig.getDropPolicy(sliceName);
 		} catch (ConfigError e) {
-			FVLog.log(LogLevel.ALERT, fvClassifier, "Failed to retrieve drop policy from config."
+			FVLog.log(LogLevel.ALERT, workerSwitch, "Failed to retrieve drop policy from config."
 					+ "\nDefauting to exact drop_policy");
 			drop_policy = "exact";
 		}
@@ -189,7 +189,7 @@ TopologyControllable {
 			flowMod.setMatch(flowEntry.getRuleMatch());
 		else
 			// Should never happen
-			FVLog.log(LogLevel.CRIT, fvClassifier, "Error in configuration!");
+			FVLog.log(LogLevel.CRIT, workerSwitch, "Error in configuration!");
 		flowMod.setCommand(FVFlowMod.OFPFC_ADD);
 		flowMod.setActions(new LinkedList<OFAction>()); // send to zero-length
 		// list, i.e., DROP
@@ -201,10 +201,10 @@ TopologyControllable {
 		// send removed msg (1), not the check overlap (2), or
 		// emergency flow cache (4)
 
-		FVLog.log(LogLevel.WARN, fvClassifier, "inserting drop (hard="
+		FVLog.log(LogLevel.WARN, workerSwitch, "inserting drop (hard="
 				+ hardTimeout + ",idle=" + idleTimeout + ") rule for "
 				+ flowEntry);
-		fvClassifier.sendMsg(flowMod, fvClassifier);
+		workerSwitch.sendMsg(flowMod, workerSwitch);
 	}
 
 	private String toVerboseString() {
@@ -218,7 +218,7 @@ TopologyControllable {
 	}
 
 	@Override
-	public void sliceFromController(WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
+	public void sliceFromController(WorkerSwitch workerSwitch, OriginalSwitch fvSlicer) {
 		FVMessageUtil.dropUnexpectedMesg(this, fvSlicer);
 	}
 

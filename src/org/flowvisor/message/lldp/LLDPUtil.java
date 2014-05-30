@@ -33,14 +33,14 @@ public class LLDPUtil {
 	 *
 	 * @param po
 	 *            message
-	 * @param fvClassifier
+	 * @param workerSwitch
 	 *            switch classifier
 	 * @param fvSlicer
 	 *            slice polcies
 	 * @return did we handle the message?
 	 */
 	static public boolean handleLLDPFromController(FVPacketOut po,
-			WorkerSwitch fvClassifier, OriginalSwitch fvSlicer) {
+			WorkerSwitch workerSwitch, OriginalSwitch fvSlicer) {
 
 		FVLog.log(LogLevel.DEBUG,null,"inside handleLLDPFromController in LLDPUtil" );
 		if (!LLDPCheck(po.getPacketData()))
@@ -56,7 +56,7 @@ public class LLDPUtil {
 		
 		//Get the ports from the classifier and check if it belongs to that slice
 		//and send only those ports relevant to this slice to form a new LLDP Trailer.
-		/*List<OFPhysicalPort> ports = fvClassifier.getSwitchInfo().getPorts();
+		/*List<OFPhysicalPort> ports = workerSwitch.getSwitchInfo().getPorts();
 		
 		
 		//OFPhysicalPort port = (OFPhysicalPort)po.getInPort();
@@ -82,7 +82,7 @@ public class LLDPUtil {
 				FVLog.log(LogLevel.DEBUG,null,"The ports are: ", port.getPortNumber());
 				FVLog.log(LogLevel.DEBUG,null,"The hw addr is: ", hw );
 				LLDPTrailer trailer = new LLDPTrailer(fvSlicer.getSliceName(), fvName, port.getPortNumber(), port.getHardwareAddress());
-				FVLog.log(LogLevel.DEBUG, null, "DPID = ",fvClassifier.getDPID());
+				FVLog.log(LogLevel.DEBUG, null, "DPID = ",workerSwitch.getDPID());
 				trailer.appendTo(po);
 			}
 		}*/
@@ -91,7 +91,7 @@ public class LLDPUtil {
 		trailer.appendTo(po);
 		FVLog.log(LogLevel.DEBUG, fvSlicer, "applied lldp hack: " + po
 				+ " slice=" + fvSlicer.getSliceName());
-		fvClassifier.sendMsg(po, fvSlicer);
+		workerSwitch.sendMsg(po, fvSlicer);
 		return true;
 	}
 
@@ -124,17 +124,17 @@ public class LLDPUtil {
 	 * true, we've handled this packet
 	 *
 	 * @param po
-	 * @param fvClassifier
+	 * @param workerSwitch
 	 * @return did we handle this message?
 	 */
 	static public boolean handleLLDPFromSwitch(FVPacketIn pi,
-			WorkerSwitch fvClassifier) {
+			WorkerSwitch workerSwitch) {
 		FVLog.log(LogLevel.DEBUG,null,"inside handleLLDPFromSwitch in LLDPUtil" );
 		if (!LLDPCheck(pi.getPacketData()))
 			return false;
 		LLDPTrailer trailer = LLDPTrailer.getTrailer(pi);
 		if (trailer != null) {
-			OriginalSwitch fvSlicer = fvClassifier.getOriginalSwitchByName(trailer
+			OriginalSwitch fvSlicer = workerSwitch.getOriginalSwitchByName(trailer
 					.getSliceName());
 			if (fvSlicer != null) {
 				if (fvSlicer.isConnected()) {
@@ -146,7 +146,8 @@ public class LLDPUtil {
 					// e.g., send them another hop
 					// the con is that we would have to track more BUFFER_IDS
 					// System.out.println("MURAD: Sending PacketIn LLDP: " + pi.toString());
-					fvSlicer.sendMsg(pi, fvClassifier);
+					System.out.println("MURAD: LLDPUtil, trailer and slicer found and sending from sw: " + workerSwitch.getName());
+					fvSlicer.sendMsg(pi, workerSwitch);
 				}
 				return true;
 			}
@@ -156,19 +157,19 @@ public class LLDPUtil {
 		 * this port
 		 */
 		if (trailer != null)
-			FVLog.log(LogLevel.DEBUG, fvClassifier,
+			FVLog.log(LogLevel.DEBUG, workerSwitch,
 					"broadcasting b.c failed to undo llpd hack for unknown slice '"
 							+ trailer.getSliceName() + "': " + pi);
 		else
-			FVLog.log(LogLevel.DEBUG, fvClassifier,
+			FVLog.log(LogLevel.DEBUG, workerSwitch,
 					"broadcasting b.c no lldp trailer found");
 		short inport = pi.getInPort();
 		pi.setXid(0xdeaddead); // mark this as broadcasted
 		
 		
-		for (OriginalSwitch fvSlicer : fvClassifier.getSlicers()) {
+		for (OriginalSwitch fvSlicer : workerSwitch.getSlicers()) {
 				if (fvSlicer.portInSlice(inport) && fvSlicer.isConnected() && fvSlicer.isOptedIn())
-					fvSlicer.sendMsg(pi, fvClassifier);
+					fvSlicer.sendMsg(pi, workerSwitch);
 		}
 		return true;
 	}
