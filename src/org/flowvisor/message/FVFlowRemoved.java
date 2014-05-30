@@ -38,16 +38,15 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 	public void classifyFromSwitch(WorkerSwitch wSwitch) {
 		//System.out.println("MURAD: FVFlowRamoder-37, Recv florRemove type: " + this.getReason().name() + " from sw " + wSwitch.getName());
 		
-		OriginalSwitch fvSlicer;
+		OriginalSwitch originalSwitch;
 		if(wSwitch.getDuplicateSwitch() != null){
 			WorkerSwitch duplicateVFClassifier = LimeContainer.getAllWorkingSwitches().get(wSwitch.getDuplicateSwitch().getDPID());
 			if(wSwitch.isActive()){
-				fvSlicer = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+				originalSwitch = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
 			else{ 
 				if(duplicateVFClassifier.isActive()){
-					fvSlicer = duplicateVFClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
-					wSwitch = duplicateVFClassifier;
+					originalSwitch = duplicateVFClassifier.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 				}
 				else{
 					// ignore msg, we don't know this witch
@@ -57,7 +56,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		}
 		else{
 			if(wSwitch.isActive()){
-				fvSlicer = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
+				originalSwitch = wSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch);
 			}
 			else{
 				// ignore packet, we only forward to controller from active switches when no migration is happening 
@@ -66,60 +65,7 @@ public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 			}
 		}
 		
-		wSwitch.handleFlowModRemove(this, fvSlicer);	
-		
-		/*FlowMap flowSpace = wSwitch.getSwitchFlowMap();
-		Set<String> slicesToUpdate = new HashSet<String>();
-		
-		String sliceName = wSwitch.getFlowDB().processFlowRemoved(this,
-				wSwitch.getDPID());
-		
-		CookiePair pair = untanslateCookie(wSwitch);
-		
-		//FVLog.log(LogLevel.DEBUG, wSwitch, slicerFromCookie);
-		
-		
-		
-		
-		
-		
-		if (sliceName != null)
-			slicesToUpdate.add(sliceName);
-		else if (pair != null) 
-			slicesToUpdate.add(pair.getSliceName());
-		else {
-			// flow tracking either disabled or broken
-			// just fall back to everyone who *could* have inserted this flow
-			List<FlowEntry> flowEntries = flowSpace.matches(
-					wSwitch.getDPID(), new FVMatch(getMatch()));
-			for (FlowEntry flowEntry : flowEntries) {
-				for (OFAction ofAction : flowEntry.getActionsList()) {
-					if (ofAction instanceof SliceAction) {
-						SliceAction sliceAction = (SliceAction) ofAction;
-						if ((sliceAction.getSlicePerms() & SliceAction.WRITE) != 0) {
-							slicesToUpdate.add(sliceAction.getSliceName());
-						}
-					}
-				}
-			}
-		}
-		// forward this msg to each of them
-		FVLog.log(LogLevel.DEBUG, wSwitch, slicesToUpdate.toString());
-		for (String slice : slicesToUpdate) {
-			OriginalSwitch fvSlicer = wSwitch.getOriginalSwitchByName(slice);
-			if (fvSlicer == null) {
-				FVLog.log(LogLevel.CRIT, wSwitch,
-						"inconsistent state: missing fvSliver entry for: "
-								+ slice);
-				continue;
-			}
-			fvSlicer.decrementFlowRules();
-			fvSlicer.getFlowRewriteDB().processFlowRemoved(this);
-			if (pair != null)
-				this.setCookie(pair.getCookie());
-			fvSlicer.sendMsg(this, wSwitch);
-		}*/
-		
+		wSwitch.handleFlowModRemove(this, originalSwitch);			
 	}
 
 	@Override
