@@ -883,14 +883,17 @@ SwitchChangedListener {
 				System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine");
 				
 			} catch (BufferFull e) {
+				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " framing BUG !!!!!");
 				FVLog.log(LogLevel.CRIT, this,
 						"framing BUG; tearing down: got ", e);
 				this.loop.queueEvent(new TearDownEvent(this, this));
 				this.stats.increment(FVStatsType.DROP, from, msg);
 			} catch (MalformedOFMessage e) {
+				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!");
 				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
 				this.stats.increment(FVStatsType.DROP, from, msg);
 			} catch (IOException e) {
+				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " got IO error !!!!!");
 				FVLog.log(LogLevel.WARN, this,
 						"restarting connection, got IO error: ", e);
 				this.tearDown();
@@ -899,6 +902,7 @@ SwitchChangedListener {
 			FVLog
 			.log(LogLevel.WARN, this, "dropping msg: no connection: ",
 					msg);
+			System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " no connection !!!!!");
 			this.stats.increment(FVStatsType.DROP, from, msg);
 		}
 
