@@ -1499,7 +1499,7 @@ SwitchChangedListener {
 			match.setDataLayerVirtualLan(port);
 			
 			List<OFAction> actionList = new ArrayList<OFAction>();
-			actionList.add(new OFActionStripVirtualLan());
+			//actionList.add(new OFActionStripVirtualLan());
 			actionList.add(new OFActionOutput(port));
 			
 			ghostFlowMod.setMatch(match);
