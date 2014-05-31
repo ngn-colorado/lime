@@ -128,8 +128,8 @@ Classifiable, Slicable, Cloneable {
 				if(workerSwitch.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 					if (workerSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
 						originalPort = ((OFActionOutput) action).getPort();
-						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
-						this.getActions().add(i, addedVlanAction);
+						//OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						//this.getActions().add(i, addedVlanAction);
 						((OFActionOutput) action).setPort(workerSwitch.getGhostPort());
 						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
 							this.setBufferId(bufferId);
