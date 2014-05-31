@@ -1500,7 +1500,8 @@ SwitchChangedListener {
 			actionList.add(new OFActionOutput(port));
 			ghostFlowMod.setMatch(match);
 			ghostFlowMod.setActions(actionList);
-			ghostFlowMod.setPriority((short) 500);
+			ghostFlowMod.setPriority((short) 32767);
+			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + ghostFlowMod.toString());
 			this.sendMsg(ghostFlowMod, this);
 		}
 	}
