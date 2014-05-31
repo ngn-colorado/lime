@@ -1495,20 +1495,17 @@ SwitchChangedListener {
 			
 			OFMatch match = new OFMatch();
 			match.setWildcards(OFMatch.OFPFW_ALL);
-
-			ghostFlowMod.setMatch(match);
-			ghostFlowMod.setCommand(OFFlowMod.OFPFC_ADD);
-			ghostFlowMod.setOutPort(OFPort.OFPP_NONE);
-			ghostFlowMod.setBufferId(0xffffffff); // buffer to NONE
 			match.setInputPort(ghostPort);
-			
 			match.setDataLayerVirtualLan(port);
 			
 			List<OFAction> actionList = new ArrayList<OFAction>();
 			actionList.add(new OFActionStripVirtualLan());
 			actionList.add(new OFActionOutput(port));
-			ghostFlowMod.setOutPort((short) -1);
+			
 			ghostFlowMod.setMatch(match);
+			ghostFlowMod.setCommand(OFFlowMod.OFPFC_ADD);
+			ghostFlowMod.setOutPort(OFPort.OFPP_NONE);
+			ghostFlowMod.setBufferId(0xffffffff); // buffer to NONE
 			ghostFlowMod.setActions(actionList);
 			ghostFlowMod.setPriority((short) 32767);
 			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + ghostFlowMod.toString());
