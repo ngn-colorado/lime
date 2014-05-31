@@ -1493,13 +1493,14 @@ SwitchChangedListener {
 			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port);
 			FVFlowMod ghostFlowMod = new FVFlowMod();
 			OFMatch match = new OFMatch();
-			match.setDataLayerVirtualLan(port);
+			//match.setDataLayerVirtualLan(port);
 			match.setInputPort(ghostPort);
 			List<OFAction> actionList = new ArrayList<OFAction>();
-			actionList.add(new OFActionStripVirtualLan());
+			//actionList.add(new OFActionStripVirtualLan());
 			actionList.add(new OFActionOutput(port));
 			ghostFlowMod.setMatch(match);
 			ghostFlowMod.setActions(actionList);
+			ghostFlowMod.setPriority((short) 500);
 			this.sendMsg(ghostFlowMod, this);
 		}
 	}
