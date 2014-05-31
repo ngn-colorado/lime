@@ -1490,7 +1490,7 @@ SwitchChangedListener {
 		// finally, we create a new FlowMod with times of zero to handle any packets coming from ghost port without asking controller since controller should not 
 		// know about the ghost port
 		if(fromGhostToOriginal){
-			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port);
+			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port + " with ghostPort " + ghostPort);
 			FVFlowMod ghostFlowMod = new FVFlowMod();
 			OFMatch match = new OFMatch();
 			//match.setDataLayerVirtualLan(port);
