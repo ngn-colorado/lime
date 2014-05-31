@@ -27,13 +27,7 @@ py net.addLink(net.get('s3'), net.get('s6'))
 py s3.attach('s3-eth4')
 py s3.detach('s3-eth4')
 
-
-py net.addLink(net.get('s1'), net.get('s4'),3,3)
-
-py net.addLink(net.get('s2'), net.get('s5'),4,4)
-
-py s1.attach('s1-eth3')
-
+// Be careful of FlowMod' length when modyfing it!!!!
 
 // best so far for ovx testbed // attaching clone switch to second interface in hosts even before cloning start
 // in mininet script
