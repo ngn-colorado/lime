@@ -1497,7 +1497,7 @@ SwitchChangedListener {
 		// know about the ghost port
 		if(fromGhostToOriginal){
 			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port + " with ghostPort " + ghostPort);
-			/*OFFlowMod ghostFlowMod = new OFFlowMod();
+			OFFlowMod ghostFlowMod = new OFFlowMod();
 			
 			OFMatch match = new OFMatch();
 			//match.setWildcards(OFMatch.OFPFW_ALL);
@@ -1515,10 +1515,10 @@ SwitchChangedListener {
 			ghostFlowMod.setActions(actionList);
 			ghostFlowMod.setPriority((short) 32767);
 			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + ghostFlowMod.toString());
-			this.sendMsg(ghostFlowMod, this);*/
+			this.sendMsg(ghostFlowMod, this);
 			
 			
-			OFMatch match = new OFMatch();
+			/*OFMatch match = new OFMatch();
 			match.setWildcards(OFMatch.OFPFW_ALL);
 			OFFlowMod fm = new OFFlowMod();
 			fm.setMatch(match);
@@ -1526,7 +1526,8 @@ SwitchChangedListener {
 			fm.setOutPort(OFPort.OFPP_NONE);
 			fm.setBufferId(0xffffffff); // buffer to NONE
 			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " trying to send test HELLO FlowMod");
-			sendMsg(fm, this);
+			sendMsg(fm, this);*/
+			System.out.println("MURAD: WorkerSwitch, ++++++++++++++++++++++++++++");
 		}
 	}
 
