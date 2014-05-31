@@ -1501,7 +1501,7 @@ SwitchChangedListener {
 			
 			OFMatch match = new OFMatch();
 			//match.setWildcards(OFMatch.OFPFW_ALL);
-			match.setInputPort(ghostPort).setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
+			match.setInputPort(ghostPort);//.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
 			//match.setDataLayerVirtualLan(port);
 			
 			List<OFAction> actionList = new ArrayList<OFAction>();
