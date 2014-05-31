@@ -880,7 +880,7 @@ SwitchChangedListener {
 			FVLog.log(LogLevel.DEBUG, this, "send to switch:", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
-				System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine");
+				//System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine");
 				
 			} catch (BufferFull e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " framing BUG !!!!!");
