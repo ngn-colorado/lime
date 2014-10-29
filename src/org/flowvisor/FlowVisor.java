@@ -41,6 +41,8 @@ import org.openflow.example.cli.Options;
 import org.openflow.example.cli.ParseException;
 import org.openflow.example.cli.SimpleCLI;
 
+import sun.io.MalformedInputException;
+
 public class FlowVisor {
 	// VENDOR EXTENSION ID
 	public final static int FLOWVISOR_VENDOR_EXTENSION = 0x80000001;
@@ -196,9 +198,37 @@ public class FlowVisor {
 		LimeContainer.insertActiveToOriginalSwitchMap(1, 1);
 		System.out.println("MURAD: Original Top-level Switch: " + 1);*/
 		
-		LimeContainer.addOriginalSwitch(256, portTable);
-		LimeContainer.insertActiveToOriginalSwitchMap(256, 256);
-		System.out.println("MURAD: Original Top-level Switch: " + 256);
+//		ubuntulime-2 br0 DPID:
+//		00003e5286851a47
+//		port table:
+		
+//		ubuntulime-3 br0 DPID:
+//		0000f2222aa1e448
+//		port table:
+		
+		DPID ubuntulime2 = new DPID("00003e5286851a47");
+		DPID ubuntulime3 = new DPID("0000f2222aa1e448");
+		
+		HashMap<Short, PortInfo> ubuntulime2porttable = new HashMap<>();
+		ubuntulime2porttable.put((short)1, new PortInfo(PortType.H_CONNECTED, null, null));
+		ubuntulime2porttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
+		ubuntulime2porttable.put((short)3, new PortInfo(PortType.GHOST, null, null));
+		
+		HashMap<Short, PortInfo> ubuntulime3porttable = new HashMap<>();
+		ubuntulime3porttable.put((short)1, new PortInfo(PortType.H_CONNECTED, null, null));
+		ubuntulime3porttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
+		ubuntulime3porttable.put((short)3, new PortInfo(PortType.GHOST, null, null));
+		
+		LimeContainer.addOriginalSwitch(ubuntulime2.getDpidLong(), ubuntulime2porttable);
+		LimeContainer.insertActiveToOriginalSwitchMap(ubuntulime2.getDpidLong(), ubuntulime2.getDpidLong());
+		System.out.println("MICHAEL: Original switch: "+ubuntulime2.getDpidLong());
+		
+		LimeContainer.addCloneSwitch(ubuntulime3.getDpidLong(), ubuntulime2porttable);
+		LimeContainer.insertActiveToCloneSwitchMap(ubuntulime2.getDpidLong(), ubuntulime3.getDpidLong());
+		
+//		LimeContainer.addOriginalSwitch(256, portTable);
+//		LimeContainer.insertActiveToOriginalSwitchMap(256, 256);
+//		System.out.println("MURAD: Original Top-level Switch: " + 256);
 		
 		//for(long j=46200400562356226L; j<46200400562356228L; j++){
 		//for(long j=2; j<4; j++){
@@ -261,6 +291,10 @@ public class FlowVisor {
 		// start event processing
 		pollLoop.doEventLoop();
 	}
+	
+	
+	
+	
 
 	
 	/**
