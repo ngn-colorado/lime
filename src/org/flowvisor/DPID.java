@@ -1,5 +1,6 @@
 package org.flowvisor;
 
+import java.io.PrintStream;
 import java.math.BigInteger;
 
 public class DPID {
@@ -32,7 +33,7 @@ public class DPID {
 		}
 		dpidBigInt = DPID;
 		dpidString = DPIDLongToDPIDString(dpidBigInt.longValue());
-		dpidHexString = DPIDLongToHex(dpidBigInt.longValue());
+		dpidHexString = DPIDLongToHex(dpidBigInt.longValue());   
 	}
 	
 	public static BigInteger DPIDHexToBigInteger(String DPID){
@@ -91,20 +92,24 @@ public class DPID {
 		DPID = DPID.replaceAll(identifier, "");
 //		System.out.println(DPID);
 		BigInteger bigDPID = new BigInteger(DPID, 16);
-		DPID = bigDPID.toString(16);
-//		System.out.println(DPID);
-		if(DPID.length() != 16){
+//		DPID = bigDPID.toString(16);
+		
+		String newDPID = Long.toHexString(bigDPID.longValue());
+//		newDPID = String.format("%016x", bigDPID.longValue());
+		newDPID = DPIDLongToHex(bigDPID.longValue());
+//		System.out.println(newDPID + "\n");
+		if(newDPID.length() != 16){
 			throw new IllegalArgumentException("Input string does contain the correct amount of hex characters");
 		}
 		int colonCount = 0;
-		for(int i=0; i<DPID.length(); i++){
-			dpidString += DPID.charAt(i);
-			if(i%2 == 1 && i != DPID.length() - 1){
+		for(int i=0; i<newDPID.length(); i++){
+			dpidString += newDPID.charAt(i);
+			if(i%2 == 1 && i != newDPID.length() - 1){
 				colonCount++;
 			}
 		}
 		if(colonCount != 7){
-			throw new IllegalArgumentException("Hex string was incorrect. " + colonCount + " colon seperates written. Generated dpid string was "+DPID);
+			throw new IllegalArgumentException("Hex string was incorrect. " + colonCount + " colon seperates written. Generated dpid string was "+newDPID);
 		}
 		return dpidString;
 	}
@@ -122,11 +127,12 @@ public class DPID {
 	}
 	
 	public static String DPIDLongToHex(Long DPID){
-		String dpid = Long.toHexString(DPID);
-		int neededZeros = 16 - dpid.length();
-		for(int i = 0; i<neededZeros; i++){
-			dpid = "0" + dpid;
-		}
+//		String dpid = Long.toHexString(DPID);
+//		int neededZeros = 16 - dpid.length();
+//		for(int i = 0; i<neededZeros; i++){
+//			dpid = "0" + dpid;
+//		}
+		String dpid = String.format("%016x", DPID);
 		return dpid;
 	}
 	
@@ -164,7 +170,8 @@ public class DPID {
 	}
 
 	public static void main(String[] args){
-		String dpidString = "aa:bb:cc:ee:ff:11:22:33";
+//		String dpidString = "aa:bb:cc:ee:ff:11:22:33";
+		String dpidString = "00:A4:23:05:00:00:00:01";
 		System.out.println("Original DPID: "+dpidString);
 //		String dpid2 = "7a:bb:cc:ee:ff:11:22:33";
 //		System.out.println(Long.parseLong("-"+DPID.DPIDStringToHex(dpid2, "").toUpperCase(), 16));

@@ -154,7 +154,8 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 	public void init() {
 		FVLog.log(LogLevel.DEBUG, this, "initializing new OriginalSwitch");
 
-		hostname = "128.138.201.93";
+//		hostname = "128.138.201.93";
+		hostname = "172.16.1.6";
 		port = 6633;
 		lldpOptIn = false; // based on slice-info we created
 		//hostname = FVConfig.getSliceHost(sliceName); //MURAD-config
