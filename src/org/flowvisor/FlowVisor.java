@@ -227,28 +227,40 @@ public class FlowVisor {
 //		ubuntu-int2 mac: 52:54:00:83:4d:44
 		
 //		DPID ubuntulime2 = new DPID("00003e5286851a47");
+//		00:00:3e:52:86:85:1a:47
 //		DPID ubuntulime3 = new DPID("0000f2222aa1e448");
+//		00:00:f2:22:2a:a1:e4:48
 		
 //		DPID of original ovx Vswitch: "00:a4:23:05:00:00:00:01"
 //		DPID of clone ovx Vswitch: "00:a4:23:05:00:00:00:01"
+		
+//		create flow rules, as learning switch in floodlight does not work:
+//		curl -d '{"switch": "00:a4:23:05:00:00:00:01", "name":"flow-mod-1", "cookie":"0", "priority":"32768", "ingress-port":"1","active":"true", "actions":"output=2"}' http://172.16.1.6:8080/wm/staticflowentrypusher/json
+//		curl -d '{"switch": "00:a4:23:05:00:00:00:01", "name":"flow-mod-2", "cookie":"0", "priority":"32768", "ingress-port":"2","active":"true", "actions":"output=1"}' http://172.16.1.6:8080/wm/staticflowentrypusher/json
 		
 //		ovs on ubuntulime-2 and ubuntulime-3 must have ovx vm (172.16.1.5) as the of controller
 //		ovs vm must have flowvisor/lime vm as controller (172.16.1.4)
 //		flowvisor/lime must know that floodlight vm (172.16.1.6) is the top level controller
 //		set the ip of the floodlight controller in org.flowvisor.slicer.OriginalSwitch as the hostname variable in the init function
 		
+//		DPID ubuntu-ngn-r720-2: 0000a63989c12248
+//		00:00:a6:39:89:c1:22:48
+//		DIPD ubuntu-ngn-r720-3: 0000eeee35e82748
+//		00:00:ee:ee:35:e8:27:48
+		
+		
 		DPID originalVswitch = new DPID("00:a4:23:05:00:00:00:01");
 		DPID cloneVswitch = new DPID("00:a4:23:05:00:00:00:01");
 		
 		HashMap<Short, PortInfo> originalVswitchporttable = new HashMap<>();
-		originalVswitchporttable.put((short)1, new PortInfo(PortType.H_CONNECTED, null, null));
+		originalVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
 		originalVswitchporttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
-		originalVswitchporttable.put((short)3, new PortInfo(PortType.GHOST, null, null));
+		originalVswitchporttable.put((short)3, new PortInfo(PortType.H_CONNECTED, null, null));
 		
 		HashMap<Short, PortInfo> cloneVswitchporttable = new HashMap<>();
-		cloneVswitchporttable.put((short)1, new PortInfo(PortType.H_CONNECTED, null, null));
+		cloneVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
 		cloneVswitchporttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
-		cloneVswitchporttable.put((short)3, new PortInfo(PortType.GHOST, null, null));
+		cloneVswitchporttable.put((short)3, new PortInfo(PortType.H_CONNECTED, null, null));
 		
 		LimeContainer.addOriginalSwitch(originalVswitch.getDpidLong(), originalVswitchporttable);
 		LimeContainer.insertActiveToOriginalSwitchMap(originalVswitch.getDpidLong(), originalVswitch.getDpidLong());
