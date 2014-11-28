@@ -248,9 +248,10 @@ public class FlowVisor {
 //		DIPD ubuntu-ngn-r720-3: 0000eeee35e82748
 //		00:00:ee:ee:35:e8:27:48
 		
-		
+//		first vSwitch in ovx is: 00:a4:23:05:00:00:00:01
 		DPID originalVswitch = new DPID("00:a4:23:05:00:00:00:01");
-		DPID cloneVswitch = new DPID("00:a4:23:05:00:00:00:01");
+//		second vSwitch in ovx is: 00:a4:23:05:00:00:00:02
+		DPID cloneVswitch = new DPID("00:a4:23:05:00:00:00:02");
 		
 		HashMap<Short, PortInfo> originalVswitchporttable = new HashMap<>();
 		originalVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
