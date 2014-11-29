@@ -117,7 +117,7 @@ public class LimeMigrationHandler {
 					}
 					else{
 						portMissing = true;
-						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found for aSW " + activeSwID + " or cSW " + cloneSwID); 
+						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found for aSW " + activeSwID + " or cSW " + cloneSwID);
 						break;
 					}
 				}
@@ -125,6 +125,9 @@ public class LimeMigrationHandler {
 
 				System.out.println("portMissing variable: "+portMissing);
 				System.out.println("ghostPort variable: "+ghostPort);
+				
+				//skip check for now:
+				portMissing = false;
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
 					activeSwitch.setDuplicateSwitch(cloneSwitch);

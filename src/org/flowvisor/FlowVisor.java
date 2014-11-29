@@ -265,7 +265,7 @@ public class FlowVisor {
 //		LimeContainer.addOriginalSwitch(cloneVswitch.getDpidLong(), cloneVswitchporttable);
 //		LimeContainer.insertActiveToOriginalSwitchMap(cloneVswitch.getDpidLong(), cloneVswitch.getDpidLong());
 		System.out.println("MICHAEL: Clone switch: "+cloneVswitch.getDpidLong());
-		LimeContainer.addCloneSwitch(cloneVswitch.getDpidLong(), originalVswitchporttable);
+		LimeContainer.addCloneSwitch(cloneVswitch.getDpidLong(), cloneVswitchporttable);
 		LimeContainer.insertActiveToCloneSwitchMap(originalVswitch.getDpidLong(), cloneVswitch.getDpidLong());
 		
 		
