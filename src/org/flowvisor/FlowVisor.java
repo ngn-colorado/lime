@@ -190,13 +190,7 @@ public class FlowVisor {
 		portTable.put((short) 1, new PortInfo(PortType.H_CONNECTED, null, null));
 		portTable.put((short) 2, new PortInfo(PortType.H_CONNECTED, null, null));
 
-		/*LimeContainer.addOriginalSwitch(46200400562356225L, portTable);  // this represnts the switch 00:a4:23:05:00:00:00:01 in OVX
-		LimeContainer.insertActiveToOriginalSwitchMap(46200400562356225L, 46200400562356225L);
-		System.out.println("MURAD: Original Top-level Switch: " + 46200400562356225L);*/
 		
-		/*LimeContainer.addOriginalSwitch(1, portTable);
-		LimeContainer.insertActiveToOriginalSwitchMap(1, 1);
-		System.out.println("MURAD: Original Top-level Switch: " + 1);*/
 		
 		//in ovx-> physical hosts are connected to virtual switches based on host mac -> do not need to know the physical port # on the ovs
 		
@@ -267,13 +261,27 @@ public class FlowVisor {
 		LimeContainer.insertActiveToOriginalSwitchMap(originalVswitch.getDpidLong(), originalVswitch.getDpidLong());
 		System.out.println("MICHAEL: Original switch: "+originalVswitch.getDpidLong());
 		
-		LimeContainer.addCloneSwitch(cloneVswitch.getDpidLong(), originalVswitchporttable);
-		LimeContainer.insertActiveToCloneSwitchMap(originalVswitch.getDpidLong(), cloneVswitch.getDpidLong());
+		
+		LimeContainer.addOriginalSwitch(cloneVswitch.getDpidLong(), cloneVswitchporttable);
+		LimeContainer.insertActiveToOriginalSwitchMap(cloneVswitch.getDpidLong(), cloneVswitch.getDpidLong());
+		System.out.println("MICHAEL: Original switch 2: "+cloneVswitch.getDpidLong());
+//		LimeContainer.addCloneSwitch(cloneVswitch.getDpidLong(), originalVswitchporttable);
+//		LimeContainer.insertActiveToCloneSwitchMap(originalVswitch.getDpidLong(), cloneVswitch.getDpidLong());
+		
+		
+		
+		/*LimeContainer.addOriginalSwitch(46200400562356225L, portTable);  // this represnts the switch 00:a4:23:05:00:00:00:01 in OVX
+		LimeContainer.insertActiveToOriginalSwitchMap(46200400562356225L, 46200400562356225L);
+		System.out.println("MURAD: Original Top-level Switch: " + 46200400562356225L);*/
+		
+		/*LimeContainer.addOriginalSwitch(1, portTable);
+		LimeContainer.insertActiveToOriginalSwitchMap(1, 1);
+		System.out.println("MURAD: Original Top-level Switch: " + 1);*/
 		
 //		LimeContainer.addOriginalSwitch(256, portTable);
 //		LimeContainer.insertActiveToOriginalSwitchMap(256, 256);
 //		System.out.println("MURAD: Original Top-level Switch: " + 256);
-		
+//		these dpids are: 00:00:A4:23:05:00:00:00:02 to 00:00:A4:23:05:00:00:00:04
 		//for(long j=46200400562356226L; j<46200400562356228L; j++){
 		//for(long j=2; j<4; j++){
 		/*for(long j=512; j<769; j=j+256){	
