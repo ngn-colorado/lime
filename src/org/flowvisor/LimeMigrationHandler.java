@@ -68,20 +68,20 @@ public class LimeMigrationHandler {
 		// 		remove vlanid 
 		// 		forward to port = to vlanid
 
-		boolean firstSuccessful = LimeVMMigrater.liveMigrateQemuVM("128.138.189.249", "128.138.189.140", "ubuntu-int1");
-		boolean secondSuccessful = LimeVMMigrater.liveMigrateQemuVM("128.138.189.249", "128.138.189.140", "ubuntu-int2");
-		
-		if(!firstSuccessful){
-			System.out.println("MICHAEL: Error: migration of ubuntu-int1 not successful");
-		}
-		
-		if(!secondSuccessful){
-			System.out.println("MICHAEL: Error: migration of ubuntu-int2 not successful");
-		}
-		
-		if(!firstSuccessful || !secondSuccessful){
-			return;
-		}
+//		boolean firstSuccessful = LimeVMMigrater.liveMigrateQemuVM("128.138.189.249", "128.138.189.140", "ubuntu-int1");
+//		boolean secondSuccessful = LimeVMMigrater.liveMigrateQemuVM("128.138.189.249", "128.138.189.140", "ubuntu-int2");
+//		
+//		if(!firstSuccessful){
+//			System.out.println("MICHAEL: Error: migration of ubuntu-int1 not successful");
+//		}
+//		
+//		if(!secondSuccessful){
+//			System.out.println("MICHAEL: Error: migration of ubuntu-int2 not successful");
+//		}
+//		
+//		if(!firstSuccessful || !secondSuccessful){
+//			return;
+//		}
 
 		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
 			if((LimeContainer.getAllWorkingSwitches().containsKey(entry.getKey())) &&
