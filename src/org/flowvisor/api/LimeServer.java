@@ -29,6 +29,7 @@ public class LimeServer implements Runnable {
 
 		try {
 			ServerSocket serverSocket = new ServerSocket(portNumber);
+			final LimeMigrationHandler limeMigHandler = new LimeMigrationHandler();
 			while(true){
 				final Socket clientSocket = serverSocket.accept();
 				Runnable handlerTask = new Runnable(){
@@ -43,17 +44,11 @@ public class LimeServer implements Runnable {
 							while ((inputLine = in.readLine()) != null) {
 								System.out.println("Recv from operator: " + inputLine);
 								out.println("LIME said: " + inputLine);
-								LimeMigrationHandler limeMigHandler = null;
 								if (inputLine.equals("start")) {
-									limeMigHandler = new LimeMigrationHandler();
 									limeMigHandler.init();
 								} else if (inputLine.startsWith("migration finished: ")) {
 									// message must be in form: "migration finished:
 									// original_dpid clone_dpid
-									if (limeMigHandler == null) {
-										System.out.println("migration must be started first");
-										continue;
-									}
 									String[] tokens = inputLine.split(" ");
 									DPID originalDPID = new DPID(tokens[2]);
 									DPID cloneDPID = new DPID(tokens[3]);
