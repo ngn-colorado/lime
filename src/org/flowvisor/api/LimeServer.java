@@ -28,9 +28,8 @@ public class LimeServer implements Runnable {
 		int portNumber = 8082;
 
 		try {
+			ServerSocket serverSocket = new ServerSocket(portNumber);
 			while(true){
-				
-				ServerSocket serverSocket = new ServerSocket(portNumber);
 				final Socket clientSocket = serverSocket.accept();
 				Runnable handlerTask = new Runnable(){
 					@Override
