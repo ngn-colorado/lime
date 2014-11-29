@@ -8,12 +8,20 @@ package org.flowvisor.api;
  *
  */
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
+import org.flowvisor.DPID;
+import org.flowvisor.LimeContainer;
 import org.flowvisor.LimeMigrationHandler;
+import org.flowvisor.classifier.WorkerSwitch;
 
 public  class LimeServer implements Runnable{
+		
 	@Override
 	public void run(){
 		System.out.println("MURAD: LimeServer is running...");
@@ -32,9 +40,22 @@ public  class LimeServer implements Runnable{
 			while ((inputLine = in.readLine()) != null) {
 				System.out.println("Recv from operator: " + inputLine);
 				out.println("LIME said: " + inputLine);
+				LimeMigrationHandler limeMigHandler = null;
 				if(inputLine.equals("start")){
-					LimeMigrationHandler limeMigHandler = new LimeMigrationHandler();
+					limeMigHandler = new LimeMigrationHandler();
 					limeMigHandler.init();
+				} else if(inputLine.startsWith("migration finished: ")){
+					//message must be in form: "migration finished: original_dpid clone_dpid
+					if(limeMigHandler == null){
+						System.out.println("migration must be started first");
+						continue;
+					}
+					String[] tokens = inputLine.split(" ");
+					DPID originalDPID = new DPID(tokens[2]);
+					DPID cloneDPID = new DPID(tokens[3]);
+					WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(originalDPID.getDpidLong());
+					WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(cloneDPID.getDpidLong());
+					limeMigHandler.switchDoneMigrating(cloneSwitch, originalSwitch);
 				}
 				
 			}
