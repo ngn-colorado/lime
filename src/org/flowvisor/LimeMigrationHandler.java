@@ -33,16 +33,16 @@ public class LimeMigrationHandler {
 
 		//TODO the below code of setting up clone switches and their ports should not be hard coded but rather received from outside
 		// top switch only has two ports and they are connected to switches (SW_CONNECTED)
-		HashMap<Short, PortInfo> portTable1 = new HashMap<>();
-		portTable1.put((short) 1, new PortInfo(PortType.EMPTY, null, null));
-		portTable1.put((short) 2, new PortInfo(PortType.EMPTY, null, null));
-		portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
+//		HashMap<Short, PortInfo> portTable1 = new HashMap<>();
+//		portTable1.put((short) 1, new PortInfo(PortType.EMPTY, null, null));
+//		portTable1.put((short) 2, new PortInfo(PortType.EMPTY, null, null));
+//		portTable1.put((short) 3, new PortInfo(PortType.GHOST, null, null));
 		/*LimeContainer.addCloneSwitch(46200400562356228L, portTable1);
 		LimeContainer.insertActiveToCloneSwitchMap(46200400562356228L-3, 46200400562356228L);
 		System.out.println("MURAD: Clone Top-level Switch: " + 46200400562356228L);*/
-		LimeContainer.addCloneSwitch(512, portTable1);
-		LimeContainer.insertActiveToCloneSwitchMap(256, 512);
-		System.out.println("MURAD: Clone Top-level Switch: " + 512);
+//		LimeContainer.addCloneSwitch(512, portTable1);
+//		LimeContainer.insertActiveToCloneSwitchMap(256, 512);
+//		System.out.println("MURAD: Clone Top-level Switch: " + 512);
 		
 		//for(long j=46200400562356229L; j<46200400562356231L; j++){
 		/*for(long j=1280; j<1537; j=j+256){
@@ -68,6 +68,16 @@ public class LimeMigrationHandler {
 		// 		remove vlanid 
 		// 		forward to port = to vlanid
 
+		boolean firstSuccessful = LimeVMMigrater.liveMigrateQemuVM("128.138.189.249", "128.138.189.140", "ubuntu-int1");
+		boolean secondSuccessful = LimeVMMigrater.liveMigrateQemuVM("128.138.189.249", "128.138.189.140", "ubuntu-int2");
+		
+		if(!firstSuccessful){
+			System.out.println("MICHAEL: Error: migration of ubuntu-int1 not successful");
+		}
+		
+		if(!secondSuccessful){
+			System.out.println("MICHAEL: Error: migration of ubuntu-int2 not successful");
+		}
 
 		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
 			if((LimeContainer.getAllWorkingSwitches().containsKey(entry.getKey())) &&
