@@ -60,7 +60,9 @@ public class LimeServer implements Runnable {
 									DPID cloneDPID = new DPID(tokens[3]);
 									WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(originalDPID.getDpidLong());
 									WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(cloneDPID.getDpidLong());
+									System.out.println("calling done migration function");
 									limeMigHandler.switchDoneMigrating(cloneSwitch, originalSwitch);
+									System.out.println("migration done function finished");
 								}
 							}
 						} catch (IOException e) {
