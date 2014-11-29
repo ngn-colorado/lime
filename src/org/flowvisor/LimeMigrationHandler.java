@@ -123,6 +123,8 @@ public class LimeMigrationHandler {
 				}
 				cloneSwitch.setConnectedHostCounter(emptyPortsCounter);
 
+				System.out.println("portMissing variable: "+portMissing);
+				System.out.println("ghostPort variable: "+ghostPort);
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
 					activeSwitch.setDuplicateSwitch(cloneSwitch);
