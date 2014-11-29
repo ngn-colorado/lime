@@ -136,7 +136,7 @@ public class LimeMigrationHandler {
 					// copy FlowMod table from active to switch and push it the switch
 					cloneSwitch.insertFlowRuleTableAndSendModified(activeSwitch, ghostPort);  //FIXME we may need to clone this
 					
-					
+//					switchDoneMigrating(cloneSwitch, activeSwitch);
 				}
 				else{
 					System.out.println("MURAD: ERROR finding port!!");
