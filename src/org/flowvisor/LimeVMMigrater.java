@@ -16,13 +16,16 @@ public class LimeVMMigrater {
 			System.out.println("Destination IP address is invalid.");
 			return false;
 		}
+		System.out.println("Validated ip addresses");
 		String src_uri = "qemu+ssh://"+sourceIP+"/system";
 		String dest_uri = "qemu+ssh://"+destIP+"/system";
 		Connect src = null;
 		Connect dst = null;
 		Domain domain_to_migrate = null;
 		try {
+			System.out.println("Attempting to connect to "+src_uri);
 			src = new Connect(src_uri);
+			System.out.println("Successfully connected to "+src_uri);
 		} catch (LibvirtException e) {
 			System.out.println("Could not connect to: "+src_uri);
 			e.printStackTrace();
@@ -30,7 +33,9 @@ public class LimeVMMigrater {
 			return false;
 		}
 		try {
+			System.out.println("Attempting to connect to "+dest_uri);
 			dst = new Connect(dest_uri);
+			System.out.println("Successfully connected to "+dest_uri);
 		} catch (LibvirtException e) {
 			System.out.println("Could not connect to: "+dest_uri);
 			e.printStackTrace();
