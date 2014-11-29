@@ -78,6 +78,10 @@ public class LimeMigrationHandler {
 		if(!secondSuccessful){
 			System.out.println("MICHAEL: Error: migration of ubuntu-int2 not successful");
 		}
+		
+		if(!firstSuccessful || !secondSuccessful){
+			return;
+		}
 
 		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
 			if((LimeContainer.getAllWorkingSwitches().containsKey(entry.getKey())) &&
