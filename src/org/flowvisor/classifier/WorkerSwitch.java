@@ -1393,7 +1393,8 @@ SwitchChangedListener {
 				}
 			}
 			System.out.println("FLow mod being sent: "+flowMod);
-			handleFlowModAndSend(flowMod, false);
+//			handleFlowModAndSend(flowMod, false);
+			sendMsg(flowMod, this);
 		}
 	}
 
