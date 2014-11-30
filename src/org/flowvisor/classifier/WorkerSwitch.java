@@ -876,6 +876,7 @@ SwitchChangedListener {
 	 */
 
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
+		System.out.println("sendMsg: OF msg length short: "+msg.getLength() + "\nmessage length unsigned: "+msg.getLengthU()+"\nmessage contents: "+msg.toString());
 		if (this.msgStream != null) {
 			FVLog.log(LogLevel.DEBUG, this, "send to switch:", msg);
 			try {
@@ -891,7 +892,7 @@ SwitchChangedListener {
 			} catch (MalformedOFMessage e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!\nMessage: "+msg.toString()+"\nError: "+e.getMessage());
 				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
-//				this.stats.increment(FVStatsType.DROP, from, msg);
+				this.stats.increment(FVStatsType.DROP, from, msg);
 			} catch (IOException e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " got IO error !!!!!");
 				FVLog.log(LogLevel.WARN, this,

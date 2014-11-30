@@ -237,8 +237,8 @@ public class FlowVisor {
 //		flowvisor/lime must know that floodlight vm (172.16.1.6) is the top level controller
 //		set the ip of the floodlight controller in org.flowvisor.slicer.OriginalSwitch as the hostname variable in the init function
 		
-//		DPID ubuntu-ngn-r720-2: 0000a63989c12248
-//		00:00:a6:39:89:c1:22:48
+//		DPID ubuntu-ngn-r720-2: 0000fe58101cc94f
+//		00:00:fe:58:10:1c:c9:4f
 //		DIPD ubuntu-ngn-r720-3: 0000eeee35e82748
 //		00:00:ee:ee:35:e8:27:48
 		

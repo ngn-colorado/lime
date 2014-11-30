@@ -42,7 +42,6 @@ public class FVMessageAsyncStream extends OFMessageAsyncStream {
 	public void testAndWrite(OFMessage m) throws BufferFull,
 			MalformedOFMessage, IOException {
 		int len = m.getLengthU();
-//		int len = m.getLength();
 		if (this.outBuf.remaining() < len) {
 			this.flush(); // try a quick write to flush buffer
 			if (this.outBuf.remaining() < len) {
@@ -75,7 +74,7 @@ public class FVMessageAsyncStream extends OFMessageAsyncStream {
 		int wrote = this.outBuf.position() - start;
 		if (len != wrote) { // was the packet correctly written
 			// no! back it out and throw an error
-//			this.outBuf.position(start);
+			this.outBuf.position(start);
 			FVLog.log(LogLevel.CRIT, null, "dropping bad OF Message: " + m);
 			throw new MalformedOFMessage("len=" + len + ",wrote=" + wrote
 					+ " msg=" + m);
