@@ -249,8 +249,8 @@ public class FlowVisor {
 		
 		HashMap<Short, PortInfo> originalVswitchporttable = new HashMap<>();
 		originalVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
-		originalVswitchporttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
-		originalVswitchporttable.put((short)3, new PortInfo(PortType.H_CONNECTED, null, null));
+		originalVswitchporttable.put((short)2, new PortInfo(PortType.EMPTY, null, null));
+		originalVswitchporttable.put((short)3, new PortInfo(PortType.EMPTY, null, null));
 		
 		HashMap<Short, PortInfo> cloneVswitchporttable = new HashMap<>();
 		cloneVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
