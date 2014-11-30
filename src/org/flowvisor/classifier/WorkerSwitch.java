@@ -880,7 +880,7 @@ SwitchChangedListener {
 			FVLog.log(LogLevel.DEBUG, this, "send to switch:", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
-				System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine: "+msg);
+//				System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine: "+msg);
 				
 			} catch (BufferFull e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " framing BUG !!!!!");
@@ -1388,6 +1388,7 @@ SwitchChangedListener {
 					}
 				}
 			}
+			System.out.println("FLow mod being sent: "+flowMod);
 			handleFlowModAndSend(flowMod);
 		}
 	}
