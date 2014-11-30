@@ -891,7 +891,7 @@ SwitchChangedListener {
 			} catch (MalformedOFMessage e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!\nMessage: "+msg.toString()+"\nError: "+e.getMessage());
 				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
-				this.stats.increment(FVStatsType.DROP, from, msg);
+//				this.stats.increment(FVStatsType.DROP, from, msg);
 			} catch (IOException e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " got IO error !!!!!");
 				FVLog.log(LogLevel.WARN, this,
