@@ -1376,7 +1376,7 @@ SwitchChangedListener {
 
 		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
 			FVFlowMod flowMod = entry.getValue();
-			System.out.println("Current flowmod: "+flowMod);
+			System.out.println("\nCurrent flowmod: "+flowMod+"\n");
 			for(int i = 0; i<flowMod.getActions().size(); i++ ){
 				action = flowMod.getActions().get(i);
 				if(action instanceof OFActionOutput){
