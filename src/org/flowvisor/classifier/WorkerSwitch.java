@@ -1396,6 +1396,7 @@ SwitchChangedListener {
 //			handleFlowModAndSend(flowMod, false);
 //			sendMsg(flowMod, this);
 			try {
+				flowMod.setLength((short) (flowMod.getLength()+8));
 				this.msgStream.testAndWrite(flowMod);
 			} catch (BufferFull e) {
 				// TODO Auto-generated catch block
