@@ -41,7 +41,8 @@ public class FVMessageAsyncStream extends OFMessageAsyncStream {
 
 	public void testAndWrite(OFMessage m) throws BufferFull,
 			MalformedOFMessage, IOException {
-		int len = m.getLengthU();
+//		int len = m.getLengthU();
+		int len = m.getLength();
 		if (this.outBuf.remaining() < len) {
 			this.flush(); // try a quick write to flush buffer
 			if (this.outBuf.remaining() < len) {
