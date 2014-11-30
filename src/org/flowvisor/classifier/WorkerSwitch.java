@@ -1393,7 +1393,7 @@ SwitchChangedListener {
 				}
 			}
 			System.out.println("FLow mod being sent: "+flowMod);
-			handleFlowModAndSend(flowMod);
+			handleFlowModAndSend(flowMod, false);
 		}
 	}
 
@@ -1418,11 +1418,15 @@ SwitchChangedListener {
 		}
 	}*/
 
+	public synchronized void handleFlowModAndSend(FVFlowMod fm){
+		handleFlowModAndSend(fm, true);
+	}
+	
 	/**
 	 * Check type of FlowMod and if it should be add/modyfied/deleted, send flowMod to switch 
 	 * @param fm
 	 */
-	public synchronized void handleFlowModAndSend(FVFlowMod fm){
+	public synchronized void handleFlowModAndSend(FVFlowMod fm, boolean addToTable){
 		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + fm.toString());
 		System.out.println("Adding flow mod to flow table object: "+fm.toString());
 		this.flowTable.addFlowMod(fm, fm.getCookie());
