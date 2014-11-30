@@ -1367,12 +1367,14 @@ SwitchChangedListener {
 	 * @param ghostPort
 	 */
 	public synchronized void insertFlowRuleTableAndSendModified(WorkerSwitch ActiveSwitch, short ghostPort){
+		System.out.println("Starting flow mod migration");
 		this.flowTable.copyFromAnotherLimeFlowTable(ActiveSwitch.flowTable);
 		OFAction action;
 		short originalPort;
 
 		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
 			FVFlowMod flowMod = entry.getValue();
+			System.out.println("Current flowmod: "+flowMod);
 			for(int i = 0; i<flowMod.getActions().size(); i++ ){
 				action = flowMod.getActions().get(i);
 				if(action instanceof OFActionOutput){

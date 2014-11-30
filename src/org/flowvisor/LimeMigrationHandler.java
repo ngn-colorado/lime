@@ -134,6 +134,7 @@ public class LimeMigrationHandler {
 					// setup clone switch
 					cloneSwitch.setDuplicateSwitch(activeSwitch);
 					// copy FlowMod table from active to switch and push it the switch
+					System.out.println("Starting flowmod migration function");
 					cloneSwitch.insertFlowRuleTableAndSendModified(activeSwitch, ghostPort);  //FIXME we may need to clone this
 					
 //					switchDoneMigrating(cloneSwitch, activeSwitch);
