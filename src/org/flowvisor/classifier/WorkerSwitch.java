@@ -1429,7 +1429,9 @@ SwitchChangedListener {
 	public synchronized void handleFlowModAndSend(FVFlowMod fm, boolean addToTable){
 		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + fm.toString());
 		System.out.println("Adding flow mod to flow table object: "+fm.toString());
-		this.flowTable.addFlowMod(fm, fm.getCookie());
+		if(addToTable){
+			this.flowTable.addFlowMod(fm, fm.getCookie());
+		}
 		this.sendMsg(fm, this);
 		/*if(flowTable.handleFlowMods(fm)){
 			// send fm to switch
