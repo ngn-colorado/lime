@@ -876,7 +876,7 @@ SwitchChangedListener {
 	 */
 
 	public void sendMsg(OFMessage msg, FVSendMsg from) {
-		System.out.println("sendMsg: OF msg length short: "+msg.getLength() + "\nmessage length unsigned: "+msg.getLengthU()+"\nmessage contents: "+msg.toString());
+//		System.out.println("sendMsg: OF msg length short: "+msg.getLength() + "\nmessage length unsigned: "+msg.getLengthU()+"\nmessage contents: "+msg.toString());
 		if (this.msgStream != null) {
 			FVLog.log(LogLevel.DEBUG, this, "send to switch:", msg);
 			try {
