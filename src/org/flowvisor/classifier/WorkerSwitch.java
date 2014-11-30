@@ -1394,7 +1394,20 @@ SwitchChangedListener {
 			}
 			System.out.println("FLow mod being sent: "+flowMod);
 //			handleFlowModAndSend(flowMod, false);
-			sendMsg(flowMod, this);
+//			sendMsg(flowMod, this);
+			try {
+				this.msgStream.testAndWrite(flowMod);
+			} catch (BufferFull e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedOFMessage e) {
+				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!\nMessage: "+flowMod.toString()+"\nError: "+e.getMessage());
+				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
+				this.stats.increment(FVStatsType.DROP, this, flowMod);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
