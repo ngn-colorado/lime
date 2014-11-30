@@ -304,6 +304,7 @@ public class LimeFlowTable{
 	}
 
 	public long addFlowMod(final FVFlowMod flowmod, long cookie) {
+		System.out.println("Added flowmod to flowtable: "+flowmod);
 		this.flowmodMap.put(cookie, flowmod);
 		this.cookieMap.put(flowmod.hashCode(), cookie);
 		return cookie;
