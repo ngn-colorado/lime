@@ -1392,24 +1392,25 @@ SwitchChangedListener {
 					}
 				}
 			}
+			flowMod.setLength((short) (flowMod.getLength()+8));
 			System.out.println("FLow mod being sent: "+flowMod);
-//			handleFlowModAndSend(flowMod, false);
+			handleFlowModAndSend(flowMod, false);
 //			sendMsg(flowMod, this);
-			try {
-				flowMod.setLength((short) (flowMod.getLength()+8));
-//				flowMod.setLength((short) (flowMod.getLength()));
-				this.msgStream.testAndWrite(flowMod);
-			} catch (BufferFull e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MalformedOFMessage e) {
-				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!\nMessage: "+flowMod.toString()+"\nError: "+e.getMessage());
-				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
-				this.stats.increment(FVStatsType.DROP, this, flowMod);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				flowMod.setLength((short) (flowMod.getLength()+8));
+////				flowMod.setLength((short) (flowMod.getLength()));
+//				this.msgStream.testAndWrite(flowMod);
+//			} catch (BufferFull e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (MalformedOFMessage e) {
+//				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!\nMessage: "+flowMod.toString()+"\nError: "+e.getMessage());
+//				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
+//				this.stats.increment(FVStatsType.DROP, this, flowMod);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 	}
 
