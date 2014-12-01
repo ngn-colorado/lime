@@ -620,9 +620,9 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 
 						continue;
 					}
-					/*System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
+					System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
 					System.out.println("MURAD: msg-data: " + msg.toString());
-					System.out.println("+++++++++++");*/
+					System.out.println("+++++++++++");
 					((Slicable) msg).sliceFromController(activeSwitch, this);
 
 				} else
