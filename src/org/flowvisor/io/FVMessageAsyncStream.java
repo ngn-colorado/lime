@@ -74,7 +74,7 @@ public class FVMessageAsyncStream extends OFMessageAsyncStream {
 		int wrote = this.outBuf.position() - start;
 		if (len != wrote) { // was the packet correctly written
 			// no! back it out and throw an error
-			this.outBuf.position(start);
+//			this.outBuf.position(start);
 			FVLog.log(LogLevel.CRIT, null, "dropping bad OF Message: " + m);
 			throw new MalformedOFMessage("len=" + len + ",wrote=" + wrote
 					+ " msg=" + m);
