@@ -1398,8 +1398,10 @@ SwitchChangedListener {
 					}
 				}
 			}
-//			flowMod.setLength((short) (flowMod.getLength()+8));
-			flowMod.setLength((short) (flowMod.getLength()));
+			if(flowMod.getOutPort() != -1){
+				flowMod.setLength((short) (flowMod.getLength()+8));	
+			}
+//			flowMod.setLength((short) (flowMod.getLength()));
 			System.out.println("FLow mod being sent: "+flowMod);
 			handleFlowModAndSend(flowMod, false);
 //			sendMsg(flowMod, this);
