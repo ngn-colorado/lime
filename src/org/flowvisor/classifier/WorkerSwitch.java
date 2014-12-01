@@ -1392,7 +1392,8 @@ SwitchChangedListener {
 					}
 				}
 			}
-			flowMod.setLength((short) (flowMod.getLength()+8));
+//			flowMod.setLength((short) (flowMod.getLength()+8));
+			flowMod.setLength((short) (flowMod.getLength()));
 			System.out.println("FLow mod being sent: "+flowMod);
 			handleFlowModAndSend(flowMod, false);
 //			sendMsg(flowMod, this);
@@ -1545,8 +1546,8 @@ SwitchChangedListener {
 			ghostFlowMod.setBufferId(0xffffffff); // buffer to NONE
 			ghostFlowMod.setActions(actionList);
 			ghostFlowMod.setPriority((short) 32767);
-			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH + 8);  // 8 for each action?
-//			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH);
+//			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH + 8);  // 8 for each action?
+			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH);
 			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + ghostFlowMod.toString());
 			this.sendMsg(ghostFlowMod, this);
 			
