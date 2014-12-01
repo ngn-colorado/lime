@@ -18,26 +18,20 @@ package org.flowvisor.classifier;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.flowvisor.exceptions.ActionDisallowedException;
-import org.flowvisor.flows.FlowDBEntry;
-import org.flowvisor.log.FVLog;
-import org.flowvisor.log.LogLevel;
 import org.flowvisor.message.FVFlowMod;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMatch;
-import org.openflow.protocol.OFPort;
-import org.openflow.protocol.OFError.OFFlowModFailedCode;
+import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionOutput;
 
 /**
  * Virtualized version of the switch flow table.
@@ -304,6 +298,22 @@ public class LimeFlowTable{
 	}
 
 	public long addFlowMod(final FVFlowMod flowmod, long cookie) {
+		if(flowmod.getOutPort() == -1){
+			System.out.println("Caught message with output port of -1");
+			List<OFAction> actions = flowmod.getActions();
+			for(OFAction action : actions){
+				System.out.println("Action: "+action);
+				if(action instanceof OFActionOutput){
+					OFActionOutput outputAction = (OFActionOutput)action;
+					short outPort = outputAction.getPort();
+					System.out.println("OFOutputAction port: "+ outPort);
+					flowmod.setOutPort(outPort);
+				}
+			}
+		}
+		
+		
+		
 		System.out.println("Added flowmod to flowtable: "+flowmod);
 		this.flowmodMap.put(cookie, flowmod);
 		this.cookieMap.put(flowmod.hashCode(), cookie);
