@@ -1382,11 +1382,13 @@ SwitchChangedListener {
 				if(action instanceof OFActionOutput){
 					if(this.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 						if (this.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
+							System.out.println("Modifying flow: "+flowMod);
 							originalPort = ((OFActionOutput) action).getPort(); 
 							OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
 							flowMod.getActions().add(i, addedVlanAction);
 							((OFActionOutput) action).setPort(ghostPort);
 							flowMod.setOriginalOutputPort(originalPort);
+							System.out.println("Flow after modification: "+flowMod);
 							break; //Assuming that there is only one output port...	
 						}
 					}
