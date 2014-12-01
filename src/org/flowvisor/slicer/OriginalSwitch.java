@@ -621,9 +621,9 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 						continue;
 					}
 					String msgContents = msg.toString();
-					if(msgContents.contains(";port")){
-						System.out.println("OriginalSwitch: raw message contents: "+msgContents);
-					}
+//					if(msgContents.contains(";port")){
+//						System.out.println("OriginalSwitch: raw message contents: "+msgContents);
+//					}
 //					System.out.println("MURAD: Receiving from controller msg-type: " + msg.getType());
 //					System.out.println("MURAD: msg-data: " + msg.toString());
 //					System.out.println("+++++++++++");

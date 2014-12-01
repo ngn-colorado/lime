@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.flowvisor.PortInfo.PortType;
+import org.flowvisor.classifier.LimeFlowTable;
 import org.flowvisor.classifier.WorkerSwitch;
 
 
@@ -90,6 +91,11 @@ public class LimeMigrationHandler {
 				WorkerSwitch activeSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
 				long cloneSwID  = (long) entry.getValue();
 				WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(cloneSwID);
+				
+				
+//				print flow table of active switch:
+				LimeFlowTable ft = activeSwitch.getFlowTable();
+				System.out.println("Table dump: "+ft.dump());
 
 				boolean portMissing = false;
 				short ghostPort = -1;

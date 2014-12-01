@@ -202,6 +202,10 @@ SwitchChangedListener {
 			setFlowTracking(false);
 		}
 	}
+	
+	public LimeFlowTable getFlowTable(){
+		return flowTable;
+	}
 
 	public short getMissSendLength() {
 		return missSendLength;

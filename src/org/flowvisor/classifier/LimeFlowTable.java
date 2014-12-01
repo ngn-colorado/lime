@@ -349,11 +349,12 @@ public class LimeFlowTable{
 	/**
 	 * dump the contents of the FlowTable
 	 */
-	public void dump() {
+	public String dump() {
 		String ret = "";
 		for (final Map.Entry<Long, FVFlowMod> fe : this.flowmodMap.entrySet()) {
 			ret += "cookie["+fe.getKey() + "] :" + fe.getValue().toString() + "\n";
 		}
+		return ret;
 		/*this.log.info("OVXFlowTable \n========================\n" + ret
 				+ "========================\n");*/
 	}
