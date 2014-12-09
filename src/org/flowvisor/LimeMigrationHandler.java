@@ -25,10 +25,21 @@ public class LimeMigrationHandler {
 	
 	
 	/**
-	 * Make sure that all required active and clone switches and their ports are available
+	 * Starts the migration process. Order of migration:
+	 * 
+	 * 1. Provide a new virtual topology to LIME
+	 * 2. Request new virtual topology
+	 * 	1. Create/add new virtual topology in OVX
+	 * 	2.  Create necessary tunnels in OVS physical plane for ghost ports
+	 * 3. Clone flow tables to clone switches with vlan tags
+	 * 4. Perform physical migration of VMs
+	 * 5. CLean up old network
+	 * 
+	 * 
 	 * @throws InterruptedException
 	 */
 	public void init() throws InterruptedException{ // TODO create LIME exception of missing ports or switches
+		//TODO: need to specify topology here based on what is received in the LimeServer
 		System.out.println("MURAD: LimeMigration, inititlizing migration process");
 		// this should be received from operator, for testing, we just assume that we have them
 
