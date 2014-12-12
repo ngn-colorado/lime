@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.flowvisor.FlowVisor;
 import org.flowvisor.LimeContainer;
 import org.flowvisor.LimeSwitch;
 import org.flowvisor.PortInfo;
@@ -27,15 +28,14 @@ import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.ConfigurationEvent;
 import org.flowvisor.config.FVConfig;
-
 import org.flowvisor.config.FlowMapChangedListener;
 import org.flowvisor.config.FlowSpaceImpl;
+import org.flowvisor.config.Flowvisor;
 import org.flowvisor.config.FlowvisorChangedListener;
 import org.flowvisor.config.FlowvisorImpl;
 import org.flowvisor.config.Slice;
 import org.flowvisor.config.SwitchChangedListener;
 import org.flowvisor.config.SwitchImpl;
-
 import org.flowvisor.events.FVEvent;
 import org.flowvisor.events.FVEventHandler;
 import org.flowvisor.events.FVEventLoop;
@@ -1390,67 +1390,114 @@ SwitchChangedListener {
 		System.out.println("Starting flow mod migration of " + originalActiveSwitch.getDPID() + " to "+getDPID());
 		System.out.println("ActiveSwitch flow table size: "+originalActiveSwitch.flowTable.flowmodMap.size());
 		
-		//Get the original switch's flow table. NOTE: this table needs to be populated with flowmods as they are received and written to the physical switch
+		//Get the original switch's flow table and copy to clone switch's flow table. 
+		//NOTE: this table needs to be populated with flowmods as they are received and written to the physical switch
 		this.flowTable.copyFromAnotherLimeFlowTable(originalActiveSwitch.flowTable);
-		OFAction action;
-		short originalPort;
-		
-		
+				
 		//Go through each flowmod in the original switch's flow table. If the flowmod is OFAction then the flowmod must be written
 		//to the clone switch with vlan tag that outputs matchin packets to the ghost port
 		//A rule to strip this tag and perform the original action must be written to the original switch
 		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
+			//get the flow mod out of the table entry
 			FVFlowMod flowMod = entry.getValue();
 			System.out.println("\nCurrent flowmod: "+flowMod+"\n");
-			for(int i = 0; i<flowMod.getActions().size(); i++ ){
-				action = flowMod.getActions().get(i);
-				if(action instanceof OFActionOutput){
-					if(this.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
-						//TODO: I think that all flow mods need to be written to clone.
-						if (this.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){
-							int originalSize = flowMod.getLengthU();
-							System.out.println("Modifying flow: "+flowMod);
-							originalPort = ((OFActionOutput) action).getPort(); 
-							OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
-							int tagSize = addedVlanAction.getLengthU();
-							flowMod.getActions().add(i, addedVlanAction);
-							flowMod.computeLength();
-							System.out.println("Expected length: " + (originalSize + tagSize) +"\nCurrent length: "+flowMod.getLengthU());
-							((OFActionOutput) action).setPort(ghostPort);
-							flowMod.setOriginalOutputPort(originalPort);
-							System.out.println("Flow after modification: "+flowMod);
-							
-							//TODO: add rule to remove tag on original switch- e.g. the ActiveSwitch object
-							
-							break; //Assuming that there is only one output port...	
+			//clone the mod and add vlan tag
+			short vlanNumber = cloneFlowToSwitch(flowMod, ghostPort, this);
+			
+			//create mod to handle receipt of vlan tags in the original switch
+			FVFlowMod vlanHandlerMod = createVlanHandlerMod(flowMod, vlanNumber, ghostPort);
+			//write clonedMod to original switch
+			originalActiveSwitch.handleFlowModAndSend(vlanHandlerMod, true);
+		}
+	}
+	
+	private FVFlowMod createVlanHandlerMod(FVFlowMod originalMod, short vlanNumber, short ghostPort) {
+		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
+		FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
+		//create match to match packets coming in ghostPort for a particular vlan
+		OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
+		OFMatch match = new OFMatch();
+		match.setDataLayerVirtualLan(vlanNumber);
+		match.setInputPort(ghostPort);
+		//TODO: set the actions of this mod to be the actions of the original mod.
+		//For now, use the vlan tag # as the output port of this mod
+		OFAction outputAction = new OFActionOutput(vlanNumber);
+		newMod.setMatch(match);
+		newMod.setActions(new LinkedList<OFAction>());
+		newMod.getActions().add(stripVlan);
+		newMod.getActions().add(outputAction);
+		newMod.setCommand(FVFlowMod.OFPFC_ADD);
+		//hard code priority
+		newMod.setPriority((short)1);
+		//need this flag?
+		newMod.setFlags((short)1);
+		newMod.computeLength();
+		return newMod;
+	}
+
+	/**
+	 * Creates a modified flow to the clone switch by creating a vlan tag associated
+	 * with the original flow if it is an OFAction, adding the tag to the packet,
+	 * and outputting the packet out the clone's ghost port. Does NOT write the flowmod
+	 * to the clone switch.
+	 * 
+	 * @param clone The clone switch instance
+	 * @param flowmod The original flowmod in from the original switch
+	 * @param cloneGhostPort The ghost port in the clone
+	 * @return The vlan tag for this mod
+	 */
+	public short cloneFlowToSwitch(FVFlowMod flowMod, short cloneGhostPort, WorkerSwitch cloneSwitch){
+		//create new mod, assuming the clone function works
+		FVFlowMod clonedMod = (FVFlowMod) flowMod.clone();
+		System.out.println("\nCurrent flowmod: "+flowMod+"\n");
+		short vlanNumber = -1;
+		//Loop through each action, however at this time we only support actions with one output port
+		//TODO: support multiple output ports in future
+		for(int i = 0; i<clonedMod.getActions().size(); i++ ){
+			OFAction action = clonedMod.getActions().get(i);
+			if(action instanceof OFActionOutput){
+				if(cloneSwitch.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+					//TODO: I think that all flow mods need to be written to clone. The host migration process occurs later
+					//and we would be able to tell which hosts are still attached to the switch this way anyway
+					if (cloneSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){
+						System.out.println("Modifying flow: "+clonedMod);
+						int originalSize = clonedMod.getLengthU();		
+						short originalPort = ((OFActionOutput) action).getPort();
+						//create vlan tag action
+						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						if(vlanNumber < 0){
+							vlanNumber = originalPort;
 						}
+						int tagSize = addedVlanAction.getLengthU();
+						//add vlan tag action to mod
+						clonedMod.getActions().add(i, addedVlanAction);
+						//recompute length?
+						clonedMod.computeLength();
+						System.out.println("Expected length: " + (originalSize + tagSize) +"\nCurrent length: "+flowMod.getLengthU());
+						//set output action of the mod to output on the ghostport
+						((OFActionOutput) action).setPort(cloneGhostPort);
+						flowMod.setOriginalOutputPort(originalPort);
+						System.out.println("Flow after modification: "+flowMod);
+						
+						//TODO: add rule to remove tag on original switch- e.g. the ActiveSwitch object -  this will be done in another function call
+						
+						break; //Assuming that there is only one output port...	
 					}
 				}
 			}
-//			if(flowMod.getOutPort() != -1){
-//				flowMod.setLength((short) (flowMod.getLength()+8));	
-//			}
-//			flowMod.setLength((short) (flowMod.getLength()));
-			System.out.println("Flow mod being sent: "+flowMod);
-			handleFlowModAndSend(flowMod, true);
-//			sendMsg(flowMod, this);
-//			try {
-//				flowMod.setLength((short) (flowMod.getLength()+8));
-////				flowMod.setLength((short) (flowMod.getLength()));
-//				this.msgStream.testAndWrite(flowMod);
-//			} catch (BufferFull e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (MalformedOFMessage e) {
-//				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " BUG: bad msg !!!!!\nMessage: "+flowMod.toString()+"\nError: "+e.getMessage());
-//				FVLog.log(LogLevel.CRIT, this, "BUG: bad msg: ", e);
-//				this.stats.increment(FVStatsType.DROP, this, flowMod);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		}
+
+		System.out.println("Flow mod being sent: "+flowMod);
+		//write flowmod to the clone switch
+		cloneSwitch.handleFlowModAndSend(clonedMod, true);
+		return vlanNumber;
 	}
+	
+	
+	
+	
+	
+	
 
 	/*public synchronized void addFlowRule(FVFlowMod flowMod){
 		flowRulesTable.add(flowMod);
