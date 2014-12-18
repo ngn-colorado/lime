@@ -1,9 +1,8 @@
 package org.flowvisor;
 
+import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -20,30 +19,28 @@ public class LimeHttpServer {
 	
 	public static void main(String[] args){
 		System.out.println("Starting embedded Jersey http server");
-		HttpServer httpServer;
+		HttpServer server = createHttpServer();
 		try {
-			httpServer = createHttpServer();
-			//not needed when using JdkHttpServer
-//			httpServer.start();
-			System.out.println("Started embedded Jersey server");
-		} catch (ProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
+			server.start();
+			System.out.println("Press any key to end application....");
+			System.in.read();
+			server.shutdownNow();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+
 	}
 
-	private static HttpServer createHttpServer() throws ProcessingException, URISyntaxException {
-		ResourceConfig limeResourceConfig = new ResourceConfig(LimeWebApplication.class);
-		URI baseUri = UriBuilder.fromUri(BASE_LIME_URI_STRING).port(BASE_LIME_PORT).build();
-//		return JdkHttpServerFactory.createHttpServer(baseUri, limeResourceConfig);
-//		HttpServer server = HttpServer.createSimpleServer(BASE_LIME_URI_STRING);
-		return GrizzlyHttpServerFactory.createHttpServer(baseUri);//, limeResourceConfig);
+	private static HttpServer createHttpServer() {
+//		HttpServer server = new HttpServer();
 //		NetworkListener netListener = new NetworkListener("jaxws-listener", "0.0.0.0", BASE_LIME_PORT);
-		
+		ResourceConfig config = new ResourceConfig(LimeAPI.class);
+		URI baseUri = UriBuilder.fromUri(BASE_LIME_URI_STRING).port(BASE_LIME_PORT).build();
+	    HttpServer server = GrizzlyHttpServerFactory.createHttpServer(baseUri, config);
+//		HttpHandler httpHandler = new JaxwsHandler(new LimeAPI());
+	    return server;
 	}
 	
 
