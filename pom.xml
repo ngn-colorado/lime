@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Lime</groupId>
+  <artifactId>Lime</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Lime</name>
+  <repositories>
+	<repository>
+		<id>lib</id>
+		<name>lib</name>
+		<releases>
+		    <enabled>true</enabled>
+		    <checksumPolicy>ignore</checksumPolicy>
+		</releases>
+		<snapshots>
+			<enabled>false</enabled>
+		</snapshots>
+		<url>file://lime/lib</url>
+	</repository>
+  </repositories>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>src.tests</testSourceDirectory>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

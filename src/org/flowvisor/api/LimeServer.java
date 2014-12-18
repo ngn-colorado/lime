@@ -20,13 +20,26 @@ import org.flowvisor.LimeContainer;
 import org.flowvisor.LimeMigrationHandler;
 import org.flowvisor.classifier.WorkerSwitch;
 
-public class LimeServer implements Runnable {
+import com.sun.net.httpserver.HttpServer;
 
+public class LimeServer implements Runnable {
+	private HttpServer httpServer;
+	
+//	public LimeServer(int apiPort){
+//		httpServer
+//	}
+	
+	
+	
 	@Override
 	public void run() {
 		System.out.println("MURAD: LimeServer is running...");
 		int portNumber = 8082;
 
+		
+		
+		
+		
 		try {
 			ServerSocket serverSocket = new ServerSocket(portNumber);
 			final LimeMigrationHandler limeMigHandler = new LimeMigrationHandler();
