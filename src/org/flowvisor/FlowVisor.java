@@ -257,6 +257,8 @@ public class FlowVisor {
 		cloneVswitchporttable.put((short)2, new PortInfo(PortType.EMPTY, null, null));
 		cloneVswitchporttable.put((short)3, new PortInfo(PortType.EMPTY, null, null));
 		
+		//TODO: check/convert LimeContainer to a singleton
+		
 		LimeContainer.addOriginalSwitch(originalVswitch.getDpidLong(), originalVswitchporttable);
 		LimeContainer.insertActiveToOriginalSwitchMap(originalVswitch.getDpidLong(), originalVswitch.getDpidLong());
 		System.out.println("MICHAEL: Original switch: "+originalVswitch.getDpidLong());
