@@ -170,7 +170,9 @@ public class LimeMigrationHandler {
 		System.out.println("Initialization was seccuful..");
 	}
 
-	public synchronized void switchDoneMigrating(WorkerSwitch cloneSwitch, WorkerSwitch activeSwitch){
+	public synchronized void switchDoneMigrating(DPID activeSwitchDpid){
+		WorkerSwitch activeSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwitchDpid.getDpidLong());
+		WorkerSwitch cloneSwitch = activeSwitch.getDuplicateSwitch();
 		cloneSwitchCounter ++;
 		// edit original switch to map to this clone switch now
 		activeSwitch.getOriginalSwitchByName(LimeContainer.OriginalSwitch).setActiveSwitch(cloneSwitch);
