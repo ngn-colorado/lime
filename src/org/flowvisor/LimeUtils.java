@@ -36,7 +36,7 @@ public class LimeUtils {
 			return false;
 		}
 		
-		return false;
+		return true;
 	}
 
 	private static boolean processSwitch(JSONObject switchObj, String dpid) {
@@ -70,21 +70,32 @@ public class LimeUtils {
 			return false;
 		}
 		if(isOriginal){
-			LimeContainer.addOriginalSwitch(currentSwitch.getDpidLong(), portMap);
-			LimeContainer.insertActiveToOriginalSwitchMap(currentSwitch.getDpidLong(), currentSwitch.getDpidLong());
+			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as original switch to Lime with port map:\n"+printPortMap(portMap));
+//			LimeContainer.addOriginalSwitch(currentSwitch.getDpidLong(), portMap);
+//			LimeContainer.insertActiveToOriginalSwitchMap(currentSwitch.getDpidLong(), currentSwitch.getDpidLong());
 			return true;
 		} else if(isClone){
 			if(originalDpid == null){
 				System.out.println("Need the original dpid for the clone switch");
 				return false;
 			}
-			LimeContainer.addCloneSwitch(currentSwitch.getDpidLong(), portMap);
-			LimeContainer.insertActiveToCloneSwitchMap(originalDpid.getDpidLong(), currentSwitch.getDpidLong());
+			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as clone switch to Lime with original switch: "+originalDpid.getDpidHexString() +" with port map:\n"+printPortMap(portMap));
+//			LimeContainer.addCloneSwitch(currentSwitch.getDpidLong(), portMap);
+//			LimeContainer.insertActiveToCloneSwitchMap(originalDpid.getDpidLong(), currentSwitch.getDpidLong());
 			return true;
 		} else{
 			System.out.println("Illegal state");
 			return false;
 		}
+	}
+
+	private static String printPortMap(HashMap<Short, PortInfo> portMap) {
+		String response = "";
+		for(Short port : portMap.keySet()){
+			PortInfo info = portMap.get(port);
+			response += "Port: "+port+" Type: "+info.getType()+"\n";
+		}
+		return response;
 	}
 
 	private static HashMap<Short, PortInfo> processPorts(JSONObject portsObj) {
