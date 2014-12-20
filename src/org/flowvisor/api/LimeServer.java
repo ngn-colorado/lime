@@ -17,30 +17,27 @@ import java.net.Socket;
 
 import org.flowvisor.DPID;
 import org.flowvisor.LimeContainer;
+import org.flowvisor.LimeHttpServer;
 import org.flowvisor.LimeMigrationHandler;
 import org.flowvisor.classifier.WorkerSwitch;
 
 import com.sun.net.httpserver.HttpServer;
 
 public class LimeServer implements Runnable {
-	private HttpServer httpServer;
-	
-//	public LimeServer(int apiPort){
-//		httpServer
-//	}
-	
-	
 	
 	@Override
 	public void run() {
-		System.out.println("MURAD: LimeServer is running...");
-		int portNumber = 8082;
-
+//		System.out.println("MURAD: LimeServer is running...");
+//		int portNumber = 8082;
+		System.out.println("MICHAEL: Starting Lime HTTP Server");
+		LimeHttpServer server = new LimeHttpServer();
+		Thread thread = new Thread(server);
+		thread.start();
 		
 		
 		
 		
-		try {
+/*		try {
 			ServerSocket serverSocket = new ServerSocket(portNumber);
 			final LimeMigrationHandler limeMigHandler = new LimeMigrationHandler();
 			while(true){
@@ -90,6 +87,6 @@ public class LimeServer implements Runnable {
 			.println("Exception caught when trying to listen on port "
 					+ portNumber + " or listening for a connection");
 			System.out.println(e.getMessage());
-		}
+		}*/
 	}
 }
