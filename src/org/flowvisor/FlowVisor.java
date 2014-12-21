@@ -186,9 +186,9 @@ public class FlowVisor {
 		// TODO the following for-loop just for testing and it is assuming this topology
 		
 		// top switch only has two ports and they are connected to switches (SW_CONNECTED)
-		HashMap<Short, PortInfo> portTable = new HashMap<>();
-		portTable.put((short) 1, new PortInfo(PortType.H_CONNECTED, null, null));
-		portTable.put((short) 2, new PortInfo(PortType.H_CONNECTED, null, null));
+//		HashMap<Short, PortInfo> portTable = new HashMap<>();
+//		portTable.put((short) 1, new PortInfo(PortType.H_CONNECTED, null, null));
+//		portTable.put((short) 2, new PortInfo(PortType.H_CONNECTED, null, null));
 
 		
 		
@@ -243,32 +243,32 @@ public class FlowVisor {
 //		00:00:ee:ee:35:e8:27:48
 		
 //		first vSwitch in ovx is: 00:a4:23:05:00:00:00:01
-		DPID originalVswitch = new DPID("00:a4:23:05:00:00:00:01");
+//		DPID originalVswitch = new DPID("00:a4:23:05:00:00:00:01");
 //		second vSwitch in ovx is: 00:a4:23:05:00:00:00:02
-		DPID cloneVswitch = new DPID("00:a4:23:05:00:00:00:02");
+//		DPID cloneVswitch = new DPID("00:a4:23:05:00:00:00:02");
 		
-		HashMap<Short, PortInfo> originalVswitchporttable = new HashMap<>();
-		originalVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
-		originalVswitchporttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
-		originalVswitchporttable.put((short)3, new PortInfo(PortType.H_CONNECTED, null, null));
-		
-		HashMap<Short, PortInfo> cloneVswitchporttable = new HashMap<>();
-		cloneVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
-		cloneVswitchporttable.put((short)2, new PortInfo(PortType.EMPTY, null, null));
-		cloneVswitchporttable.put((short)3, new PortInfo(PortType.EMPTY, null, null));
+//		HashMap<Short, PortInfo> originalVswitchporttable = new HashMap<>();
+//		originalVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
+//		originalVswitchporttable.put((short)2, new PortInfo(PortType.H_CONNECTED, null, null));
+//		originalVswitchporttable.put((short)3, new PortInfo(PortType.H_CONNECTED, null, null));
+//		
+//		HashMap<Short, PortInfo> cloneVswitchporttable = new HashMap<>();
+//		cloneVswitchporttable.put((short)1, new PortInfo(PortType.GHOST, null, null));
+//		cloneVswitchporttable.put((short)2, new PortInfo(PortType.EMPTY, null, null));
+//		cloneVswitchporttable.put((short)3, new PortInfo(PortType.EMPTY, null, null));
 		
 		//TODO: check/convert LimeContainer to a singleton
 		
-		LimeContainer.addOriginalSwitch(originalVswitch.getDpidLong(), originalVswitchporttable);
-		LimeContainer.insertActiveToOriginalSwitchMap(originalVswitch.getDpidLong(), originalVswitch.getDpidLong());
-		System.out.println("MICHAEL: Original switch: "+originalVswitch.getDpidLong());
+//		LimeContainer.addOriginalSwitch(originalVswitch.getDpidLong(), originalVswitchporttable);
+//		LimeContainer.insertActiveToOriginalSwitchMap(originalVswitch.getDpidLong(), originalVswitch.getDpidLong());
+//		System.out.println("MICHAEL: Original switch: "+originalVswitch.getDpidLong());
 		
 		
 //		LimeContainer.addOriginalSwitch(cloneVswitch.getDpidLong(), cloneVswitchporttable);
 //		LimeContainer.insertActiveToOriginalSwitchMap(cloneVswitch.getDpidLong(), cloneVswitch.getDpidLong());
-		System.out.println("MICHAEL: Clone switch: "+cloneVswitch.getDpidLong());
-		LimeContainer.addCloneSwitch(cloneVswitch.getDpidLong(), cloneVswitchporttable);
-		LimeContainer.insertActiveToCloneSwitchMap(originalVswitch.getDpidLong(), cloneVswitch.getDpidLong());
+//		System.out.println("MICHAEL: Clone switch: "+cloneVswitch.getDpidLong());
+//		LimeContainer.addCloneSwitch(cloneVswitch.getDpidLong(), cloneVswitchporttable);
+//		LimeContainer.insertActiveToCloneSwitchMap(originalVswitch.getDpidLong(), cloneVswitch.getDpidLong());
 		
 		
 		

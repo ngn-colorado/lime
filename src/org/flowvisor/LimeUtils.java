@@ -108,4 +108,22 @@ public class LimeUtils {
 		}
 		return portMap;
 	}
+	
+	public static boolean validIPAddress(String ip){
+		String[] tokens = ip.split("\\.");
+		if(tokens.length != 4){
+			return false;
+		}
+		for(String str : tokens){
+			try{
+				int i = Integer.parseInt(str);
+				if(i < 0 || i > 255){
+					return false;
+				}
+			} catch(NumberFormatException e){
+				return false;
+			}
+		}
+		return true;
+	}
 }

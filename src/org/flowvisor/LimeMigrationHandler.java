@@ -3,12 +3,14 @@
  */
 package org.flowvisor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
+import org.apache.derby.impl.sql.compile.HasVariantValueNodeVisitor;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.LimeFlowTable;
 import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.message.FVFlowMod;
 
 
 
@@ -35,6 +37,7 @@ public class LimeMigrationHandler {
 	 * 4. Perform physical migration of VMs
 	 * 5. CLean up old network
 	 * 
+	 * this method is called before vms are migrated
 	 * 
 	 * @throws InterruptedException
 	 */
@@ -95,36 +98,37 @@ public class LimeMigrationHandler {
 //			return;
 //		}
 
-		for (Map.Entry entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
-			if((LimeContainer.getAllWorkingSwitches().containsKey(entry.getKey())) &&
-					(LimeContainer.getAllWorkingSwitches().containsKey(entry.getValue()))){
-				long activeSwID = (long) entry.getKey();
+//		for (Map.Entry<Long, Long> entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
+		for(Long activeSwID : LimeContainer.getActiveToCloneSwitchMap().keySet()){
+			Long cloneSwID = LimeContainer.getActiveToCloneSwitchMap().get(activeSwID);
+			boolean activeSwitchIsWorking = LimeContainer.getAllWorkingSwitches().containsKey(activeSwID);
+			boolean cloneSwitchIsWorking = LimeContainer.getAllWorkingSwitches().containsKey(cloneSwID);
+			if(activeSwitchIsWorking && cloneSwitchIsWorking){
 				WorkerSwitch activeSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
-				long cloneSwID  = (long) entry.getValue();
 				WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(cloneSwID);
-				
 				
 //				print flow table of active switch:
 				LimeFlowTable ft = activeSwitch.getFlowTable();
 				System.out.println("Table dump: "+ft.dump());
 
 				boolean portMissing = false;
-				short ghostPort = -1;
-				HashMap<Short, PortInfo> portTable = LimeContainer.getCloneSwitchContainer().get(cloneSwID).getPortTable();
-				cloneSwitch.setActivePorts(portTable);
+				//TODO: this method should work or it should not be in WorkerSwitch
+				short ghostPort = cloneSwitch.getGhostPort();
+				HashMap<Short, PortInfo> clonePortTable = LimeContainer.getCloneSwitchContainer().get(cloneSwID).getPortTable();
+				cloneSwitch.setActivePorts(clonePortTable);
 				int emptyPortsCounter = 0;
-				for (Map.Entry portEntry : portTable.entrySet()){
-					short portNo = (short) portEntry.getKey();
-					PortInfo pInfo = (PortInfo) portEntry.getValue();
-					if(activeSwitch.getActivePorts().containsKey(portNo)){   //TODO need to check if clone switch has all the required ports
-						if(!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.H_CONNECTED)){// we don't want to change these to empty ports
+				for (Short portNumber : clonePortTable.keySet()){
+					PortInfo pInfo = clonePortTable.get(portNumber);
+					if(activeSwitch.getActivePorts().containsKey(portNumber)){   //TODO need to check if clone switch has all the required ports
+						if(!activeSwitch.getActivePorts().get(portNumber).getType().equals(PortType.H_CONNECTED)){// we don't want to change these to empty ports
 							//&&!activeSwitch.getActivePorts().get(portNo).getType().equals(PortType.SW_CONNECTED)){ 
-							activeSwitch.getActivePorts().get(portNo).setType(pInfo.getType());
+							activeSwitch.getActivePorts().get(portNumber).setType(pInfo.getType());
 						}
-						cloneSwitch.getActivePorts().get(portNo).setType(pInfo.getType());
-						if(pInfo.getType().equals(PortType.GHOST)){
-							ghostPort = portNo; // this should only happens once since we only have one ghost port
-						}
+						//TODO: what is the purpose of this line?
+						cloneSwitch.getActivePorts().get(portNumber).setType(pInfo.getType());
+//						if(pInfo.getType().equals(PortType.GHOST)){
+//							ghostPort = portNumber; // this should only happens once since we only have one ghost port
+//						}
 						
 						if(pInfo.getType().equals(PortType.EMPTY)){
 							emptyPortsCounter ++;
@@ -134,7 +138,7 @@ public class LimeMigrationHandler {
 					}
 					else{
 						portMissing = true;
-						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNo+ " is not found for aSW " + activeSwID + " or cSW " + cloneSwID);
+						System.out.println("MURAD: LimeMigrationHandler, ERROR, port " + portNumber+ " is not found for aSW " + activeSwID + " or cSW " + cloneSwID);
 						break;
 					}
 				}
@@ -144,7 +148,7 @@ public class LimeMigrationHandler {
 				System.out.println("ghostPort variable: "+ghostPort);
 				
 				//skip check for now:
-				portMissing = false;
+//				portMissing = false;
 				if (!portMissing && ghostPort != -1){
 					// setup active switch
 					activeSwitch.setDuplicateSwitch(cloneSwitch);
@@ -152,7 +156,7 @@ public class LimeMigrationHandler {
 					cloneSwitch.setDuplicateSwitch(activeSwitch);
 					// copy FlowMod table from active to switch and push it the switch
 					System.out.println("Starting flowmod migration function");
-					cloneSwitch.insertFlowRuleTableAndSendModified(activeSwitch, ghostPort);  //FIXME we may need to clone this
+					WorkerSwitch.insertFlowRuleTableAndSendModified(activeSwitch, cloneSwitch, activeSwitch.getFlowTable().getFlowTable());  //FIXME we may need to clone this
 					
 //					switchDoneMigrating(cloneSwitch, activeSwitch);
 				}
@@ -163,12 +167,44 @@ public class LimeMigrationHandler {
 
 			}
 			else{
-				System.out.println("MURAD: ERROR finding Active to Clone switches!!!!!!!!!!: " + entry.getKey() + " " + entry.getValue());
+				System.out.println("MURAD: ERROR finding Active to Clone switches!!!!!!!!!!: " + activeSwID + " " + cloneSwID);
 				return;
 			}
 		}
-		System.out.println("Initialization was seccuful..");
+		System.out.println("Initialization was successful..");
 	}
+	
+	/**
+	 * This will use libvirt to migrate the vms. Will need to have access rights for libvirt
+	 * to the hosts, the ip address of the libvirt hosts/hypervisors, the destination libvirt host/hypervisor ip, and the libvirt names of the hosts
+	 */
+	public void migrateVM(LimeHost host){
+		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
+		if(migrated){
+			//create reverse rule. need to have the connected port
+			WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(host.getOriginalDpid().getDpidLong());
+			WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(host.getCloneDpid().getDpidLong());
+			
+			
+			//TODO: this logic is not quite correct: this will create a vlan tag to send ALL of the non-vlan rules in the original switch
+			//and create a handler in the clone switch. need to do so for each host individually, so if the output port is the same as the port
+			//that the host is connected to. need a sub-method that does this for a port, or create a table of flow mods that only contains flow
+			//mods where the output port == the port the host is connected to
+			//also need to delete the non-vlan rules from the physical switch, but not from the lime flow table
+			//for now, assume that the host is connected to the same port on the cloned switch as on the original switch
+			ArrayList<FVFlowMod> matchingMods = new ArrayList<FVFlowMod>();
+			for(FVFlowMod flowMod : originalSwitch.getFlowTable().getFlowTable()){
+				if(WorkerSwitch.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
+					matchingMods.add(flowMod);
+				}
+				
+			}
+			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods);
+		}
+	}
+
+
+	
 
 	public synchronized void switchDoneMigrating(DPID activeSwitchDpid){
 		WorkerSwitch activeSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwitchDpid.getDpidLong());
@@ -194,6 +230,44 @@ public class LimeMigrationHandler {
 			// send to ovx to delete all old active switches
 			LimeContainer.getCloneSwitchContainer().clear();
 			LimeContainer.getActiveToCloneSwitchMap().clear();
+			//TODO: need to put correct flow tables into the new switches
 		}
 	}
+
+
+	public void migrateVMAsynchronously(final LimeHost currentHost) {
+		Runnable migrateVMTask = new Runnable(){
+			@Override
+			public void run() {
+				migrateVM(currentHost);
+			}
+		};
+		Thread migrateVMThread = new Thread(migrateVMTask);
+		migrateVMThread.start();
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

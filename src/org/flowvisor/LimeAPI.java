@@ -1,5 +1,7 @@
 package org.flowvisor;
 
+import java.util.HashMap;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -79,6 +81,21 @@ public class LimeAPI {
 		String response = "Configuration was processed ";
 		return processedJson ? response  + "successfully\n" : response + "unsuccessfully\n";
 	}
+	
+//	@POST
+//	@Path("/migrateVM")
+//	@Produces(MediaType.TEXT_PLAIN)
+//	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//	public String migrateVM(String data){
+//		LimeHost currentHost = LimeUtils.parseVM(data);
+//		String response = "Machine information was processed ";
+//		if(currentHost == null){
+//			return response + "unsuccessfully\n";
+//		} else{
+//			migrationHandler.migrateVMAsynchronously(currentHost);
+//			return response + "successfully\nLibvirt is migrating "+currentHost.getLibvirtDomain() +" from " + currentHost.getOriginalHost() + " to " + currentHost.getDestinationHost();
+//		}
+//	}
 	
 	public void setMigrationHandler(LimeMigrationHandler handler){
 		this.migrationHandler = handler;

@@ -7,18 +7,20 @@ import org.libvirt.LibvirtException;
 //import org.libvirt.*;
 
 public class LimeVMMigrater {
+	//qemu+ssh://
+	private static final String URI_STRING = "tcp://";
 	public static boolean liveMigrateQemuVM(String sourceIP, String destIP, String vmDomain){
-		if(!validIPAddress(sourceIP)){
+		if(!LimeUtils.validIPAddress(sourceIP)){
 			System.out.println("Source IP address is invalid.");
 			return false;
 		}
-		if(!validIPAddress(destIP)){
+		if(!LimeUtils.validIPAddress(destIP)){
 			System.out.println("Destination IP address is invalid.");
 			return false;
 		}
 		System.out.println("Validated ip addresses");
-		String src_uri = "qemu+ssh://"+sourceIP+"/system";
-		String dest_uri = "qemu+ssh://"+destIP+"/system";
+		String src_uri = URI_STRING+sourceIP+"/system";
+		String dest_uri = URI_STRING+destIP+"/system";
 		Connect src = null;
 		Connect dst = null;
 		Domain domain_to_migrate = null;
@@ -64,6 +66,10 @@ public class LimeVMMigrater {
 					return false;
 				}
 				else{
+					while(migrated_domain.isActive() != 1){
+						System.out.println("Waiting for domain to come up");
+						Thread.sleep(1000);
+					}
 					System.out.println("Migration of "+domain_to_migrate.getName()+" successful.");
 					return true;
 				}
@@ -71,28 +77,36 @@ public class LimeVMMigrater {
 				System.out.println("Please start "+domain_to_migrate);
 				return false;
 			}
-		} catch (LibvirtException e) {
+		} catch (LibvirtException | InterruptedException e) {
 			e.printStackTrace();
 			return false;
 //			System.exit(-3);
 		}
 	}
 	
-	public static boolean validIPAddress(String ip){
-		String[] tokens = ip.split("\\.");
-		if(tokens.length != 4){
+	/**
+	 * Check if a given libvirt domain exists on given libvirt hypervisor
+	 * @param hostIp String ip address of the libvirt hypervisor
+	 * @param domain String libvirt domain of the vm to be checked 
+	 * @return boolean true if the vm exists, false if not or an error is encountered
+	 */
+	public boolean checkDomain(String hostIp, String domain){
+		if(!LimeUtils.validIPAddress(hostIp)){
+			System.out.println("IP address is invalid");
 			return false;
 		}
-		for(String str : tokens){
-			try{
-				int i = Integer.parseInt(str);
-				if(i < 0 || i > 255){
-					return false;
-				}
-			} catch(NumberFormatException e){
+		try {
+			Connect hypervisor = new Connect(URI_STRING+hostIp+"/system");
+			Domain dom = hypervisor.domainLookupByName(domain);
+			if(dom == null){
+				System.out.println("Lookup failed");
 				return false;
 			}
+			return true;
+		} catch (LibvirtException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
 		}
-		return true;
 	}
 }
