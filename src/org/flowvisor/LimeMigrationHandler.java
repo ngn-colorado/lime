@@ -200,6 +200,12 @@ public class LimeMigrationHandler {
 				
 			}
 			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods);
+			//TODO: need to delete the incorrect rules from the physical switches, but keep the rules in the lime flow table object
+			for(FVFlowMod flowMod : matchingMods){
+				//delete all non-vlan tag mods from the original switch, bypassing the lime flow table object, assuming this method works
+				LimeUtils.deleteFlowMod(originalSwitch, flowMod);
+			}
+
 			return true;
 		}
 		return false;

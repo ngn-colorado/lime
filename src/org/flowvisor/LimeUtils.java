@@ -3,9 +3,14 @@ package org.flowvisor;
 import java.util.HashMap;
 
 import org.flowvisor.PortInfo.PortType;
+import org.flowvisor.classifier.WorkerSwitch;
+import org.flowvisor.message.FVFlowMod;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.OFPort;
 
 public class LimeUtils {
 //	json format:
@@ -173,5 +178,16 @@ public class LimeUtils {
 	public static LimeHost parseVM(String data) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public static void deleteFlowMod(WorkerSwitch destinationSwitch, FVFlowMod flowMod){
+		FVFlowMod deleteMod = (FVFlowMod) flowMod.clone();
+		deleteMod.setCommand(OFFlowMod.OFPFC_DELETE);
+		OFFlowMod fm = new OFFlowMod();
+//		fm.setMatch(match);
+//		fm.setCommand(OFFlowMod.OFPFC_DELETE);
+		deleteMod.setOutPort(OFPort.OFPP_NONE);
+		deleteMod.setBufferId(0xffffffff); // buffer to NONE
+		destinationSwitch.sendMsg(fm, destinationSwitch);
 	}
 }
