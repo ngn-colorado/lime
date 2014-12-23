@@ -90,7 +90,7 @@ public class LimeVMMigrater {
 	 * @param domain String libvirt domain of the vm to be checked 
 	 * @return boolean true if the vm exists, false if not or an error is encountered
 	 */
-	public boolean checkDomain(String hostIp, String domain){
+	public static boolean checkDomain(String hostIp, String domain){
 		if(!LimeUtils.validIPAddress(hostIp)){
 			System.out.println("IP address is invalid");
 			return false;

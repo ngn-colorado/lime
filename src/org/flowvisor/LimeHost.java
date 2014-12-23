@@ -9,12 +9,19 @@ package org.flowvisor;
  *
  */
 public final class LimeHost {
+	//required
 	private final String originalHost;
+	//required
 	private final String destinationHost;
+	//required
 	private final String libvirtDomain;
+	//required
 	private final DPID originalDpid;
+	//required
 	private final DPID cloneDpid;
+	//required
 	private final Short connectedPort;
+	//not required for now, will be in future
 	private final Short clonePort;
 	public LimeHost(String originalHost, String destinationHost,
 			String libvirtDomain, DPID originalDpid, DPID cloneDpid,

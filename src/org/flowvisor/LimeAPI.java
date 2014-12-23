@@ -10,6 +10,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.flowvisor.LimeUtils.JsonFormat;
+
+import org.flowvisor.LimeUtils.JsonFormat;
+
 @Path("")
 public class LimeAPI {
 	private LimeMigrationHandler migrationHandler = null;
@@ -77,25 +81,26 @@ public class LimeAPI {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String config(String data){
-		boolean processedJson = LimeUtils.parseJsonConfig(data);
+		boolean processedJson = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH, migrationHandler);
 		String response = "Configuration was processed ";
 		return processedJson ? response  + "successfully\n" : response + "unsuccessfully\n";
 	}
 	
-//	@POST
-//	@Path("/migrateVM")
-//	@Produces(MediaType.TEXT_PLAIN)
-//	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//	public String migrateVM(String data){
-//		LimeHost currentHost = LimeUtils.parseVM(data);
-//		String response = "Machine information was processed ";
+	@POST
+	@Path("/migrateVM")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public String migrateVM(String data){
+		boolean processed = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.HOST, migrationHandler);
+		String response = "Machine information was processed ";
+		return processed ? response  + "successfully\n" : response + "unsuccessfully\n";
 //		if(currentHost == null){
 //			return response + "unsuccessfully\n";
 //		} else{
 //			migrationHandler.migrateVMAsynchronously(currentHost);
-//			return response + "successfully\nLibvirt is migrating "+currentHost.getLibvirtDomain() +" from " + currentHost.getOriginalHost() + " to " + currentHost.getDestinationHost();
+//			return response + ;
 //		}
-//	}
+	}
 	
 	public void setMigrationHandler(LimeMigrationHandler handler){
 		this.migrationHandler = handler;

@@ -178,7 +178,7 @@ public class LimeMigrationHandler {
 	 * This will use libvirt to migrate the vms. Will need to have access rights for libvirt
 	 * to the hosts, the ip address of the libvirt hosts/hypervisors, the destination libvirt host/hypervisor ip, and the libvirt names of the hosts
 	 */
-	public void migrateVM(LimeHost host){
+	public boolean migrateVM(LimeHost host){
 		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
 		if(migrated){
 			//create reverse rule. need to have the connected port
@@ -200,7 +200,9 @@ public class LimeMigrationHandler {
 				
 			}
 			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods);
+			return true;
 		}
+		return false;
 	}
 
 

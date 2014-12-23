@@ -17,26 +17,69 @@ public class LimeUtils {
 //			original:<value> -> value: dpid(original switch of this clone), if value not present, assume original
 //		}
 //	}
+	public static enum JsonFormat{
+		SWITCH, HOST
+	}
 	
 	
-	
-	public static boolean parseJsonConfig(String jsonConfig){
+	public static boolean parseJsonConfig(String jsonConfig, JsonFormat type, LimeMigrationHandler handler){
 		try {
 			Object obj = JSONValue.parseWithException(jsonConfig);
 			JSONObject json = (JSONObject)obj;
-			for(Object dpidObj : json.keySet()){
-				String dpid = (String)dpidObj;
-				JSONObject switchObj = (JSONObject) json.get(dpidObj);
-				if(!processSwitch(switchObj, (String)dpidObj)){
-					return false;
+			for(Object jsonObj : json.keySet()){
+				switch(type){
+					case SWITCH:
+						String dpid = (String)jsonObj;
+						JSONObject configObj = (JSONObject) json.get(jsonObj);
+						return processSwitch(configObj, (String)jsonObj);
+					case HOST:
+						LimeHost host = parseVM((JSONObject)jsonObj);
+						return handler.migrateVM(host);
+					default:
+						return false;
 				}
 			}
+			System.out.println("No json objects in key set");
+			return false;
 		} catch (ParseException e) {
 			System.out.println("JSON parsing failed");
 			return false;
 		}
+	}
+
+	private static LimeHost parseVM(JSONObject jsonObj) {
+		String originalHost = (String)jsonObj.get("originalHost");
+		if(!validIPAddress(originalHost)){
+			System.out.println("original host ip is invalid");
+			return null;
+		}
 		
-		return true;
+		String destinationHost = (String)jsonObj.get("destinationHost");
+		if(!validIPAddress(destinationHost)){
+			System.out.println("destination host ip is invalid");
+			return null;
+		}
+		
+		String libvirtDomain = (String)jsonObj.get("domain");
+		if(!LimeVMMigrater.checkDomain(originalHost, libvirtDomain)){
+			System.out.println("Could not verify domain name");
+			return null;
+		}
+		
+		try{
+			DPID originalDpid = new DPID((String)jsonObj.get("originalDpid"));
+			DPID cloneDpid = new DPID((String)jsonObj.get("cloneDpid"));
+			Short connectedPort = Short.parseShort((String)jsonObj.get("connectedPort"));
+			Short clonePort = Short.parseShort((String)jsonObj.get("clonePort"));
+			LimeHost host = new LimeHost(originalHost, destinationHost, libvirtDomain, originalDpid, cloneDpid, connectedPort, clonePort);
+			return host;
+		} catch(NumberFormatException e){
+			System.out.println("Could not create Short from the provided port numbers");
+			return null;
+		} catch (IllegalArgumentException e){
+			System.out.println("Could not create a dpid from the provided dpid strings");
+			return null;
+		} 
 	}
 
 	private static boolean processSwitch(JSONObject switchObj, String dpid) {
@@ -125,5 +168,10 @@ public class LimeUtils {
 			}
 		}
 		return true;
+	}
+
+	public static LimeHost parseVM(String data) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
