@@ -1,4 +1,4 @@
-<project name="flowvisor" default="dist" basedir=".">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="flowvisor" default="dist" basedir=".">
 
     <description>
         simple example build file
@@ -14,6 +14,8 @@
     <property name="jetty-jar" value="-7.0.2.v20100331.jar"/>
     <property name="gson-jar" value="-2.0.jar"/>
     <property name="fv_classpath" location="${of_jar}:lib/xmlrpc-client-${xml-ver}.jar:lib/xmlrpc-server-${xml-ver}.jar:lib/xmlrpc-common-${xml-ver}.jar:lib/jsse.jar:lib/jetty-continuation${jetty-jar}:lib/jetty-http${jetty-jar}:lib/jetty-io${jetty-jar}:lib/jetty-server${jetty-jar}:lib/jetty-servlet${jetty-jar}:lib/servlet-api-2.5.jar:lib/jetty-security${jetty-jar}:lib/jetty-util${jetty-jar}:lib/commons-codec-1.4.jar:lib/cglib-2.2.jar:lib/junit-4.8.1.jar:lib/gson${gson-jar}:lib/asm-3.0.jar:lib/jna.jar:lib/syslog4j-0.9.46-bin.jar:lib/log4j-1.2.16.jar:lib/commons-dbcp-1.4.jar:lib/commons-collections-3.2.1.jar:lib/commons-logging-1.1.jar:lib/commons-pool-1.5.6.jar:lib/derby.jar:lib/derbytools.jar:lib/jsonrpc2-base-1.30.jar:lib/jsonrpc2-server-1.8.jar:lib/libvirt-0.5.1.jar"/>
+
+    
     <property name="fv_src" location="src"/>
     <property name="fv_tests" location="src.tests"/>
     <property name="fv_build" location="build/"/>
@@ -26,6 +28,77 @@
     <property name="src.dir" value="${fv_src}"/>
     <property name="class.dir" value="${fv_build}"/>
     <property name="instrumented.dir" value="inst"/>
+
+	<path id="classpath_compile">
+		<fileset dir="lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+	<path id="classpath_build">
+		<path refid="classpath_compile"/>
+		<pathelement path="${fv_build}"/>
+	</path>
+	
+	<manifestclasspath property="manifest_classpath" jarfile="${fv_jar}">
+        <classpath refid="classpath_compile" />
+    </manifestclasspath>
+	
+	
+	
+
+	<!--iviy init. using ivy to download the maven dependencies-->
+	<property name="ivy.install.version" value="2.1.0-rc2" />
+    <condition property="ivy.home" value="${env.IVY_HOME}">
+      <isset property="env.IVY_HOME" />
+    </condition>
+    <property name="ivy.home" value="${user.home}/.ant" />
+    <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+
+    <target name="download-ivy" unless="offline">
+
+        <mkdir dir="${ivy.jar.dir}"/>
+        <!-- download Ivy from web site so that it can be used even without any special installation -->
+        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" 
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+    <target name="init-ivy" depends="download-ivy">
+      <!-- try to load ivy here from ivy home, in case the user has not already dropped
+              it into ant's lib dir (note that the latter copy will always take precedence).
+              We will not fail as long as local lib dir exists (it may be empty) and
+              ivy is in at least one of ant's lib dir or the local lib dir. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                 uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+    
+    
+    <!--converts the maven pom.xml to an ivy.xml so that we can get the dependencies-->
+    <target name="convert-pom" depends="init-ivy">
+        <ivy:convertpom pomFile="pom.xml" ivyFile="ivy.xml" />
+    </target>
+    
+    <!--uses ivy to download the project dependencies-->
+    <target name="resolve" description="retrieve dependencies with ivy" depends="convert-pom">
+    	<ivy:resolve/>
+        <ivy:retrieve ivypattern="*" conf="compile" pattern="lib/[artifact](-[classifier]).[ext]"/>
+    </target>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     
     <path id="emma.lib">
@@ -54,16 +127,21 @@
         <mkdir dir="${fv_test_build}"/>
     </target>
 
-    <target name="compile" depends="init"
+    <target name="compile" depends="init, resolve"
         description="compile the source " >
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac debug="true" srcdir="${fv_src}" classpath="${fv_classpath}" destdir="${fv_build}"/>
+        <javac debug="true" srcdir="${fv_src}" destdir="${fv_build}">
+			<classpath refid="classpath_compile" />
+        </javac>
+        
     </target>
 
     <target name="compile-tests" depends="compile"
         description="compile the tests " >
         <!-- Compile the java code from ${tv_tests} into ${test_build} -->
-        <javac debug="true" srcdir="${fv_tests}" classpath="${fv_build}:${fv_classpath}" destdir="${fv_test_build}"/>
+        <javac debug="true" srcdir="${fv_tests}" destdir="${fv_test_build}">
+        	<classpath refid="classpath_build" />
+        </javac>
     </target>
 
     <target name="dist" depends="compile"
@@ -74,7 +152,7 @@
         <jar destfile="${fv_jar}" filesetmanifest="mergewithoutmain">
             <manifest>
                 <attribute name="Main-Class" value="org.flowvisor.FlowVisor"/>
-                <attribute name="Class-Path" value="${fv_classpath}"/>
+                <attribute name="Class-Path" value="${manifest_classpath}"/>
             </manifest>
             <fileset dir="${fv_build}"/>
         </jar>
@@ -101,7 +179,7 @@
             <arg line="${args}"/>
             <classpath>
                 <pathelement location="${fv_jar}"/>
-                <pathelement location="${fv_classpath}"/>
+                <path refid="${classpath_compile}"/>
             </classpath>
         </java>
     </target>
@@ -109,7 +187,6 @@
     <target name="javadoc">
         <javadoc access="protected"
         author="true"
-        classpath="${fv_jar}:${fv_classpath}"
         destdir="${docs}"
         doctitle="FlowVisor"
         nodeprecated="false"
@@ -121,7 +198,12 @@
         sourcepath="${fv_src}"
         splitindex="true"
         use="true"
-        version="true"/>
+        version="true">
+        	<classpath>
+        		<pathelement location="${fv_jar}"/>
+        		<path refid="${classpath_compile}"/>
+        	</classpath>
+        </javadoc>
     </target>
 
     <target name="tests" depends="test">
@@ -129,8 +211,9 @@
     <target name="test" depends="compile-tests,instrument">
          <mkdir dir="test-reports"/>
         <junit printsummary="yes" failureproperty="junit.failure" fork="yes">
-            <classpath path="${instrumented.dir}:${fv_build}:${fv_classpath}:${fv_test_build}">
+            <classpath path="${instrumented.dir}:${fv_build}:${fv_test_build}">
                 <path refid="emma.lib"/>
+                <path refid="${classpath_compile}" />
             </classpath>
             <jvmarg value="-Dderby.system.home=."/>
             <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />  
