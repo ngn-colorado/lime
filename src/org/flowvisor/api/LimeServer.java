@@ -8,22 +8,16 @@ package org.flowvisor.api;
  *
  */
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.flowvisor.DPID;
-import org.flowvisor.LimeContainer;
 import org.flowvisor.LimeHttpServer;
-import org.flowvisor.LimeMigrationHandler;
-import org.flowvisor.classifier.WorkerSwitch;
-
-import com.sun.net.httpserver.HttpServer;
 
 public class LimeServer implements Runnable {
+	private AtomicBoolean running;
+	
+	public LimeServer(){
+		running = new AtomicBoolean(true);
+	}
 	
 	@Override
 	public void run() {
@@ -33,6 +27,9 @@ public class LimeServer implements Runnable {
 		LimeHttpServer server = new LimeHttpServer();
 		Thread thread = new Thread(server);
 		thread.start();
+//		while(running.get()){
+//			Thread.sleep();
+//		}
 		
 		
 		

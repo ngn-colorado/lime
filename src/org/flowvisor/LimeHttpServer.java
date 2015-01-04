@@ -14,7 +14,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 //import com.sun.net.httpserver.HttpServer;
 
 public class LimeHttpServer implements Runnable{
-	public static final String BASE_LIME_URI_STRING = "http://localhost/";
+	public static final String BASE_LIME_URI_STRING = "http://0.0.0.0/";
 	public static final int BASE_LIME_PORT = 9000;
 	public static final String BASE_LIME_URI_STRING_WITH_PORT = "http://localhost:"+BASE_LIME_PORT+"/";
 	private AtomicBoolean continueServer;
@@ -59,6 +59,7 @@ public class LimeHttpServer implements Runnable{
 			server.start();
 			while(continueServer.get()){
 				Thread.sleep(1000);
+				System.out.println("Server running on port: "+BASE_LIME_PORT);
 			}
 			server.shutdownNow();
 		} catch (IOException e) {
