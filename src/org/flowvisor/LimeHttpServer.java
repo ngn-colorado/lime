@@ -45,7 +45,7 @@ public class LimeHttpServer implements Runnable{
 	private static HttpServer createHttpServer() {
 //		HttpServer server = new HttpServer();
 //		NetworkListener netListener = new NetworkListener("jaxws-listener", "0.0.0.0", BASE_LIME_PORT);
-		ResourceConfig config = new ResourceConfig(LimeAPI.class);
+		ResourceConfig config = new ResourceConfig(org.flowvisor.LimeAPI.class);
 		URI baseUri = UriBuilder.fromUri(BASE_LIME_URI_STRING).port(BASE_LIME_PORT).build();
 	    HttpServer server = GrizzlyHttpServerFactory.createHttpServer(baseUri, config);
 //		HttpHandler httpHandler = new JaxwsHandler(new LimeAPI());
