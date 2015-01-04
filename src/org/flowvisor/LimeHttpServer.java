@@ -54,9 +54,11 @@ public class LimeHttpServer implements Runnable{
 
 	@Override
 	public void run() {
+		System.out.println("In http server run method");
 		HttpServer server = createHttpServer();
 		try {
 			server.start();
+			System.out.println("Starting embedded Jersey http server");
 			while(continueServer.get()){
 				Thread.sleep(1000);
 				System.out.println("Server running on port: "+BASE_LIME_PORT);
