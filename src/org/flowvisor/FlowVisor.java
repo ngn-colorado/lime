@@ -313,8 +313,12 @@ public class FlowVisor {
 		}*/
 		
 		// start Lime server
-		LimeServer lServer = new LimeServer();
-		new Thread(lServer).start();
+//		LimeServer lServer = new LimeServer();
+//		new Thread(lServer).start();
+		
+		LimeHttpServer httpServer = new LimeHttpServer();
+		Thread serverThread = new Thread(httpServer);
+		serverThread.start();
 
 		// init switchAcceptor
 		OFSwitchAcceptor acceptor = new OFSwitchAcceptor(pollLoop, port, 16);
