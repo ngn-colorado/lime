@@ -42,9 +42,9 @@
 	
 	<dirname file="${fv_jar}" property="fv_jar.dir" />
 	
-	<mkdir property="create_fv_dist_dir" dir="${fv_jar.dir}" />
+	<mkdir dir="${fv_jar.dir}" />
 	
-	<manifestclasspath property="manifest_classpath" jarfile="${fv_jar}" depends="create_fv_dist_dir">
+	<manifestclasspath property="manifest_classpath" jarfile="${fv_jar}">
         <classpath refid="classpath_compile" />
     </manifestclasspath>
 	
