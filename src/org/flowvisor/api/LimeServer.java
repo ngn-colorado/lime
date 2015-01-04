@@ -14,9 +14,16 @@ import org.flowvisor.LimeHttpServer;
 
 public class LimeServer implements Runnable {
 	private AtomicBoolean running;
+	private LimeHttpServer server;
 	
 	public LimeServer(){
 		running = new AtomicBoolean(true);
+		server = new LimeHttpServer();
+	}
+	
+	public void shutdown(){
+		server.stopServer();
+		running.set(false);
 	}
 	
 	@Override
@@ -24,14 +31,17 @@ public class LimeServer implements Runnable {
 //		System.out.println("MURAD: LimeServer is running...");
 //		int portNumber = 8082;
 		System.out.println("MICHAEL: Starting Lime HTTP Server");
-		LimeHttpServer server = new LimeHttpServer();
 		Thread thread = new Thread(server);
 		thread.start();
-//		while(running.get()){
-//			Thread.sleep();
-//		}
+		while(running.get()){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		
-		
+		System.out.println("Exited lime http server");
 		
 		
 /*		try {
