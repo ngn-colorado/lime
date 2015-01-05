@@ -90,7 +90,7 @@
     <!--uses ivy to download the project dependencies-->
     <target name="resolve" description="retrieve dependencies with ivy" depends="convert-pom">
     	<ivy:resolve/>
-        <ivy:retrieve ivypattern="*" conf="compile" pattern="lib/[artifact](-[classifier]).[ext]"/>
+        <ivy:retrieve ivypattern="*" conf="compile" pattern="lib/[artifact].[ext]"/>
     </target>
     
     
