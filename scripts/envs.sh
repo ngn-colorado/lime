@@ -29,35 +29,47 @@ fv_defines="-Dorg.flowvisor.config_dir=$config_dir -Dorg.flowvisor.install_dir=$
 
 
 # Setup some environmental variables
-classpath=$jars/openflow.jar:\
-$jars/xmlrpc-client-3.1.3.jar:\
-$jars/xmlrpc-common-3.1.3.jar:\
-$jars/xmlrpc-server-3.1.3.jar:\
-$jars/commons-logging-1.1.jar:\
-$jars/ws-commons-util-1.0.2.jar:\
-$jars/jsse.jar:\
-$jars/asm-3.0.jar:\
-$jars/cglib-2.2.jar:\
-$jars/commons-codec-1.4.jar:\
-$jars/commons-collections-3.2.1.jar:\
-$jars/commons-dbcp-1.4.jar:\
-$jars/commons-pool-1.5.6.jar:\
-$jars/gson-2.0.jar:\
-$jars/jetty-continuation-7.0.2.v20100331.jar:\
-$jars/jetty-http-7.0.2.v20100331.jar:\
-$jars/jetty-io-7.0.2.v20100331.jar:\
-$jars/jetty-security-7.0.2.v20100331.jar:\
-$jars/jetty-server-7.0.2.v20100331.jar:\
-$jars/jetty-util-7.0.2.v20100331.jar:\
-$jars/servlet-api-2.5.jar:\
-$jars/derby.jar:\
-$jars/derbytools.jar:\
-$jars/jna.jar:\
-$jars/syslog4j-0.9.46-bin.jar:\
-$jars/log4j-1.2.16.jar:\
-$jars/jsonrpc2-base-1.30.jar:\
-$jars/jsonrpc2-server-1.8.jar:\
-$install_dir/flowvisor.jar
+classpath=""
+was_here=$(pwd)
+cd $jars
+for jar in $(ls)
+do
+	classpath="$classpath$jars/$jar:"
+done
+classpath="$classpath$install_dir/flowvisor.jar"
+cd $was_here
+
+
+
+#classpath=$jars/openflow.jar:\
+#$jars/xmlrpc-client-3.1.3.jar:\
+#$jars/xmlrpc-common-3.1.3.jar:\
+#$jars/xmlrpc-server-3.1.3.jar:\
+#$jars/commons-logging-1.1.jar:\
+#$jars/ws-commons-util-1.0.2.jar:\
+#$jars/jsse.jar:\
+#$jars/asm-3.0.jar:\
+#$jars/cglib-2.2.jar:\
+#$jars/commons-codec-1.4.jar:\
+#$jars/commons-collections-3.2.1.jar:\
+#$jars/commons-dbcp-1.4.jar:\
+#$jars/commons-pool-1.5.6.jar:\
+#$jars/gson-2.0.jar:\
+#$jars/jetty-continuation-7.0.2.v20100331.jar:\
+#$jars/jetty-http-7.0.2.v20100331.jar:\
+#$jars/jetty-io-7.0.2.v20100331.jar:\
+#$jars/jetty-security-7.0.2.v20100331.jar:\
+#$jars/jetty-server-7.0.2.v20100331.jar:\
+#$jars/jetty-util-7.0.2.v20100331.jar:\
+#$jars/servlet-api-2.5.jar:\
+#$jars/derby.jar:\
+#$jars/derbytools.jar:\
+#$jars/jna.jar:\
+#$jars/syslog4j-0.9.46-bin.jar:\
+#$jars/log4j-1.2.16.jar:\
+#$jars/jsonrpc2-base-1.30.jar:\
+#$jars/jsonrpc2-server-1.8.jar:\
+#$install_dir/flowvisor.jar
 
 emmajar=$jars/emma/emma.jar
 
