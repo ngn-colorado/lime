@@ -227,7 +227,10 @@ $install $verbose --owner=$binuser --group=$bingroup --mode=755 fv-startup  $roo
 echo Installing jars
 cd $owd
 cd $libs
-$install $verbose --owner=$binuser --group=$bingroup --mode=644 $LIBS $root$prefix/libexec/flowvisor
+for f in $(ls);
+do
+	$install $verbose --owner=$binuser --group=$bingroup --mode=644 $f $root$prefix/libexec/flowvisor
+done
 
 echo Installing flowvisor.jar
 cd $owd
