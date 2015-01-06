@@ -81,6 +81,7 @@ public class LimeAPI {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String config(String data){
+		System.out.println("Received data:\n"+data);
 		boolean processedJson = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH, migrationHandler);
 		String response = "Configuration was processed ";
 		return processedJson ? response  + "successfully\n" : response + "unsuccessfully\n";

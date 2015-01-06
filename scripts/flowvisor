@@ -31,7 +31,7 @@ if [ -z $FV_JVM_ARGS ]; then
     export FV_JVM_ARGS="$default_jvm_args"
 fi
 
-FV_DEBUG_PORT=8000
+#FV_DEBUG_PORT=8000
 echo "$FV_DEBUG_PORT"
 if [ ! -z $FV_DEBUG_PORT ] ; then
 # Checkout http://java.dzone.com/articles/how-debug-remote-java-applicat for 
