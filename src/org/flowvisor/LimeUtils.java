@@ -37,32 +37,33 @@ public class LimeUtils {
 		try {
 			Object obj = JSONValue.parseWithException(jsonConfig);
 			JSONObject json = (JSONObject)obj;
-			for(Object jsonObj : json.keySet()){
-				switch(type){
-					case SWITCH:
+			switch(type){
+				case SWITCH:
+					for(Object jsonObj : json.keySet()){
+						//TODO: support more than one switch here
 						String dpid = (String)jsonObj;
 						JSONObject configObj = (JSONObject) json.get(jsonObj);
 						String response = "Configuration was processed ";
 						return processSwitch(configObj, (String)jsonObj) ? response + "successfully\n" : response + "unsuccessfully\n";
-					case HOST:
-						LimeHost host = parseVM((JSONObject)json.get(jsonObj));
-						System.out.println("data contains valid json");
-						response = "Machine information was processed ";
-						boolean success = false;
-						System.out.println("preparing to migrate host: "+host);
-						LimeMigrationHandler handler = LimeMigrationHandler.getInstance();
-						if(handler.isMigrating()){
-							success = handler.migrateVM(host);
-						} else{
-							return "Migration must be initiated first";
-						}
-						return success ? response  + "successfully\n" : response + "unsuccessfully\n";
-					default:
-						return null;
-				}
+					}
+					System.out.println("No json objects in key set");
+					return null;
+				case HOST:
+					LimeHost host = parseVM(json);
+					System.out.println("data contains valid json");
+					String response = "Machine information was processed ";
+					boolean success = false;
+					System.out.println("preparing to migrate host: "+host);
+					LimeMigrationHandler handler = LimeMigrationHandler.getInstance();
+					if(handler.isMigrating()){
+						success = handler.migrateVM(host);
+					} else{
+						return "Migration must be initiated first";
+					}
+					return success ? response  + "successfully\n" : response + "unsuccessfully\n";
+				default:
+					return null;
 			}
-			System.out.println("No json objects in key set");
-			return null;
 		} catch (ParseException e) {
 			System.out.println("JSON parsing failed");
 			return null;
