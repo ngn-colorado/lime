@@ -1,7 +1,5 @@
 package org.flowvisor;
 
-import java.util.HashMap;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -10,13 +8,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.flowvisor.LimeUtils.JsonFormat;
-
-import org.flowvisor.LimeUtils.JsonFormat;
-
 @Path("")
 public class LimeAPI {
-	private LimeMigrationHandler migrationHandler = null;
 	@GET
 	@Path("")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -50,6 +43,7 @@ public class LimeAPI {
 	@Path("/startMigration")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String startMigration(){
+		LimeMigrationHandler migrationHandler = LimeMigrationHandler.getInstance();
 		if(migrationHandler == null){
 			return "\n A migration handler object must be defined";
 		}
@@ -66,11 +60,9 @@ public class LimeAPI {
 	@Path("/finishMigration/{DPID}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String finishMigration(@PathParam("DPID") String DPID){
-		if(migrationHandler == null){
-			return "\n A migration handler object must be defined";
-		}
-	//TODO: change this method to have the handler lookup the clone switch of the switch that is done migrating in the table, so only the dpid
+			//TODO: change this method to have the handler lookup the clone switch of the switch that is done migrating in the table, so only the dpid
 	//of the switch done migrating needs to be provided to the api
+		LimeMigrationHandler migrationHandler = LimeMigrationHandler.getInstance();
 		DPID finishedSwitch = new DPID(DPID);
 		migrationHandler.switchDoneMigrating(finishedSwitch);
 		return "\n Handler finished migration for switch "+finishedSwitch.getDpidString();
@@ -82,7 +74,7 @@ public class LimeAPI {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String config(String data){
 		System.out.println("Received data:\n"+data);
-		String processedJsonResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH, migrationHandler);
+		String processedJsonResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH);
 		if(processedJsonResponse != null){
 			return processedJsonResponse;
 		} else{
@@ -95,15 +87,11 @@ public class LimeAPI {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String migrateVM(String data){
-		String processedResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.HOST, migrationHandler);
+		String processedResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.HOST);
 		if(processedResponse != null){
 			return processedResponse;
 		} else{
 			return "Error encountered";
 		}
-	}
-	
-	public void setMigrationHandler(LimeMigrationHandler handler){
-		this.migrationHandler = handler;
 	}
 }

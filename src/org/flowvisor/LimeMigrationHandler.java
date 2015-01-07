@@ -18,11 +18,21 @@ import org.flowvisor.message.FVFlowMod;
  * @author Murad Kaplan
  *
  */
-public class LimeMigrationHandler {
+public final class LimeMigrationHandler {
 	private int cloneSwitchCounter;
+	private static LimeMigrationHandler singleInstance = null;
+	private boolean migrating;
 	
-	public LimeMigrationHandler(){
+	private LimeMigrationHandler(){
 		cloneSwitchCounter = 0;
+		migrating = false;
+	}
+	
+	public static LimeMigrationHandler getInstance(){
+		if(singleInstance == null){
+			singleInstance = new LimeMigrationHandler();
+		}
+		return singleInstance;
 	}
 	
 	
@@ -172,6 +182,7 @@ public class LimeMigrationHandler {
 			}
 		}
 		System.out.println("Initialization was successful..");
+		migrating = true;
 	}
 	
 	/**
@@ -239,6 +250,7 @@ public class LimeMigrationHandler {
 			LimeContainer.getCloneSwitchContainer().clear();
 			LimeContainer.getActiveToCloneSwitchMap().clear();
 			//TODO: need to put correct flow tables into the new switches
+			migrating = false;
 		}
 	}
 
@@ -252,6 +264,10 @@ public class LimeMigrationHandler {
 		};
 		Thread migrateVMThread = new Thread(migrateVMTask);
 		migrateVMThread.start();
+	}
+	
+	public boolean isMigrating(){
+		return migrating;
 	}
 }
 

@@ -33,7 +33,7 @@ public class LimeUtils {
 	 * @param handler
 	 * @return null on failure, String to print on web page on success
 	 */
-	public static String parseJsonConfig(String jsonConfig, JsonFormat type, LimeMigrationHandler handler){
+	public static String parseJsonConfig(String jsonConfig, JsonFormat type){
 		try {
 			Object obj = JSONValue.parseWithException(jsonConfig);
 			JSONObject json = (JSONObject)obj;
@@ -47,7 +47,14 @@ public class LimeUtils {
 					case HOST:
 						LimeHost host = parseVM((JSONObject)jsonObj);
 						response = "Machine information was processed ";
-						return handler.migrateVM(host) ? response  + "successfully\n" : response + "unsuccessfully\n";
+						boolean success = false;
+						LimeMigrationHandler handler = LimeMigrationHandler.getInstance();
+						if(handler.isMigrating()){
+							success = handler.migrateVM(host);
+						} else{
+							return "Migration must be initiated first";
+						}
+						return success ? response  + "successfully\n" : response + "unsuccessfully\n";
 					default:
 						return null;
 				}
