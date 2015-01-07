@@ -136,8 +136,8 @@ public class LimeUtils {
 				return false;
 			}
 			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as clone switch to Lime with original switch: "+originalDpid.getDpidHexString() +" with port map:\n"+printPortMap(portMap));
-//			LimeContainer.addCloneSwitch(currentSwitch.getDpidLong(), portMap);
-//			LimeContainer.insertActiveToCloneSwitchMap(originalDpid.getDpidLong(), currentSwitch.getDpidLong());
+			LimeContainer.addCloneSwitch(currentSwitch.getDpidLong(), portMap);
+			LimeContainer.insertActiveToCloneSwitchMap(originalDpid.getDpidLong(), currentSwitch.getDpidLong());
 			return true;
 		} else{
 			System.out.println("Illegal state");
