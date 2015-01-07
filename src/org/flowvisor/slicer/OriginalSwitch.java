@@ -153,9 +153,11 @@ public class OriginalSwitch implements FVEventHandler, FVSendMsg, FlowvisorChang
 
 	public void init() {
 		FVLog.log(LogLevel.DEBUG, this, "initializing new OriginalSwitch");
-
+//		TODO: refactor this to a more logical place!
+//		NOTE: this is the ip address of the real OF controller, and is here for whatever reason
 //		hostname = "128.138.201.93";
-		hostname = "172.16.1.6";
+//		hostname = "172.16.1.6";
+		hostname = "192.168.1.3";
 		port = 6633;
 		lldpOptIn = false; // based on slice-info we created
 		//hostname = FVConfig.getSliceHost(sliceName); //MURAD-config
