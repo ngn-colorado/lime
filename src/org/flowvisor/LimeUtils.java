@@ -46,6 +46,7 @@ public class LimeUtils {
 						return processSwitch(configObj, (String)jsonObj) ? response + "successfully\n" : response + "unsuccessfully\n";
 					case HOST:
 						LimeHost host = parseVM((JSONObject)jsonObj);
+						System.out.println("data contains valid json");
 						response = "Machine information was processed ";
 						boolean success = false;
 						System.out.println("preparing to migrate host: "+host);

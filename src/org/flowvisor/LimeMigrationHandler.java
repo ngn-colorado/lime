@@ -190,7 +190,9 @@ public final class LimeMigrationHandler {
 	 * to the hosts, the ip address of the libvirt hosts/hypervisors, the destination libvirt host/hypervisor ip, and the libvirt names of the hosts
 	 */
 	public boolean migrateVM(LimeHost host){
+		System.out.println("In migrate vm function");
 		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
+		System.out.println("migrate vm function returned");
 		if(migrated){
 			//create reverse rule. need to have the connected port
 			WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(host.getOriginalDpid().getDpidLong());
