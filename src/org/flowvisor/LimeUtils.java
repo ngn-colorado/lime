@@ -48,6 +48,7 @@ public class LimeUtils {
 						LimeHost host = parseVM((JSONObject)jsonObj);
 						response = "Machine information was processed ";
 						boolean success = false;
+						System.out.println("preparing to migrate host: "+host);
 						LimeMigrationHandler handler = LimeMigrationHandler.getInstance();
 						if(handler.isMigrating()){
 							success = handler.migrateVM(host);

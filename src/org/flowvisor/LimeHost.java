@@ -56,4 +56,13 @@ public final class LimeHost {
 	public Short getClonePort() {
 		return clonePort;
 	}
+	@Override
+	public String toString() {
+		return "LimeHost [originalHost=" + originalHost + ", destinationHost="
+				+ destinationHost + ", libvirtDomain=" + libvirtDomain
+				+ ", originalDpid=" + originalDpid + ", cloneDpid=" + cloneDpid
+				+ ", connectedPort=" + connectedPort + ", clonePort="
+				+ clonePort + "]";
+	}
+	
 }
