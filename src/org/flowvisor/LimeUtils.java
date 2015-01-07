@@ -26,8 +26,14 @@ public class LimeUtils {
 		SWITCH, HOST
 	}
 	
-	
-	public static boolean parseJsonConfig(String jsonConfig, JsonFormat type, LimeMigrationHandler handler){
+	/**
+	 * 
+	 * @param jsonConfig
+	 * @param type
+	 * @param handler
+	 * @return null on failure, String to print on web page on success
+	 */
+	public static String parseJsonConfig(String jsonConfig, JsonFormat type, LimeMigrationHandler handler){
 		try {
 			Object obj = JSONValue.parseWithException(jsonConfig);
 			JSONObject json = (JSONObject)obj;
@@ -36,19 +42,21 @@ public class LimeUtils {
 					case SWITCH:
 						String dpid = (String)jsonObj;
 						JSONObject configObj = (JSONObject) json.get(jsonObj);
-						return processSwitch(configObj, (String)jsonObj);
+						String response = "Configuration was processed ";
+						return processSwitch(configObj, (String)jsonObj) ? response + "successfully\n" : response + "unsuccessfully\n";
 					case HOST:
 						LimeHost host = parseVM((JSONObject)jsonObj);
-						return handler.migrateVM(host);
+						response = "Machine information was processed ";
+						return handler.migrateVM(host) ? response  + "successfully\n" : response + "unsuccessfully\n";
 					default:
-						return false;
+						return null;
 				}
 			}
 			System.out.println("No json objects in key set");
-			return false;
+			return null;
 		} catch (ParseException e) {
 			System.out.println("JSON parsing failed");
-			return false;
+			return null;
 		}
 	}
 
@@ -119,8 +127,8 @@ public class LimeUtils {
 		}
 		if(isOriginal){
 			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as original switch to Lime with port map:\n"+printPortMap(portMap));
-//			LimeContainer.addOriginalSwitch(currentSwitch.getDpidLong(), portMap);
-//			LimeContainer.insertActiveToOriginalSwitchMap(currentSwitch.getDpidLong(), currentSwitch.getDpidLong());
+			LimeContainer.addOriginalSwitch(currentSwitch.getDpidLong(), portMap);
+			LimeContainer.insertActiveToOriginalSwitchMap(currentSwitch.getDpidLong(), currentSwitch.getDpidLong());
 			return true;
 		} else if(isClone){
 			if(originalDpid == null){

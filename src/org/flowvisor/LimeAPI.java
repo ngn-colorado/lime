@@ -82,9 +82,12 @@ public class LimeAPI {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String config(String data){
 		System.out.println("Received data:\n"+data);
-		boolean processedJson = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH, migrationHandler);
-		String response = "Configuration was processed ";
-		return processedJson ? response  + "successfully\n" : response + "unsuccessfully\n";
+		String processedJsonResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH, migrationHandler);
+		if(processedJsonResponse != null){
+			return processedJsonResponse;
+		} else{
+			return "Error encountered";
+		}
 	}
 	
 	@POST
@@ -92,15 +95,12 @@ public class LimeAPI {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String migrateVM(String data){
-		boolean processed = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.HOST, migrationHandler);
-		String response = "Machine information was processed ";
-		return processed ? response  + "successfully\n" : response + "unsuccessfully\n";
-//		if(currentHost == null){
-//			return response + "unsuccessfully\n";
-//		} else{
-//			migrationHandler.migrateVMAsynchronously(currentHost);
-//			return response + ;
-//		}
+		String processedResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.HOST, migrationHandler);
+		if(processedResponse != null){
+			return processedResponse;
+		} else{
+			return "Error encountered";
+		}
 	}
 	
 	public void setMigrationHandler(LimeMigrationHandler handler){
