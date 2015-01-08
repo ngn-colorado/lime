@@ -314,7 +314,7 @@ public class LimeFlowTable{
 		
 		
 		
-		System.out.println("Added flowmod to flowtable: "+flowmod);
+//		System.out.println("Added flowmod to flowtable: "+flowmod);
 		this.flowmodMap.put(cookie, flowmod);
 		this.cookieMap.put(flowmod.hashCode(), cookie);
 		return cookie;

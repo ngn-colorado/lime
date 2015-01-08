@@ -89,8 +89,8 @@ TopologyControllable {
 		}
 		LimeMsgTranslator buffIdTranslator = fvSlicer.getLimeMsgTranslator();
 		this.setBufferId(buffIdTranslator.translate(this.bufferId, workerSwitch, new OFMatch().loadFromPacket(this.packetData, this.inPort)));
-		System.out.println("MURAD: FVPacketIn, sending from sw: " + workerSwitch.getName() + " following P-In: " + this.toVerboseString());
-		System.out.println("MURAD: FVPacketIn,------------------------------------------------------------------------------------------");
+//		System.out.println("MURAD: FVPacketIn, sending from sw: " + workerSwitch.getName() + " following P-In: " + this.toVerboseString());
+//		System.out.println("MURAD: FVPacketIn,------------------------------------------------------------------------------------------");
 		fvSlicer.sendMsg(this, workerSwitch);
 		
 	}

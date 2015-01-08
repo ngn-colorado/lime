@@ -49,9 +49,9 @@ public class LimeHttpServer implements Runnable{
 		
 		URL[] urls = ((URLClassLoader)cl).getURLs();
 		
-		for(URL url : urls){
-			System.out.println(url.getFile());
-		}
+//		for(URL url : urls){
+//			System.out.println(url.getFile());
+//		}
 		
 //		HttpServer server = new HttpServer();
 //		NetworkListener netListener = new NetworkListener("jaxws-listener", "0.0.0.0", BASE_LIME_PORT);
