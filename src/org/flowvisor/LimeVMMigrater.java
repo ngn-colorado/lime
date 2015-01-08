@@ -8,7 +8,7 @@ import org.libvirt.LibvirtException;
 
 public class LimeVMMigrater {
 	//qemu+ssh://
-	private static final String URI_STRING = "tcp://";
+	private static final String URI_STRING = "qemu+ssh://";
 	public static boolean liveMigrateQemuVM(String sourceIP, String destIP, String vmDomain){
 		if(!LimeUtils.validIPAddress(sourceIP)){
 			System.out.println("Source IP address is invalid.");
@@ -96,6 +96,7 @@ public class LimeVMMigrater {
 			return false;
 		}
 		try {
+			//TODO: this doesn't work- it throws an exception about missing certificate. try ssh?
 			Connect hypervisor = new Connect(URI_STRING+hostIp+"/system");
 			Domain dom = hypervisor.domainLookupByName(domain);
 			if(dom == null){

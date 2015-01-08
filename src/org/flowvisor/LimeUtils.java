@@ -50,6 +50,9 @@ public class LimeUtils {
 					return null;
 				case HOST:
 					LimeHost host = parseVM(json);
+					if(host == null){
+						return "Could not extract host information from provided json";
+					}
 					System.out.println("data contains valid json");
 					String response = "Machine information was processed ";
 					boolean success = false;
