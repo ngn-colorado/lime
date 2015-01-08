@@ -64,6 +64,8 @@ import org.flowvisor.message.FVMessageFactory;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
 import org.flowvisor.message.SanityCheckable;
+import org.flowvisor.message.actions.FVActionOutput;
+import org.flowvisor.message.actions.FVActionStripVirtualLan;
 import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
 import org.flowvisor.message.statistics.FVAggregateStatisticsReply;
 import org.flowvisor.message.statistics.FVAggregateStatisticsRequest;
@@ -1438,7 +1440,7 @@ SwitchChangedListener {
 	private static void sendFlowMods(ArrayList<FVFlowMod> flowMods, WorkerSwitch modifiedSwitch) {
 		for(FVFlowMod flowMod : flowMods){
 			DPID switchDpid = new DPID(modifiedSwitch.getDPID());
-			System.out.println("Switch "+switchDpid.getDpidString()+" is receiving flow mod: "+flowMod);
+			System.out.println("\n\n\nSwitch "+switchDpid.getDpidString()+" is receiving flow mod: "+flowMod+"\n\n");
 			modifiedSwitch.handleFlowModAndSend(flowMod);
 		}
 		
@@ -1474,13 +1476,14 @@ SwitchChangedListener {
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
 		FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 		//create match to match packets coming in ghostPort for a particular vlan
-		OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
-		OFMatch match = new OFMatch();
+		FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
+		FVMatch match = new FVMatch();
 		match.setDataLayerVirtualLan(vlanNumber);
 		match.setInputPort(handlerSwitch.getGhostPort());
 		//TODO: set the actions of this mod to be the actions of the original mod.
 		//For now, use the vlan tag # as the output port of this mod
-		OFAction outputAction = new OFActionOutput(vlanNumber);
+		FVActionOutput outputAction = new FVActionOutput();
+		outputAction.setPort(vlanNumber);
 		newMod.setMatch(match);
 		newMod.setActions(new LinkedList<OFAction>());
 		newMod.getActions().add(stripVlan);
@@ -1543,7 +1546,7 @@ SwitchChangedListener {
 						//set output action of the mod to output on the ghostport
 						((OFActionOutput) action).setPort(senderSwitch.getGhostPort());
 //						flowMod.setOriginalOutputPort(originalPort);
-						System.out.println("Flow after modification: "+flowMod);
+						System.out.println("Flow after modification: "+clonedMod);
 						
 						//TODO: add rule to remove tag on original switch- e.g. the ActiveSwitch object -  this will be done in another function call
 						
