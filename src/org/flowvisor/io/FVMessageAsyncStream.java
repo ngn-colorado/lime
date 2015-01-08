@@ -79,7 +79,7 @@ public class FVMessageAsyncStream extends OFMessageAsyncStream {
 			throw new MalformedOFMessage("len=" + len + ",wrote=" + wrote
 					+ " msg=" + m);
 		} else{
-			System.out.println("Flushing output");
+//			System.out.println("Flushing output");
 			super.flush();
 		}
 	}

@@ -891,7 +891,7 @@ SwitchChangedListener {
 			FVLog.log(LogLevel.DEBUG, this, "send to switch:", msg);
 			try {
 				this.msgStream.testAndWrite(msg);
-				System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine: "+msg);
+//				System.out.println("MURAD: WorkerSwitch, " + this.getName() + " message sent fine: "+msg);
 				
 			} catch (BufferFull e) {
 				System.out.println("MURAD: WorkerSwitch ERROOOORR, " + this.getName() + " framing BUG !!!!!");
@@ -1590,7 +1590,7 @@ SwitchChangedListener {
 	 * @param fm
 	 */
 	public synchronized void handleFlowModAndSend(FVFlowMod fm, boolean addToTable){
-		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + fm.toString());
+//		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + fm.toString());
 		
 		if(addToTable){
 			System.out.println("Adding flow mod to flow table object: "+fm.toString());
