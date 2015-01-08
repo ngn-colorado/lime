@@ -1495,6 +1495,7 @@ SwitchChangedListener {
 		newMod.getActions().add(outputAction);
 		newMod.setOutPort(vlanNumber);
 		newMod.setCommand(FVFlowMod.OFPFC_ADD);
+		newMod.setCookie(originalMod.getCookie());
 		//hard code priority
 		newMod.setPriority((short)1);
 		//need this flag?
