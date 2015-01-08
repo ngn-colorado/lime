@@ -1,6 +1,7 @@
 package org.flowvisor.classifier;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -690,7 +691,12 @@ SwitchChangedListener {
 	 */
 	private void classifyOFMessage(OFMessage msg) {
 		FVLog.log(LogLevel.DEBUG, this, "received from switch: ", msg);
-		((Classifiable) msg).classifyFromSwitch(this); // msg specific handling
+		try{
+			((Classifiable) msg).classifyFromSwitch(this); // msg specific handling
+		}catch( BufferUnderflowException e){
+			System.out.println("Caught buffer underflow exception");
+			e.printStackTrace();
+		}
 	}
 
 	/**
