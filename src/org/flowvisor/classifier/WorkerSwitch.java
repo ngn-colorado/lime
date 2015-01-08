@@ -1480,7 +1480,7 @@ SwitchChangedListener {
 		FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 		//create match to match packets coming in ghostPort for a particular vlan
 		FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
-		FVMatch match = new FVMatch();
+		OFMatch match = new OFMatch();
 		match.setDataLayerVirtualLan(vlanNumber);
 		match.setInputPort(handlerSwitch.getGhostPort());
 		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
@@ -1491,11 +1491,13 @@ SwitchChangedListener {
 		outputAction.setPort(vlanNumber);
 		newMod.setMatch(match);
 		newMod.setActions(new LinkedList<OFAction>());
-		newMod.getActions().add(stripVlan);
-		newMod.getActions().add(outputAction);
+//		newMod.getActions().add(stripVlan);
+//		newMod.getActions().add(outputAction);
 		newMod.setOutPort(vlanNumber);
+		newMod.setHardTimeout((short)0);
+		newMod.setIdleTimeout((short)1);
 		newMod.setCommand(FVFlowMod.OFPFC_ADD);
-		newMod.setCookie(originalMod.getCookie());
+//		newMod.setCookie(originalMod.getCookie());
 		//hard code priority
 		newMod.setPriority((short)1);
 		//need this flag?
