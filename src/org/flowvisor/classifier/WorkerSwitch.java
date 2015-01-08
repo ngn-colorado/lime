@@ -64,6 +64,7 @@ import org.flowvisor.message.FVMessageFactory;
 import org.flowvisor.message.FVStatisticsReply;
 import org.flowvisor.message.FVStatisticsRequest;
 import org.flowvisor.message.SanityCheckable;
+import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
 import org.flowvisor.message.statistics.FVAggregateStatisticsReply;
 import org.flowvisor.message.statistics.FVAggregateStatisticsRequest;
 import org.flowvisor.message.statistics.FVFlowStatisticsReply;
@@ -1416,7 +1417,7 @@ SwitchChangedListener {
 			if(hasVlanAction(flowMod)){
 				continue;
 			}
-			System.out.println("\nCurrent flowmod: "+flowMod+"\n");
+//			System.out.println("\nCurrent flowmod: "+flowMod+"\n");
 			//clone the mod and add vlan tag
 			HashMap<Short,  FVFlowMod> vlanMap = createVlanSenderMod(flowMod, vlanSendingSwitch);
 			
@@ -1523,7 +1524,9 @@ SwitchChangedListener {
 						int originalSize = clonedMod.getLengthU();		
 						short originalPort = ((OFActionOutput) action).getPort();
 						//create vlan tag action
-						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+//						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
+						addedVlanAction.setVirtualLanIdentifier(originalPort);
 						if(vlanNumber < 0){
 							vlanNumber = originalPort;
 						}
@@ -1531,8 +1534,12 @@ SwitchChangedListener {
 						//add vlan tag action to mod
 						clonedMod.getActions().add(i, addedVlanAction);
 						//recompute length?
-						clonedMod.computeLength();
+						//DOESN'T appear to work
+//						clonedMod.computeLength();
+						
+						//INSTEAD recomputer manually
 						System.out.println("Expected length: " + (originalSize + tagSize) +"\nCurrent length: "+flowMod.getLengthU());
+						clonedMod.setLengthU(originalSize + tagSize);
 						//set output action of the mod to output on the ghostport
 						((OFActionOutput) action).setPort(senderSwitch.getGhostPort());
 //						flowMod.setOriginalOutputPort(originalPort);
@@ -1593,7 +1600,7 @@ SwitchChangedListener {
 //		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + fm.toString());
 		
 		if(addToTable){
-			System.out.println("Adding flow mod to flow table object: "+fm.toString());
+//			System.out.println("Adding flow mod to flow table object: "+fm.toString());
 			this.flowTable.addFlowMod(fm, fm.getCookie());
 		}
 		this.sendMsg(fm, this);
