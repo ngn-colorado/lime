@@ -1419,13 +1419,16 @@ SwitchChangedListener {
 			System.out.println("\nCurrent flowmod: "+flowMod+"\n");
 			//clone the mod and add vlan tag
 			HashMap<Short,  FVFlowMod> vlanMap = createVlanSenderMod(flowMod, vlanSendingSwitch);
+			
 			//there will only be one element in the keySet of this map
 			Short vlanNumber = (Short) vlanMap.keySet().toArray()[0];
+			sendingSwitchMods.add(vlanMap.get(vlanNumber));
 			
 			//create mod to handle receipt of vlan tags in the original switch
 			FVFlowMod vlanHandlerMod = createVlanHandlerMod(flowMod, vlanNumber, vlanReceiverSwitch);
 			//write clonedMod to original switch
 //			originalActiveSwitch.handleFlowModAndSend(vlanHandlerMod, true);
+			receivingSwitchMods.add(vlanHandlerMod);
 		}
 		sendFlowMods(sendingSwitchMods, vlanSendingSwitch);
 		sendFlowMods(receivingSwitchMods, vlanReceiverSwitch);
