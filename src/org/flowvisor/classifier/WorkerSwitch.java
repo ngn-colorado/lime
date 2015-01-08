@@ -1480,7 +1480,7 @@ SwitchChangedListener {
 		FVMatch match = new FVMatch();
 		match.setDataLayerVirtualLan(vlanNumber);
 		match.setInputPort(handlerSwitch.getGhostPort());
-		match.setWildcards(FVMatch.OFPFW_DL_VLAN | -1);
+		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 		//TODO: set the actions of this mod to be the actions of the original mod.
 		//For now, use the vlan tag # as the output port of this mod
 		FVActionOutput outputAction = new FVActionOutput();
