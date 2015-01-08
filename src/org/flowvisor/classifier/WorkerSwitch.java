@@ -1425,13 +1425,16 @@ SwitchChangedListener {
 			
 			//there will only be one element in the keySet of this map
 			Short vlanNumber = (Short) vlanMap.keySet().toArray()[0];
-			sendingSwitchMods.add(vlanMap.get(vlanNumber));
-			
-			//create mod to handle receipt of vlan tags in the original switch
-			FVFlowMod vlanHandlerMod = createVlanHandlerMod(flowMod, vlanNumber, vlanReceiverSwitch);
-			//write clonedMod to original switch
-//			originalActiveSwitch.handleFlowModAndSend(vlanHandlerMod, true);
-			receivingSwitchMods.add(vlanHandlerMod);
+			//skip weird rules that have output port of -1 that ovx doesn't support
+			if(vlanNumber > 0){
+				sendingSwitchMods.add(vlanMap.get(vlanNumber));
+				
+				//create mod to handle receipt of vlan tags in the original switch
+				FVFlowMod vlanHandlerMod = createVlanHandlerMod(flowMod, vlanNumber, vlanReceiverSwitch);
+				//write clonedMod to original switch
+	//			originalActiveSwitch.handleFlowModAndSend(vlanHandlerMod, true);
+				receivingSwitchMods.add(vlanHandlerMod);
+			}
 		}
 		sendFlowMods(sendingSwitchMods, vlanSendingSwitch);
 		sendFlowMods(receivingSwitchMods, vlanReceiverSwitch);
@@ -1484,11 +1487,13 @@ SwitchChangedListener {
 		//TODO: set the actions of this mod to be the actions of the original mod.
 		//For now, use the vlan tag # as the output port of this mod
 		FVActionOutput outputAction = new FVActionOutput();
+		//NOTE: this switch port must exist in OVX or else ovx will drop the flow mod
 		outputAction.setPort(vlanNumber);
 		newMod.setMatch(match);
 		newMod.setActions(new LinkedList<OFAction>());
 		newMod.getActions().add(stripVlan);
 		newMod.getActions().add(outputAction);
+		newMod.setOutPort(vlanNumber);
 		newMod.setCommand(FVFlowMod.OFPFC_ADD);
 		//hard code priority
 		newMod.setPriority((short)1);
