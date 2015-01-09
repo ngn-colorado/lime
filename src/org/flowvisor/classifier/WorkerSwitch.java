@@ -1491,8 +1491,8 @@ SwitchChangedListener {
 		outputAction.setPort(vlanNumber);
 		newMod.setMatch(match);
 		newMod.setActions(new LinkedList<OFAction>());
-//		newMod.getActions().add(stripVlan);
-//		newMod.getActions().add(outputAction);
+		newMod.getActions().add(stripVlan);
+		newMod.getActions().add(outputAction);
 		newMod.setOutPort(vlanNumber);
 		newMod.setHardTimeout((short)0);
 		newMod.setIdleTimeout((short)1);
