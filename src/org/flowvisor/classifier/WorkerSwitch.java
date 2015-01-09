@@ -1749,12 +1749,29 @@ SwitchChangedListener {
 	 * @return port number if exist, -1 otherwise
 	 */
 	public short getGhostPort(){
-		for (Map.Entry portEntry : activePorts.entrySet()){
-			if (((PortInfo) portEntry.getValue()).getType().equals(PortType.GHOST)){
-				return (short) portEntry.getKey();
+//		for (Map.Entry portEntry : activePorts.entrySet()){
+//			if (((PortInfo) portEntry.getValue()).getType().equals(PortType.GHOST)){
+//				return (short) portEntry.getKey();
+//			}
+//		}
+		Long swid = getDPID();
+		HashMap<Short, PortInfo> ports = LimeContainer.getOriginalSwitchContainer().get(swid).getPortTable();
+		if(ports == null){
+			//am a clone switch
+			ports = LimeContainer.getCloneSwitchContainer().get(swid).getPortTable();
+		}
+		if(ports == null){
+			//I dont exist?
+			return -1;
+		}
+		for(Short port : ports.keySet()){
+			if(ports.get(port).getType() == PortType.GHOST){
+				return port;
 			}
 		}
-		return -1;
+		//couldn't find it!
+		return -2;
+		
 	}
 
 	public void setConnectedHostCounter(int counter){
