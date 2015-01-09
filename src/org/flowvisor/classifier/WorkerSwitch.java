@@ -1487,6 +1487,7 @@ SwitchChangedListener {
 		//TODO: set the actions of this mod to be the actions of the original mod.
 		//For now, use the vlan tag # as the output port of this mod
 		FVActionOutput outputAction = new FVActionOutput();
+		outputAction.setMaxLength((short)32767);
 		//NOTE: this switch port must exist in OVX or else ovx will drop the flow mod
 		outputAction.setPort(vlanNumber);
 		newMod.setMatch(match);
@@ -1494,12 +1495,13 @@ SwitchChangedListener {
 		newMod.getActions().add(stripVlan);
 		newMod.getActions().add(outputAction);
 		newMod.setOutPort(vlanNumber);
+//		newMod.
 		newMod.setHardTimeout((short)0);
-		newMod.setIdleTimeout((short)1);
+		newMod.setIdleTimeout((short)0);
 		newMod.setCommand(FVFlowMod.OFPFC_ADD);
-//		newMod.setCookie(originalMod.getCookie());
+		newMod.setCookie(originalMod.getCookie());
 		//hard code priority
-		newMod.setPriority((short)1);
+		newMod.setPriority((short)100);
 		//need this flag?
 		newMod.setFlags((short)1);
 		newMod.computeLength();
