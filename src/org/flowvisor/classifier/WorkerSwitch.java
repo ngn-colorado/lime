@@ -1483,7 +1483,7 @@ SwitchChangedListener {
 //		stripVlan.
 		OFMatch match = new OFMatch();
 		match.setDataLayerVirtualLan(vlanNumber);
-		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
+//		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 		match.setInputPort(handlerSwitch.getGhostPort());
 		
 		//TODO: set the actions of this mod to be the actions of the original mod.
