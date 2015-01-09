@@ -1481,10 +1481,14 @@ SwitchChangedListener {
 		//create match to match packets coming in ghostPort for a particular vlan
 		FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
 //		stripVlan.
-		OFMatch match = new OFMatch();
+		FVMatch match = new FVMatch();
+		int wildcards = FVMatch.OFPFW_ALL;
+		wildcards &= ~FVMatch.OFPFW_IN_PORT;
+		wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 		match.setDataLayerVirtualLan(vlanNumber);
 //		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 		match.setInputPort(handlerSwitch.getGhostPort());
+		match.setWildcards(wildcards);
 		
 		//TODO: set the actions of this mod to be the actions of the original mod.
 		//For now, use the vlan tag # as the output port of this mod
