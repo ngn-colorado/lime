@@ -1480,10 +1480,12 @@ SwitchChangedListener {
 		FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 		//create match to match packets coming in ghostPort for a particular vlan
 		FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
+//		stripVlan.
 		OFMatch match = new OFMatch();
 		match.setDataLayerVirtualLan(vlanNumber);
-		match.setInputPort(handlerSwitch.getGhostPort());
 		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
+		match.setInputPort(handlerSwitch.getGhostPort());
+		
 		//TODO: set the actions of this mod to be the actions of the original mod.
 		//For now, use the vlan tag # as the output port of this mod
 		FVActionOutput outputAction = new FVActionOutput();
