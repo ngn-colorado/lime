@@ -95,6 +95,7 @@ import org.openflow.protocol.action.OFActionStripVirtualLan;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.protocol.statistics.OFStatisticsType;
+import org.openflow.util.U16;
 
 /**
  * Taken from WorkerSwitch class
@@ -1405,6 +1406,12 @@ SwitchChangedListener {
 	public static synchronized void insertFlowRuleTableAndSendModified(WorkerSwitch vlanSendingSwitch, WorkerSwitch vlanReceiverSwitch, Collection<FVFlowMod> flowTable){
 		System.out.println("Starting flow mod migration of " + vlanReceiverSwitch.getDPID() + " to "+vlanReceiverSwitch.getDPID());
 		System.out.println("ActiveSwitch flow table size: "+vlanReceiverSwitch.flowTable.flowmodMap.size());
+		if(vlanReceiverSwitch.getGhostPort() < 1){
+			throw new IllegalArgumentException("Receiver switch ghost port cannot be -1");
+		}
+		if(vlanSendingSwitch.getGhostPort() < 1){
+			throw new IllegalArgumentException("Sending switch ghost port cannot be -1");
+		}
 		
 		//Get the original switch's flow table and copy to clone switch's flow table. 
 		//NOTE: this table needs to be populated with flowmods as they are received and written to the physical switch
@@ -1487,7 +1494,7 @@ SwitchChangedListener {
 		wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 		match.setDataLayerVirtualLan(vlanNumber);
 //		match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
-		match.setInputPort(handlerSwitch.getGhostPort());
+		match.setInputPort(U16.t(handlerSwitch.getGhostPort()));
 		match.setWildcards(wildcards);
 		
 		//TODO: set the actions of this mod to be the actions of the original mod.
