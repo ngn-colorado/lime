@@ -1755,15 +1755,17 @@ SwitchChangedListener {
 //			}
 //		}
 		Long swid = getDPID();
-		HashMap<Short, PortInfo> ports = LimeContainer.getOriginalSwitchContainer().get(swid).getPortTable();
-		if(ports == null){
-			//am a clone switch
-			ports = LimeContainer.getCloneSwitchContainer().get(swid).getPortTable();
+		LimeSwitch container = LimeContainer.getOriginalSwitchContainer().get(swid);
+		HashMap<Short, PortInfo> ports;
+		if(container == null){
+			container = LimeContainer.getCloneSwitchContainer().get(swid);
 		}
-		if(ports == null){
-			//I dont exist?
+		if(container == null){
+			//I don't exist
 			return -1;
 		}
+			
+		ports = container.getPortTable();
 		for(Short port : ports.keySet()){
 			if(ports.get(port).getType() == PortType.GHOST){
 				return port;
