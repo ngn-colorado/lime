@@ -5,8 +5,8 @@ package org.flowvisor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import org.apache.derby.impl.sql.compile.HasVariantValueNodeVisitor;
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.LimeFlowTable;
 import org.flowvisor.classifier.WorkerSwitch;
@@ -22,10 +22,16 @@ public final class LimeMigrationHandler {
 	private int cloneSwitchCounter;
 	private static LimeMigrationHandler singleInstance = null;
 	private boolean migrating;
+	private HashMap<DPID, List<FVFlowMod>> originalFlowMods;
+	private HashMap<DPID, List<FVFlowMod>> vlanHandlerMods;
+	private HashMap<DPID, DPID> localCloneToSwitchMap;
 	
 	private LimeMigrationHandler(){
 		cloneSwitchCounter = 0;
 		migrating = false;
+		originalFlowMods = new HashMap<DPID, List<FVFlowMod>>();
+		vlanHandlerMods = new HashMap<DPID, List<FVFlowMod>>();
+		localCloneToSwitchMap = new HashMap<DPID, DPID>();
 	}
 	
 	public static LimeMigrationHandler getInstance(){
@@ -107,6 +113,12 @@ public final class LimeMigrationHandler {
 //		if(!firstSuccessful || !secondSuccessful){
 //			return;
 //		}
+		//populate original flow table map with all the flows in all of the active switches
+		for(Long activeSwID : LimeContainer.getActiveToOriginalSwitchMap().keySet()){
+			WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
+			ArrayList<FVFlowMod> currentList = new ArrayList<FVFlowMod>(currentSwitch.getFlowTable().getFlowTable());
+			originalFlowMods.put(new DPID(activeSwID), currentList);
+		}
 
 //		for (Map.Entry<Long, Long> entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
 		for(Long activeSwID : LimeContainer.getActiveToCloneSwitchMap().keySet()){
@@ -168,7 +180,9 @@ public final class LimeMigrationHandler {
 					System.out.println("\n\n\nOriginal switch dpid: "+new DPID(activeSwitch.getDPID()).getDpidHexString());
 					System.out.println("\n\n\nClone switch dpid: "+new DPID(cloneSwitch.getDPID()).getDpidHexString());
 					System.out.println("Starting flowmod migration function");
-					WorkerSwitch.insertFlowRuleTableAndSendModified(activeSwitch, cloneSwitch, activeSwitch.getFlowTable().getFlowTable());  //FIXME we may need to clone this
+					//TODO: need to keep track of original rules, as they may be modified/removed by ovx and
+					//the current lime data structures might not work
+					WorkerSwitch.insertFlowRuleTableAndSendModified(activeSwitch, cloneSwitch, activeSwitch.getFlowTable().getFlowTable(), null);  //FIXME we may need to clone this
 					
 //					switchDoneMigrating(cloneSwitch, activeSwitch);
 				}
@@ -214,7 +228,7 @@ public final class LimeMigrationHandler {
 				}
 				
 			}
-			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods);
+			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods, vlanHandlerMods);
 			//TODO: need to delete the incorrect rules from the physical switches, but keep the rules in the lime flow table object
 			for(FVFlowMod flowMod : matchingMods){
 				//delete all non-vlan tag mods from the original switch, bypassing the lime flow table object, assuming this method works
@@ -244,6 +258,7 @@ public final class LimeMigrationHandler {
 		long oSwID = LimeContainer.getActiveToOriginalSwitchMap().get(activeSwitch.getDPID());
 		LimeContainer.getActiveToOriginalSwitchMap().remove(activeSwitch.getDPID());
 		LimeContainer.getActiveToOriginalSwitchMap().put(cloneSwitch.getDPID(), oSwID);
+		localCloneToSwitchMap.put(new DPID(activeSwitch.getDPID()), new DPID(cloneSwitch.getDPID()));
 		
 		// remove ghost port
 		// this will happen automatically when OVX remove port
@@ -253,7 +268,22 @@ public final class LimeMigrationHandler {
 			// send to ovx to delete all old active switches
 			LimeContainer.getCloneSwitchContainer().clear();
 			LimeContainer.getActiveToCloneSwitchMap().clear();
+			//TODO: need to delete all vlan mods in clone switch
+			for(DPID switchDPID : vlanHandlerMods.keySet()){
+				for(FVFlowMod flowMod : vlanHandlerMods.get(switchDPID)){
+					WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(switchDPID.getDpidLong());
+					LimeUtils.deleteFlowMod(currentSwitch, flowMod);
+				}
+			}
 			//TODO: need to put correct flow tables into the new switches
+			for(DPID originalSwitch : localCloneToSwitchMap.keySet()){
+				List<FVFlowMod> originalFlows = originalFlowMods.get(originalSwitch);
+				for(FVFlowMod flowMod : originalFlows){
+					DPID currentCloneDPID = localCloneToSwitchMap.get(originalFlows);
+					WorkerSwitch currentClone = LimeContainer.getAllWorkingSwitches().get(currentCloneDPID.getDpidLong());
+					currentClone.handleFlowModAndSend(flowMod);
+				}
+			}
 			migrating = false;
 		}
 	}

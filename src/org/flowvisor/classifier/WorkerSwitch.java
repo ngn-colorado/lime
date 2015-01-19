@@ -1399,11 +1399,12 @@ SwitchChangedListener {
 	 * original rule)
 	 * @param vlanSendingSwitch The clone switch to write the flow mods to
 	 * @param vlanReceiverSwitch The original switch associated with this object. Could also be accessed with getDuplicateSwitch() I believe.
+	 * @param flowTable TODO
+	 * @param vlanModsMap TODO
 	 * @param receivingGhostPort The ghost port number of the switch that will receive the vlan tagged packets
 	 * @param sendingGhostPort The ghost port number of the switch that will send the vlan tagged packets
-	 * @param flowTable TODO
 	 */
-	public static synchronized void insertFlowRuleTableAndSendModified(WorkerSwitch vlanSendingSwitch, WorkerSwitch vlanReceiverSwitch, Collection<FVFlowMod> flowTable){
+	public static synchronized void insertFlowRuleTableAndSendModified(WorkerSwitch vlanSendingSwitch, WorkerSwitch vlanReceiverSwitch, Collection<FVFlowMod> flowTable, Map<DPID, List<FVFlowMod>> vlanModsMap){
 		System.out.println("Starting flow mod migration of " + vlanReceiverSwitch.getDPID() + " to "+vlanReceiverSwitch.getDPID());
 		System.out.println("ActiveSwitch flow table size: "+vlanReceiverSwitch.flowTable.flowmodMap.size());
 		if(vlanReceiverSwitch.getGhostPort() < 1){
@@ -1445,6 +1446,11 @@ SwitchChangedListener {
 		}
 		sendFlowMods(sendingSwitchMods, vlanSendingSwitch);
 		sendFlowMods(receivingSwitchMods, vlanReceiverSwitch);
+		DPID senderDPID = new DPID(vlanSendingSwitch.getDPID());
+		DPID receiverDPID = new DPID(vlanReceiverSwitch.getDPID());
+		Object retur = (vlanModsMap.containsKey(senderDPID)) ? vlanModsMap.get(senderDPID).addAll(sendingSwitchMods) : vlanModsMap.put(senderDPID, new ArrayList<FVFlowMod>(sendingSwitchMods)); 
+		retur = (vlanModsMap.containsKey(receiverDPID)) ? vlanModsMap.get(receiverDPID).addAll(receivingSwitchMods) : vlanModsMap.put(receiverDPID, new ArrayList<FVFlowMod>(receivingSwitchMods));
+		
 	}
 	
 	private static void sendFlowMods(ArrayList<FVFlowMod> flowMods, WorkerSwitch modifiedSwitch) {
