@@ -229,7 +229,7 @@ public final class LimeMigrationHandler {
 				}
 			}
 			if(originalDpid != null){
-				for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
+				for(FVFlowMod flowMod : originalFlowMods.get(originalDpid)){
 					if(WorkerSwitch.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
 						matchingMods.add(flowMod);
 					}
