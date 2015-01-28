@@ -222,20 +222,20 @@ public final class LimeMigrationHandler {
 			//also need to delete the non-vlan rules from the physical switch, but not from the lime flow table
 			//for now, assume that the host is connected to the same port on the cloned switch as on the original switch
 			ArrayList<FVFlowMod> matchingMods = new ArrayList<FVFlowMod>();
-//			DPID originalDpid = null;
-//			for(DPID dpid : originalFlowMods.keySet()){
-//				if(dpid.getDpidLong() == host.getOriginalDpid().getDpidLong()){
-//					originalDpid = dpid;
-//				}
-//			}
-//			if(originalDpid != null){
+			DPID originalDpid = null;
+			for(DPID dpid : originalFlowMods.keySet()){
+				if(dpid.getDpidLong() == host.getOriginalDpid().getDpidLong()){
+					originalDpid = dpid;
+				}
+			}
+			if(originalDpid != null){
 				for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
 					if(WorkerSwitch.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
 						matchingMods.add(flowMod);
 					}
 					
 				}
-//			}
+			}
 			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods, vlanHandlerMods);
 			//TODO: need to delete the incorrect rules from the physical switches, but keep the rules in the lime flow table object
 			for(FVFlowMod flowMod : matchingMods){
