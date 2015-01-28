@@ -224,7 +224,7 @@ public final class LimeMigrationHandler {
 			ArrayList<FVFlowMod> matchingMods = new ArrayList<FVFlowMod>();
 			DPID originalDpid = null;
 			for(DPID dpid : originalFlowMods.keySet()){
-				if(dpid.getDpidLong() == host.getOriginalDpid().getDpidLong()){
+				if(dpid.getDpidLong().longValue() == host.getOriginalDpid().getDpidLong().longValue()){
 					originalDpid = dpid;
 				}
 			}
