@@ -22,18 +22,18 @@ public class DPID {
 		}
 	}
 	
+
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
 				+ ((dpidBigInt == null) ? 0 : dpidBigInt.hashCode());
-		result = prime * result
-				+ ((dpidHexString == null) ? 0 : dpidHexString.hashCode());
-		result = prime * result
-				+ ((dpidString == null) ? 0 : dpidString.hashCode());
 		return result;
 	}
+
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -49,18 +49,10 @@ public class DPID {
 				return false;
 		} else if (!dpidBigInt.equals(other.dpidBigInt))
 			return false;
-		if (dpidHexString == null) {
-			if (other.dpidHexString != null)
-				return false;
-		} else if (!dpidHexString.equals(other.dpidHexString))
-			return false;
-		if (dpidString == null) {
-			if (other.dpidString != null)
-				return false;
-		} else if (!dpidString.equals(other.dpidString))
-			return false;
 		return true;
 	}
+
+
 
 	public DPID(Long DPID){
 		dpidBigInt = new BigInteger(Long.toHexString(DPID), 16);
@@ -230,6 +222,10 @@ public class DPID {
 		System.out.println("Number of bits: "+big.bitLength());
 		System.out.println("Binary string of Long value: "+Long.toBinaryString(big.longValue()));
 		System.out.println("Binary string of BigInteger value: "+big.toString(2));
+		System.out.println("Long value of DPID 1: "+dpid.getDpidLong());
+		System.out.println("Long value of DPID 2: "+dpid2.getDpidLong());
+		boolean equal = (dpid.equals(dpid2));
+		System.out.println("Are they equal?: "+equal);
 	}
 	
 }

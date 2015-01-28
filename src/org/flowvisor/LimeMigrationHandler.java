@@ -228,14 +228,16 @@ public final class LimeMigrationHandler {
 					originalDpid = dpid;
 				}
 			}
-			if(originalDpid != null){
-				for(FVFlowMod flowMod : originalFlowMods.get(originalDpid)){
+//			if(originalDpid != null){
+//				for(FVFlowMod flowMod : originalFlowMods.get(originalDpid)){
+				for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
 					if(WorkerSwitch.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
 						matchingMods.add(flowMod);
 					}
 					
 				}
-			}
+//			}
+			//TODO: this correctly creates sender vlan mod, but does not create correct vlan handler mod on the original switch
 			WorkerSwitch.insertFlowRuleTableAndSendModified(cloneSwitch, originalSwitch, matchingMods, vlanHandlerMods);
 			//TODO: need to delete the incorrect rules from the physical switches, but keep the rules in the lime flow table object
 			for(FVFlowMod flowMod : matchingMods){
