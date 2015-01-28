@@ -182,7 +182,7 @@ public final class LimeMigrationHandler {
 					System.out.println("Starting flowmod migration function");
 					//TODO: need to keep track of original rules, as they may be modified/removed by ovx and
 					//the current lime data structures might not work
-					WorkerSwitch.insertFlowRuleTableAndSendModified(activeSwitch, cloneSwitch, activeSwitch.getFlowTable().getFlowTable(), null);  //FIXME we may need to clone this
+					WorkerSwitch.insertFlowRuleTableAndSendModified(activeSwitch, cloneSwitch, activeSwitch.getFlowTable().getFlowTable(), vlanHandlerMods);  //FIXME we may need to clone this
 					
 //					switchDoneMigrating(cloneSwitch, activeSwitch);
 				}
