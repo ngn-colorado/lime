@@ -222,7 +222,7 @@ public final class LimeMigrationHandler {
 			//also need to delete the non-vlan rules from the physical switch, but not from the lime flow table
 			//for now, assume that the host is connected to the same port on the cloned switch as on the original switch
 			ArrayList<FVFlowMod> matchingMods = new ArrayList<FVFlowMod>();
-			for(FVFlowMod flowMod : originalSwitch.getFlowTable().getFlowTable()){
+			for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
 				if(WorkerSwitch.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
 					matchingMods.add(flowMod);
 				}
