@@ -7,6 +7,7 @@ public class DPID {
 	private String dpidString;
 	private String dpidHexString;
 	private BigInteger dpidBigInt;
+	
 	public DPID(String DPID){
 		try{
 			dpidBigInt = DPIDStringToBigInteger(DPID);
@@ -21,6 +22,46 @@ public class DPID {
 		}
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((dpidBigInt == null) ? 0 : dpidBigInt.hashCode());
+		result = prime * result
+				+ ((dpidHexString == null) ? 0 : dpidHexString.hashCode());
+		result = prime * result
+				+ ((dpidString == null) ? 0 : dpidString.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DPID other = (DPID) obj;
+		if (dpidBigInt == null) {
+			if (other.dpidBigInt != null)
+				return false;
+		} else if (!dpidBigInt.equals(other.dpidBigInt))
+			return false;
+		if (dpidHexString == null) {
+			if (other.dpidHexString != null)
+				return false;
+		} else if (!dpidHexString.equals(other.dpidHexString))
+			return false;
+		if (dpidString == null) {
+			if (other.dpidString != null)
+				return false;
+		} else if (!dpidString.equals(other.dpidString))
+			return false;
+		return true;
+	}
+
 	public DPID(Long DPID){
 		dpidBigInt = new BigInteger(Long.toHexString(DPID), 16);
 		dpidString = DPIDLongToDPIDString(dpidBigInt.longValue());
