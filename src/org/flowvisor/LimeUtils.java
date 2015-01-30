@@ -11,6 +11,7 @@ import org.json.simple.parser.ParseException;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPort;
+import org.openflow.protocol.OFType;
 
 public class LimeUtils {
 //	json format:
@@ -202,13 +203,15 @@ public class LimeUtils {
 	}
 	
 	public static void deleteFlowMod(WorkerSwitch destinationSwitch, FVFlowMod flowMod){
-		FVFlowMod deleteMod = (FVFlowMod) flowMod.clone();
+//		FVFlowMod deleteMod = (FVFlowMod) flowMod.clone();
+		FVFlowMod deleteMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
+		deleteMod.setMatch(flowMod.getMatch());
 		deleteMod.setCommand(OFFlowMod.OFPFC_DELETE);
-		OFFlowMod fm = new OFFlowMod();
+//		OFFlowMod fm = new OFFlowMod();
 //		fm.setMatch(match);
 //		fm.setCommand(OFFlowMod.OFPFC_DELETE);
 		deleteMod.setOutPort(OFPort.OFPP_NONE);
 		deleteMod.setBufferId(0xffffffff); // buffer to NONE
-		destinationSwitch.sendMsg(fm, destinationSwitch);
+		destinationSwitch.sendMsg(deleteMod, destinationSwitch);
 	}
 }

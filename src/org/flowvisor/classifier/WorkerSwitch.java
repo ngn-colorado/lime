@@ -1405,15 +1405,6 @@ SwitchChangedListener {
 	 * @param sendingGhostPort The ghost port number of the switch that will send the vlan tagged packets
 	 */
 	public static synchronized void insertFlowRuleTableAndSendModified(WorkerSwitch vlanSendingSwitch, WorkerSwitch vlanReceiverSwitch, Collection<FVFlowMod> flowTable, Map<DPID, List<FVFlowMod>> vlanModsMap){
-		System.out.println("Starting flow mod migration of " + vlanReceiverSwitch.getDPID() + " to "+vlanReceiverSwitch.getDPID());
-		System.out.println("ActiveSwitch flow table size: "+vlanReceiverSwitch.flowTable.flowmodMap.size());
-		if(vlanReceiverSwitch.getGhostPort() < 1){
-			throw new IllegalArgumentException("Receiver switch ghost port cannot be -1");
-		}
-		if(vlanSendingSwitch.getGhostPort() < 1){
-			throw new IllegalArgumentException("Sending switch ghost port cannot be -1");
-		}
-		
 		//Get the original switch's flow table and copy to clone switch's flow table. 
 		//NOTE: this table needs to be populated with flowmods as they are received and written to the physical switch
 		//don't need to clone flow table. this will occur in other stages
