@@ -1473,7 +1473,11 @@ SwitchChangedListener {
 				return false;
 			}
 			if(!hasPort && action instanceof OFActionOutput){
-				hasPort = (((OFActionOutput) action).getPort() == port);
+				short outputPort = ((OFActionOutput) action).getPort();
+				if(outputPort < 0){
+					return false;
+				}
+				hasPort = (outputPort == port);
 			}
 		}
 		return hasPort;
