@@ -456,12 +456,12 @@ public final class LimeMigrationHandler {
 				FVActionOutput outputAction = new FVActionOutput();
 				outputAction.setMaxLength((short)32767);
 				//NOTE: this switch port must exist in OVX or else ovx will drop the flow mod
-				outputAction.setPort(vlanNumber);
+				outputAction.setPort(outPort);
 				newMod.setMatch(match);
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
-				newMod.setOutPort(vlanNumber);
+				newMod.setOutPort(outPort);
 //				newMod.
 				newMod.setHardTimeout((short)0);
 				newMod.setIdleTimeout((short)0);
