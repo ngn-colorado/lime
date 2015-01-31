@@ -225,7 +225,7 @@ public final class LimeMigrationHandler {
 	
 	private boolean isValidFlowModWithoutVlan(FVFlowMod flowMod) {
 		OFMatch match = flowMod.getMatch();
-		if(flowMod.getOutPort() < 1 || flowMod.getOriginalOutputPort() < 1 || match.getInputPort() < 1){
+		if(flowMod.getOutPort() < 1 || match.getInputPort() < 1){
 			return false;
 		}
 		for(OFAction action : flowMod.getActions()){
