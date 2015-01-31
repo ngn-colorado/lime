@@ -132,10 +132,10 @@ public final class LimeMigrationHandler {
 		//populate original flow table map with all the flows in all of the active switches
 		for(Long activeSwID : LimeContainer.getActiveToOriginalSwitchMap().keySet()){
 			WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
-			ArrayList<FVFlowMod> currentList = new ArrayList<FVFlowMod>(currentSwitch.getFlowTable().getFlowTable());
-			for(FVFlowMod flowMod : currentList){
+			ArrayList<FVFlowMod> currentList = new ArrayList<FVFlowMod>();
+			for(FVFlowMod flowMod : currentSwitch.getFlowTable().getFlowTable()){
 				if(isValidFlowModWithoutVlan(flowMod)){
-					
+					currentList.add(flowMod);
 				}
 			}
 			originalFlowMods.put(new DPID(activeSwID), currentList);
