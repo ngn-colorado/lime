@@ -298,8 +298,13 @@ public final class LimeMigrationHandler {
 			}
 //			if(originalDpid != null){
 //				for(FVFlowMod flowMod : originalFlowMods.get(originalDpid)){
+			//TODO: the problem here is that this determines mods based on their output ports,
+			//but the mods to forward the from the original switch from the output ports in the
+			//original switch are already created. instead, need to determine mods based on the 
+			//inport == the attached host port, as we need to intercept the packets from the host,
+			//not redirect packets that are being sent
 				for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
-					if(WorkerSwitch.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
+					if(hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
 						matchingMods.add(flowMod);
 					}
 					
@@ -321,6 +326,17 @@ public final class LimeMigrationHandler {
 
 
 	
+
+	private boolean hasInputPortWithoutVlan(FVFlowMod flowMod, Short connectedPort) {
+		List<OFAction> actions = flowMod.getActions();
+		for(OFAction action : actions){
+			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
+				return false;
+			}
+		}
+		OFMatch match = flowMod.getMatch();
+		return (match.getInputPort() == connectedPort);
+	}
 
 	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods) {
 		for(FVFlowMod flowMod : matchingMods){
