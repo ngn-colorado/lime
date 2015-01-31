@@ -240,7 +240,7 @@ public final class LimeMigrationHandler {
 			//create vlan sending and receivng mods for each flos mod
 			//the receiving switch in this case is the original switch
 			//the sending switch is the clone switch;
-			createVlanHandlers(flowMod, originalSwitchDpid, cloneSwitchDpid);
+			createVlanHandlers(flowMod, cloneSwitchDpid, originalSwitchDpid);
 		}
 		
 	}
@@ -300,7 +300,7 @@ public final class LimeMigrationHandler {
 
 	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods) {
 		for(FVFlowMod flowMod : matchingMods){
-			createVlanHandlers(flowMod, cloneSwitch, originalSwitch);			
+			createVlanHandlers(flowMod, originalSwitch, cloneSwitch);			
 		}
 		
 	}
