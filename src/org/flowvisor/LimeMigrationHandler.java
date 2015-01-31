@@ -16,9 +16,12 @@ import org.flowvisor.message.actions.FVActionOutput;
 import org.flowvisor.message.actions.FVActionStripVirtualLan;
 import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
 import org.flowvisor.openflow.protocol.FVMatch;
+import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
+import org.openflow.protocol.action.OFActionStripVirtualLan;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 import org.openflow.util.U16;
 
 
@@ -130,6 +133,11 @@ public final class LimeMigrationHandler {
 		for(Long activeSwID : LimeContainer.getActiveToOriginalSwitchMap().keySet()){
 			WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
 			ArrayList<FVFlowMod> currentList = new ArrayList<FVFlowMod>(currentSwitch.getFlowTable().getFlowTable());
+			for(FVFlowMod flowMod : currentList){
+				if(isValidFlowModWithoutVlan(flowMod)){
+					
+				}
+			}
 			originalFlowMods.put(new DPID(activeSwID), currentList);
 		}
 
@@ -215,6 +223,22 @@ public final class LimeMigrationHandler {
 		migrating = true;
 	}
 	
+	private boolean isValidFlowModWithoutVlan(FVFlowMod flowMod) {
+		OFMatch match = flowMod.getMatch();
+		if(flowMod.getOutPort() < 1 || flowMod.getOriginalOutputPort() < 1 || match.getInputPort() < 1){
+			return false;
+		}
+		for(OFAction action : flowMod.getActions()){
+			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
+				return false;
+			}
+			if(action instanceof OFActionOutput && ((OFActionOutput) action).getPort() < 1){
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * this method writes vlan handler and receiver mods to the switches to handle ALL flow mods
 	 * in a given original switch - clone switch pair
