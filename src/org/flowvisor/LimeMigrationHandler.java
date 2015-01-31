@@ -404,6 +404,14 @@ public final class LimeMigrationHandler {
 
 	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject) {
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
+				short outPort = originalMod.getOutPort();
+				for(OFAction action : originalMod.getActions()){
+					if(action instanceof OFActionOutput){
+						if(((OFActionOutput) action).getPort() != outPort){
+							outPort = ((OFActionOutput) action).getPort();
+						}
+					}
+				}
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 				//create match to match packets coming in ghostPort for a particular vlan
 				FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
