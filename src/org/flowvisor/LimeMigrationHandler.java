@@ -463,7 +463,7 @@ public final class LimeMigrationHandler {
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 				mod_dl_dst.setDataLayerAddress(convertMacToBytes("a4:23:05:10:00:11"));
 				//create match to match packets coming in ghostPort for a particular vlan
-				FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
+				OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
 //				stripVlan.
 				FVMatch match = new FVMatch();
 				int wildcards = FVMatch.OFPFW_ALL;
