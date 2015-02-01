@@ -12,6 +12,7 @@ import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.LimeFlowTable;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVFlowMod;
+import org.flowvisor.message.FVPortMod;
 import org.flowvisor.message.actions.FVActionOutput;
 import org.flowvisor.message.actions.FVActionStripVirtualLan;
 import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
@@ -22,6 +23,7 @@ import org.openflow.protocol.OFType;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.protocol.action.OFActionStripVirtualLan;
+import org.openflow.protocol.action.OFActionType;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 import org.openflow.util.U16;
 
@@ -473,7 +475,7 @@ public final class LimeMigrationHandler {
 				FVActionOutput outputAction = new FVActionOutput();
 				outputAction.setMaxLength((short)32767);
 				//NOTE: this switch port must exist in OVX or else ovx will drop the flow mod
-				outputAction.setPort(outPort);
+				outputAction.setPort(OFPort.OFPP_FLOOD.getValue());
 				newMod.setMatch(match);
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
