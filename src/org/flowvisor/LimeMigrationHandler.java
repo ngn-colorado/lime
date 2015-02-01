@@ -458,12 +458,14 @@ public final class LimeMigrationHandler {
 					}
 				}
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
+				
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
 				mod_dl_src.setDataLayerAddress(convertMacToBytes("a4:23:05:01:00:00"));
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 				mod_dl_dst.setDataLayerAddress(convertMacToBytes("a4:23:05:10:00:11"));
 				//create match to match packets coming in ghostPort for a particular vlan
-				OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
+//				OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
+				OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
 //				stripVlan.
 				FVMatch match = new FVMatch();
 				int wildcards = FVMatch.OFPFW_ALL;
