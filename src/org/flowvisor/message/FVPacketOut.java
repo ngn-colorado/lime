@@ -147,6 +147,7 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 						// return the packet back as we received in this method
 						this.setBufferId(originalBufferId);
 						((OFActionOutput) action).setPort(originalPort);
+						this.computeLength();
 						return;
 						//break; //Assuming that there is only one output port...	
 					}
