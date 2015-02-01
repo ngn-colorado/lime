@@ -486,8 +486,8 @@ public final class LimeMigrationHandler {
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
-				newMod.getActions().add(mod_dl_dst);
-				newMod.getActions().add(mod_dl_src);
+//				newMod.getActions().add(mod_dl_dst);
+//				newMod.getActions().add(mod_dl_src);
 				newMod.setOutPort(OFPort.OFPP_FLOOD);
 //				newMod.
 				newMod.setHardTimeout((short)0);
