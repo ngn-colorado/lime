@@ -475,7 +475,7 @@ public final class LimeMigrationHandler {
 				outputAction.setPort(outPort);
 				newMod.setMatch(match);
 				newMod.setActions(new LinkedList<OFAction>());
-//				newMod.getActions().add(stripVlan);
+				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
 				newMod.setOutPort(outPort);
 //				newMod.
