@@ -506,7 +506,7 @@ public final class LimeMigrationHandler {
 			OFAction action = clonedMod.getActions().get(i);
 			if(action instanceof OFActionOutput){
 				//TODO: i don't think that we can necessarily tell the ports this way 
-				if(senderSwitchObject.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
+//				if(senderSwitchObject.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
 					//TODO: I think that all flow mods need to be written to clone. The host migration process occurs later
 					//and we would not be able to tell which hosts are still attached to the switch this way anyway
 //					if (destinationSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){
@@ -536,7 +536,7 @@ public final class LimeMigrationHandler {
 						
 						break; //Assuming that there is only one output port...	
 //					}
-				}
+//				}
 			}
 		}
 		sendFlowMod(clonedMod, senderSwitchObject);
