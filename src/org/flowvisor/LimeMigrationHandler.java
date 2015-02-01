@@ -17,6 +17,7 @@ import org.flowvisor.message.actions.FVActionStripVirtualLan;
 import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
 import org.flowvisor.openflow.protocol.FVMatch;
 import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
@@ -477,7 +478,7 @@ public final class LimeMigrationHandler {
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
-				newMod.setOutPort(outPort);
+				newMod.setOutPort(OFPort.OFPP_FLOOD);
 //				newMod.
 				newMod.setHardTimeout((short)0);
 				newMod.setIdleTimeout((short)0);
