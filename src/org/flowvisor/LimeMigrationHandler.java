@@ -481,14 +481,14 @@ public final class LimeMigrationHandler {
 				FVActionOutput outputAction = new FVActionOutput();
 				outputAction.setMaxLength((short)32767);
 				//NOTE: this switch port must exist in OVX or else ovx will drop the flow mod
-				outputAction.setPort(OFPort.OFPP_FLOOD.getValue());
+				outputAction.setPort(outPort);
 				newMod.setMatch(match);
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
 //				newMod.getActions().add(mod_dl_dst);
 //				newMod.getActions().add(mod_dl_src);
-				newMod.setOutPort(OFPort.OFPP_FLOOD);
+				newMod.setOutPort(outPort);
 //				newMod.
 				newMod.setHardTimeout((short)0);
 				newMod.setIdleTimeout((short)0);
