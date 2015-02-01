@@ -13,6 +13,8 @@ import org.flowvisor.classifier.LimeFlowTable;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVFlowMod;
 import org.flowvisor.message.FVPortMod;
+import org.flowvisor.message.actions.FVActionDataLayerDestination;
+import org.flowvisor.message.actions.FVActionDataLayerSource;
 import org.flowvisor.message.actions.FVActionOutput;
 import org.flowvisor.message.actions.FVActionStripVirtualLan;
 import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
@@ -456,6 +458,10 @@ public final class LimeMigrationHandler {
 					}
 				}
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
+				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
+				mod_dl_src.setDataLayerAddress("a4:23:05:01:00:00".getBytes());
+				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
+				mod_dl_dst.setDataLayerAddress("a4:23:05:10:00:11".getBytes());
 				//create match to match packets coming in ghostPort for a particular vlan
 				FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
 //				stripVlan.
@@ -480,6 +486,8 @@ public final class LimeMigrationHandler {
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
+				newMod.getActions().add(mod_dl_dst);
+				newMod.getActions().add(mod_dl_src);
 				newMod.setOutPort(OFPort.OFPP_FLOOD);
 //				newMod.
 				newMod.setHardTimeout((short)0);
