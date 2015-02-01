@@ -459,9 +459,9 @@ public final class LimeMigrationHandler {
 				}
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
-				mod_dl_src.setDataLayerAddress("a4:23:05:01:00:00".getBytes());
+				mod_dl_src.setDataLayerAddress(convertMacToBytes("a4:23:05:01:00:00"));
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
-				mod_dl_dst.setDataLayerAddress("a4:23:05:10:00:11".getBytes());
+				mod_dl_dst.setDataLayerAddress(convertMacToBytes("a4:23:05:10:00:11"));
 				//create match to match packets coming in ghostPort for a particular vlan
 				FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
 //				stripVlan.
@@ -502,6 +502,18 @@ public final class LimeMigrationHandler {
 //				handlerSwitch.handleFlowModAndSend(newMod, true);
 				sendFlowMod(newMod, receiverSwitchObject);
 				return newMod;
+	}
+
+	private byte[] convertMacToBytes(String macAddress) {
+		String[] macAddressParts = macAddress.split(":");
+
+		// convert hex string to byte values
+		byte[] macAddressBytes = new byte[6];
+		for(int i=0; i<6; i++){
+		    Integer hex = Integer.parseInt(macAddressParts[i], 16);
+		    macAddressBytes[i] = hex.byteValue();
+		}
+		return macAddressBytes;
 	}
 
 	private FVFlowMod createAndSendVlanSenderMod(short vlanTagNumber, short ghostPort, FVFlowMod flowMod, WorkerSwitch senderSwitchObject) {
