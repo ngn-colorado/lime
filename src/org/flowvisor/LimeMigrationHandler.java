@@ -468,7 +468,7 @@ public final class LimeMigrationHandler {
 				FVMatch match = new FVMatch();
 				int wildcards = FVMatch.OFPFW_ALL;
 				//TODO: cannot support using input matching for ovs, ovx and gre tunnels
-//				wildcards &= ~FVMatch.OFPFW_IN_PORT;
+				wildcards &= ~FVMatch.OFPFW_IN_PORT;
 				wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 				match.setDataLayerVirtualLan(vlanNumber);
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
