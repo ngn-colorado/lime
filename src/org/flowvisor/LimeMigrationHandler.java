@@ -228,14 +228,14 @@ public final class LimeMigrationHandler {
 	
 	private boolean isValidFlowModWithoutVlan(FVFlowMod flowMod) {
 		OFMatch match = flowMod.getMatch();
-		if(flowMod.getOutPort() < 1 || match.getInputPort() < 1){
+		if(flowMod.getOutPort() == -1 || match.getInputPort() == -1){
 			return false;
 		}
 		for(OFAction action : flowMod.getActions()){
 			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
 				return false;
 			}
-			if(action instanceof OFActionOutput && ((OFActionOutput) action).getPort() < 1){
+			if(action instanceof OFActionOutput && ((OFActionOutput) action).getPort() == -1){
 				return false;
 			}
 		}
