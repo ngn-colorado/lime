@@ -32,6 +32,8 @@ import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
+import org.openflow.protocol.action.OFActionStripVirtualLan;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 
 /**
  * Virtualized version of the switch flow table.
@@ -299,6 +301,7 @@ public class LimeFlowTable{
 
 	public long addFlowMod(final FVFlowMod flowmod, long cookie) {
 		if(flowmod.getOutPort() == -1){
+			boolean vlan = false;
 			System.out.println("Caught message with output port of -1");
 			List<OFAction> actions = flowmod.getActions();
 			for(OFAction action : actions){
@@ -309,8 +312,15 @@ public class LimeFlowTable{
 					System.out.println("OFOutputAction port: "+ outPort);
 					flowmod.setOutPort(outPort);
 				}
+				if(action instanceof OFActionStripVirtualLan || action instanceof OFActionVirtualLanIdentifier){
+					vlan = true;
+				}
+			}
+			if(vlan){
+				System.out.println("Caught vlan mod:\n\n"+flowmod+"\n");
 			}
 		}
+		
 		
 		
 		
