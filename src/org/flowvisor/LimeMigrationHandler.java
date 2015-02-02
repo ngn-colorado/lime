@@ -485,7 +485,7 @@ public final class LimeMigrationHandler {
 //				match.setInputPort((short)4);
 				match.setWildcards(wildcards);
 				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				match.setDataLayerSource(convertMacToBytes("52:54:00:aa:52:b8"));
+//				match.setDataLayerSource(convertMacToBytes("52:54:00:aa:52:b8"));
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
 				//For now, use the vlan tag # as the output port of this mod
@@ -556,7 +556,7 @@ public final class LimeMigrationHandler {
 						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
 						addedVlanAction.setVirtualLanIdentifier(vlanNumber);
 						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("52:54:00:aa:52:b8"));
+//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("52:54:00:aa:52:b8"));
 						int tagSize = addedVlanAction.getLengthU();
 						//add vlan tag action to mod
 						clonedMod.getActions().add(addedVlanAction);
