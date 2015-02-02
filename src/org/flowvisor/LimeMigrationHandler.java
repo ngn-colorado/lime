@@ -614,12 +614,16 @@ public final class LimeMigrationHandler {
 	
 	private void storeMacForDpid(DPID dpid, Short port, String mac){
 		HashMap<Short, String> current;
-		if(!dpidToMacMap.containsKey(dpid)){
+		boolean exists = dpidToMacMap.containsKey(dpid);
+		if(!exists){
 			current = new HashMap<Short, String>();
 		} else{
 			current= dpidToMacMap.get(dpid);
 		}
 		current.put(port, mac);
+		if(!exists){
+			dpidToMacMap.put(dpid, current);
+		}
 	}
 
 	private void sendFlowMod(FVFlowMod flowMod, WorkerSwitch modifiedSwitch) {
