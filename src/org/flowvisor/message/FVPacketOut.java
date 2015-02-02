@@ -133,24 +133,24 @@ public class FVPacketOut extends OFPacketOut implements Classifiable, Slicable {
 			action = this.getActions().get(i);
 			if(action instanceof OFActionOutput){
 				if(fvClassifier.getActivePorts().containsKey(((OFActionOutput) action).getPort())){
-					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
-						originalPort = ((OFActionOutput) action).getPort();
-						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
-						this.getActions().add(i, addedVlanAction);
-						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
-
-						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
-							this.setBufferId(bufferId);
-						}
-						fvClassifier.sendMsg(this, fvClassifier);
-
-						// return the packet back as we received in this method
-						this.setBufferId(originalBufferId);
-						((OFActionOutput) action).setPort(originalPort);
-						this.computeLength();
-						return;
-						//break; //Assuming that there is only one output port...	
-					}
+//					if (fvClassifier.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){ 
+//						originalPort = ((OFActionOutput) action).getPort();
+//						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+//						this.getActions().add(i, addedVlanAction);
+//						((OFActionOutput) action).setPort(fvClassifier.getGhostPort());
+//
+//						if (originalBufferId != -1){ // then it was in translator, we need the first buffer_id assigned which = pck_in's buffer_id
+//							this.setBufferId(bufferId);
+//						}
+//						fvClassifier.sendMsg(this, fvClassifier);
+//
+//						// return the packet back as we received in this method
+//						this.setBufferId(originalBufferId);
+//						((OFActionOutput) action).setPort(originalPort);
+//						this.computeLength();
+//						return;
+//						//break; //Assuming that there is only one output port...	
+//					}
 				}
 			}
 			listCounter++;
