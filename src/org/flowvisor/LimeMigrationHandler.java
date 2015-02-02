@@ -475,14 +475,14 @@ public final class LimeMigrationHandler {
 				match.setDataLayerVirtualLan(vlanNumber);
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
-//				match.setInputPort(ghostPort);
+				match.setInputPort(ghostPort);
 				//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
 				//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,
 				//then ovx attempts to get the dl_src and dl_dst of the mods, which will not exist if they 
 				//are wildcarded-> cannot set to input port, as this causes ovx to set the action as IN_PORT
 				//HACK: use a dummy port that is created in ovx. nothing will be connected, except perhaps a dummy tap
 				//in future, provide another option that is sent to lime at setup time that identifies the dummy port
-				match.setInputPort((short)4);
+//				match.setInputPort((short)4);
 				match.setWildcards(wildcards);
 				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
