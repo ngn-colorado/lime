@@ -134,6 +134,11 @@ public final class LimeMigrationHandler {
 //			return;
 //		}
 		//TODO: populate the mac map statically for now. later, parse from a provided config of some type
+		for(Long activeSwID : LimeContainer.getAllWorkingSwitches().keySet()){
+			DPID current = new DPID(activeSwID);
+			storeMacForDpid(current, (short)2, "52:54:00:aa:52:b8");
+			storeMacForDpid(current, (short)3, "52:54:00:49:a5:72");
+		}
 		//populate original flow table map with all the flows in all of the active switches
 		for(Long activeSwID : LimeContainer.getActiveToOriginalSwitchMap().keySet()){
 			WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
@@ -145,8 +150,6 @@ public final class LimeMigrationHandler {
 			}
 			DPID current = new DPID(activeSwID);
 			originalFlowMods.put(current, currentList);
-			storeMacForDpid(current, (short)2, "52:54:00:aa:52:b8");
-			storeMacForDpid(current, (short)3, "52:54:00:49:a5:72");
 		}
 
 //		for (Map.Entry<Long, Long> entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
