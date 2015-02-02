@@ -7,27 +7,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.LimeFlowTable;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVFlowMod;
-import org.flowvisor.message.FVPortMod;
 import org.flowvisor.message.actions.FVActionDataLayerDestination;
 import org.flowvisor.message.actions.FVActionDataLayerSource;
 import org.flowvisor.message.actions.FVActionOutput;
-import org.flowvisor.message.actions.FVActionStripVirtualLan;
 import org.flowvisor.message.actions.FVActionVirtualLanIdentifier;
 import org.flowvisor.openflow.protocol.FVMatch;
 import org.openflow.protocol.OFMatch;
-import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.protocol.action.OFActionStripVirtualLan;
 import org.openflow.protocol.action.OFActionType;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
-import org.openflow.util.U16;
 
 
 
@@ -44,6 +41,7 @@ public final class LimeMigrationHandler {
 	private HashMap<DPID, DPID> localCloneToSwitchMap;
 	private short vlanCounter;
 	private HashMap<Short, LimeVlanTranslationInfo> vlanTranslationMap;
+	private HashMap<DPID, HashMap<Short, String>> dpidToMacMap;
 	
 	private LimeMigrationHandler(){
 		cloneSwitchCounter = 0;
@@ -53,6 +51,7 @@ public final class LimeMigrationHandler {
 		vlanHandlerMods = new HashMap<DPID, List<FVFlowMod>>();
 		localCloneToSwitchMap = new HashMap<DPID, DPID>();
 		vlanTranslationMap = new HashMap<Short, LimeVlanTranslationInfo>();
+		dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
 	}
 	
 	public static LimeMigrationHandler getInstance(){
@@ -134,6 +133,7 @@ public final class LimeMigrationHandler {
 //		if(!firstSuccessful || !secondSuccessful){
 //			return;
 //		}
+		//TODO: populate the mac map statically for now. later, parse from a provided config of some type
 		//populate original flow table map with all the flows in all of the active switches
 		for(Long activeSwID : LimeContainer.getActiveToOriginalSwitchMap().keySet()){
 			WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
@@ -143,7 +143,10 @@ public final class LimeMigrationHandler {
 					currentList.add(flowMod);
 				}
 			}
-			originalFlowMods.put(new DPID(activeSwID), currentList);
+			DPID current = new DPID(activeSwID);
+			originalFlowMods.put(current, currentList);
+			storeMacForDpid(current, (short)2, "52:54:00:aa:52:b8");
+			storeMacForDpid(current, (short)3, "52:54:00:49:a5:72");
 		}
 
 //		for (Map.Entry<Long, Long> entry : LimeContainer.getActiveToCloneSwitchMap().entrySet()) {
@@ -449,13 +452,21 @@ public final class LimeMigrationHandler {
 
 	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject) {
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
+				String destMac = null;//getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
+				String srcMac = getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort());
 				short outPort = originalMod.getOutPort();
 				for(OFAction action : originalMod.getActions()){
 					if(action instanceof OFActionOutput){
 						if(((OFActionOutput) action).getPort() != outPort){
 							outPort = ((OFActionOutput) action).getPort();
 						}
+						if(destMac == null){
+							destMac = getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
+						}
 					}
+				}
+				if(destMac == null){
+					throw new IllegalStateException("dest mac cannot be null");
 				}
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 				
@@ -475,17 +486,18 @@ public final class LimeMigrationHandler {
 				match.setDataLayerVirtualLan(vlanNumber);
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
-//				match.setInputPort(ghostPort);
+				match.setInputPort(ghostPort);
 				//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
 				//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,
 				//then ovx attempts to get the dl_src and dl_dst of the mods, which will not exist if they 
 				//are wildcarded-> cannot set to input port, as this causes ovx to set the action as IN_PORT
 				//HACK: use a dummy port that is created in ovx. nothing will be connected, except perhaps a dummy tap
 				//in future, provide another option that is sent to lime at setup time that identifies the dummy port
-				match.setInputPort((short)4);
+//				match.setInputPort((short)4);
 				match.setWildcards(wildcards);
-//				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-//				match.setDataLayerSource(convertMacToBytes("52:54:00:aa:52:b8"));
+				
+				match.setDataLayerDestination(convertMacToBytes(destMac));
+				match.setDataLayerSource(convertMacToBytes(srcMac));
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
 				//For now, use the vlan tag # as the output port of this mod
@@ -549,14 +561,16 @@ public final class LimeMigrationHandler {
 //						mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 //						FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 //						mod_dl_dst.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+						String destMac = getMacForPort(new DPID(senderSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
+						String srcMac = getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort());
 						System.out.println("Modifying flow: "+clonedMod);
 						int originalSize = clonedMod.getLengthU();		
 						//create vlan tag action
 //						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
 						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
 						addedVlanAction.setVirtualLanIdentifier(vlanNumber);
-//						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("52:54:00:aa:52:b8"));
+						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes(destMac));
+						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
 						int tagSize = addedVlanAction.getLengthU();
 						//add vlan tag action to mod
 						clonedMod.getActions().add(addedVlanAction);
@@ -584,6 +598,28 @@ public final class LimeMigrationHandler {
 		}
 		sendFlowMod(clonedMod, senderSwitchObject);
 		return clonedMod;
+	}
+
+	private String getMacForPort(DPID dpid, short port) {
+		//TODO: for now, ignore errors. may need to deal with them later
+		if(!dpidToMacMap.containsKey(dpid)){
+			throw new IllegalArgumentException("Invalid dpid: "+dpid);
+		}
+		HashMap<Short, String> current = dpidToMacMap.get(dpid);
+		if(!current.containsKey(port)){
+			throw new IllegalArgumentException("Invalid port: "+port);
+		}
+		return current.get(port);
+	}
+	
+	private void storeMacForDpid(DPID dpid, Short port, String mac){
+		HashMap<Short, String> current;
+		if(!dpidToMacMap.containsKey(dpid)){
+			current = new HashMap<Short, String>();
+		} else{
+			current= dpidToMacMap.get(dpid);
+		}
+		current.put(port, mac);
 	}
 
 	private void sendFlowMod(FVFlowMod flowMod, WorkerSwitch modifiedSwitch) {
