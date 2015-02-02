@@ -476,6 +476,7 @@ public final class LimeMigrationHandler {
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 //				match.setInputPort(ghostPort);
+				match.setInputPort((short)0);
 				match.setWildcards(wildcards);
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
