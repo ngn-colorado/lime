@@ -470,12 +470,12 @@ public final class LimeMigrationHandler {
 				FVMatch match = new FVMatch();
 				int wildcards = FVMatch.OFPFW_ALL;
 				//TODO: cannot support using input matching for ovs, ovx and gre tunnels
-				wildcards &= ~FVMatch.OFPFW_IN_PORT;
+//				wildcards &= ~FVMatch.OFPFW_IN_PORT;
 				wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 				match.setDataLayerVirtualLan(vlanNumber);
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
-				match.setInputPort(ghostPort);
+//				match.setInputPort(ghostPort);
 				match.setWildcards(wildcards);
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
@@ -489,7 +489,7 @@ public final class LimeMigrationHandler {
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
 //				newMod.getActions().add(mod_dl_dst);
-				newMod.getActions().add(mod_dl_src);
+//				newMod.getActions().add(mod_dl_src);
 				newMod.setOutPort(outPort);
 //				newMod.
 				newMod.setHardTimeout((short)0);
