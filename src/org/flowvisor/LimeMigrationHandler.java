@@ -488,7 +488,7 @@ public final class LimeMigrationHandler {
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
-				newMod.getActions().add(mod_dl_dst);
+//				newMod.getActions().add(mod_dl_dst);
 				newMod.getActions().add(mod_dl_src);
 				newMod.setOutPort(outPort);
 //				newMod.
@@ -501,6 +501,10 @@ public final class LimeMigrationHandler {
 				//need this flag?
 				newMod.setFlags((short)1);
 				newMod.computeLength();
+				System.out.println("Actions for this mod:");
+				for(OFAction action : newMod.getActions()){
+					System.out.println(action);
+				}
 //				handlerSwitch.handleFlowModAndSend(newMod, true);
 				sendFlowMod(newMod, receiverSwitchObject);
 				return newMod;
