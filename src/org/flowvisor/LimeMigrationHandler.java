@@ -476,7 +476,12 @@ public final class LimeMigrationHandler {
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 //				match.setInputPort(ghostPort);
-				match.setInputPort((short)2);
+				//NOTE: see openvortex.messages.actions.OVXActionOutput.java line 171 else statement:
+				//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,
+				//then ovx attempts to get the dl_src and dl_dst of the mods, which will not exist if they 
+				//are wildcarded
+				//will set the input port to the output port, as we know this is a valid port
+				match.setInputPort(outPort);
 				match.setWildcards(wildcards);
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
