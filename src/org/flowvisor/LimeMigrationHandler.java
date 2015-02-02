@@ -576,7 +576,7 @@ public final class LimeMigrationHandler {
 						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
 						int tagSize = addedVlanAction.getLengthU();
 						//add vlan tag action to mod
-						clonedMod.getActions().add(1, addedVlanAction);
+						clonedMod.getActions().add(i, addedVlanAction);
 //						clonedMod.getActions().add(mod_dl_dst);
 //						clonedMod.getActions().add(mod_dl_src);
 						//recompute length?
