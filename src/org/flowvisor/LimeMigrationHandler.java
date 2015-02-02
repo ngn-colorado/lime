@@ -460,7 +460,7 @@ public final class LimeMigrationHandler {
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 				
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
-				mod_dl_src.setDataLayerAddress(convertMacToBytes("a4:23:05:01:00:00"));
+				mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 				mod_dl_dst.setDataLayerAddress(convertMacToBytes("a4:23:05:10:00:11"));
 				//create match to match packets coming in ghostPort for a particular vlan
@@ -488,7 +488,7 @@ public final class LimeMigrationHandler {
 				newMod.setActions(new LinkedList<OFAction>());
 				newMod.getActions().add(stripVlan);
 				newMod.getActions().add(outputAction);
-//				newMod.getActions().add(mod_dl_dst);
+				newMod.getActions().add(mod_dl_dst);
 //				newMod.getActions().add(mod_dl_src);
 				newMod.setOutPort(outPort);
 //				newMod.
