@@ -1661,90 +1661,90 @@ SwitchChangedListener {
 	 * @param fromGhostToOriginal to change from port to ghost port or vice versa
 	 */
 	private synchronized void updateFlowModOutputPort(short port, boolean fromGhostToOriginal){
-		short ghostPort = this.getGhostPort();
-		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " updatingFlowModOutpitport");
-		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
-			FVFlowMod updatedflowMod = (FVFlowMod) entry.getValue().clone();
-			OFAction action;
-			if (updatedflowMod.getOriginalOutputPort() == port){
-				if(fromGhostToOriginal){
-					int outoutActionIndex = 0;
-					for(int i = 0; i<updatedflowMod.getActions().size(); i++ ){
-						action = updatedflowMod.getActions().get(i);
-						if(action instanceof OFActionOutput){
-							if (((OFActionOutput) action).getPort() == ghostPort){
-								outoutActionIndex = i;
-								((OFActionOutput) action).setPort(port);
-								break;
-							}
-						}
-					}
-					if (outoutActionIndex != 0){
-						// remove vlan tag
-						updatedflowMod.getActions().remove(outoutActionIndex);
-					}
-					else{
-						// error
-					}
-				}
-				else{
-					for(int i = 0; i<updatedflowMod.getActions().size(); i++ ){
-						action = updatedflowMod.getActions().get(i);
-						if(action instanceof OFActionOutput){
-							if (((OFActionOutput) action).getPort() == port){
-								OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(port);
-								updatedflowMod.getActions().add(i, addedVlanAction);
-								((OFActionOutput) action).setPort(ghostPort);
-								updatedflowMod.setOriginalOutputPort(port);
-								break; //Assuming that there is only one output port...	
-							}
-						}
-					}
-				}
-				updatedflowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT);
-				flowTable.addFlowMod(updatedflowMod, entry.getKey());
-				this.sendMsg(updatedflowMod, this);			
-			}
-		}
+		//TODO: skip this method for now, may reenable later
+//		short ghostPort = this.getGhostPort();
+//		System.out.println("MURAD: WorkerSwitch, " + this.getName() + " updatingFlowModOutpitport");
+//		for (Map.Entry<Long, FVFlowMod> entry : flowTable.flowmodMap.entrySet()) {
+//			FVFlowMod updatedflowMod = (FVFlowMod) entry.getValue().clone();
+//			OFAction action;
+//			if (updatedflowMod.getOriginalOutputPort() == port){
+//				if(fromGhostToOriginal){
+//					int outoutActionIndex = 0;
+//					for(int i = 0; i<updatedflowMod.getActions().size(); i++ ){
+//						action = updatedflowMod.getActions().get(i);
+//						if(action instanceof OFActionOutput){
+//							if (((OFActionOutput) action).getPort() == ghostPort){
+//								outoutActionIndex = i;
+//								((OFActionOutput) action).setPort(port);
+//								break;
+//							}
+//						}
+//					}
+//					if (outoutActionIndex != 0){
+//						// remove vlan tag
+//						updatedflowMod.getActions().remove(outoutActionIndex);
+//					}
+//					else{
+//						// error
+//					}
+//				}
+//				else{
+//					for(int i = 0; i<updatedflowMod.getActions().size(); i++ ){
+//						action = updatedflowMod.getActions().get(i);
+//						if(action instanceof OFActionOutput){
+//							if (((OFActionOutput) action).getPort() == port){
+//								OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(port);
+//								updatedflowMod.getActions().add(i, addedVlanAction);
+//								((OFActionOutput) action).setPort(ghostPort);
+//								updatedflowMod.setOriginalOutputPort(port);
+//								break; //Assuming that there is only one output port...	
+//							}
+//						}
+//					}
+//				}
+//				updatedflowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT);
+//				flowTable.addFlowMod(updatedflowMod, entry.getKey());
+//				this.sendMsg(updatedflowMod, this);			
+//			}
 		
-		// finally, we create a new FlowMod with times of zero to handle any packets coming from ghost port without asking controller since controller should not 
-		// know about the ghost port
-		if(fromGhostToOriginal){
-			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port + " with ghostPort " + ghostPort);
-			OFFlowMod ghostFlowMod = new OFFlowMod();
-			
-			OFMatch match = new OFMatch();
-			//match.setWildcards(OFMatch.OFPFW_ALL);
-			match.setInputPort(ghostPort).setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
-			//match.setDataLayerVirtualLan(port);
-			
-			List<OFAction> actionList = new ArrayList<OFAction>();
-			//actionList.add(new OFActionStripVirtualLan());
-			actionList.add(new OFActionOutput(port));
-			
-			ghostFlowMod.setMatch(match);
-			ghostFlowMod.setCommand(OFFlowMod.OFPFC_ADD);
-			ghostFlowMod.setOutPort(OFPort.OFPP_NONE);
-			ghostFlowMod.setBufferId(0xffffffff); // buffer to NONE
-			ghostFlowMod.setActions(actionList);
-			ghostFlowMod.setPriority((short) 32767);
-//			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH + 8);  // 8 for each action?
-			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH);
-			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + ghostFlowMod.toString());
-			this.sendMsg(ghostFlowMod, this);
-			
-			
-			/*OFMatch match = new OFMatch();
-			match.setWildcards(OFMatch.OFPFW_ALL);
-			OFFlowMod fm = new OFFlowMod();
-			fm.setMatch(match);
-			fm.setCommand(OFFlowMod.OFPFC_DELETE);
-			fm.setOutPort(OFPort.OFPP_NONE);
-			fm.setBufferId(0xffffffff); // buffer to NONE
-			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " trying to send test HELLO FlowMod");
-			sendMsg(fm, this);*/
-			System.out.println("MURAD: WorkerSwitch, ++++++++++++++++++++++++++++");
-		}
+//		// finally, we create a new FlowMod with times of zero to handle any packets coming from ghost port without asking controller since controller should not 
+//		// know about the ghost port
+//		if(fromGhostToOriginal){
+//			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " added GhostFlowMod for port " + port + " with ghostPort " + ghostPort);
+//			OFFlowMod ghostFlowMod = new OFFlowMod();
+//			
+//			OFMatch match = new OFMatch();
+//			//match.setWildcards(OFMatch.OFPFW_ALL);
+//			match.setInputPort(ghostPort).setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
+//			//match.setDataLayerVirtualLan(port);
+//			
+//			List<OFAction> actionList = new ArrayList<OFAction>();
+//			//actionList.add(new OFActionStripVirtualLan());
+//			actionList.add(new OFActionOutput(port));
+//			
+//			ghostFlowMod.setMatch(match);
+//			ghostFlowMod.setCommand(OFFlowMod.OFPFC_ADD);
+//			ghostFlowMod.setOutPort(OFPort.OFPP_NONE);
+//			ghostFlowMod.setBufferId(0xffffffff); // buffer to NONE
+//			ghostFlowMod.setActions(actionList);
+//			ghostFlowMod.setPriority((short) 32767);
+////			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH + 8);  // 8 for each action?
+//			ghostFlowMod.setLengthU(OFFlowMod.MINIMUM_LENGTH);
+//			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " getting FlowMod " + ghostFlowMod.toString());
+//			this.sendMsg(ghostFlowMod, this);
+//			
+//			
+//			/*OFMatch match = new OFMatch();
+//			match.setWildcards(OFMatch.OFPFW_ALL);
+//			OFFlowMod fm = new OFFlowMod();
+//			fm.setMatch(match);
+//			fm.setCommand(OFFlowMod.OFPFC_DELETE);
+//			fm.setOutPort(OFPort.OFPP_NONE);
+//			fm.setBufferId(0xffffffff); // buffer to NONE
+//			System.out.println("MURAD: WorkerSwitch, " + this.getName() + " trying to send test HELLO FlowMod");
+//			sendMsg(fm, this);*/
+//			System.out.println("MURAD: WorkerSwitch, ++++++++++++++++++++++++++++");
+//		}
 	}
 
 	/**
