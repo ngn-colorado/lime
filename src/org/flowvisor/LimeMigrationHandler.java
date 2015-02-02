@@ -476,13 +476,16 @@ public final class LimeMigrationHandler {
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 //				match.setInputPort(ghostPort);
-				//NOTE: see openvortex.messages.actions.OVXActionOutput.java line 171 else statement:
+				//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
 				//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,
 				//then ovx attempts to get the dl_src and dl_dst of the mods, which will not exist if they 
-				//are wildcarded
-				//will set the input port to the output port, as we know this is a valid port
-				match.setInputPort(outPort);
+				//are wildcarded-> cannot set to input port, as this causes ovx to set the action as IN_PORT
+				//HACK: use a dummy port that is created in ovx. nothing will be connected, except perhaps a dummy tap
+				//in future, provide another option that is sent to lime at setup time that identifies the dummy port
+				match.setInputPort((short)4);
 				match.setWildcards(wildcards);
+				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
 				//For now, use the vlan tag # as the output port of this mod
@@ -542,23 +545,31 @@ public final class LimeMigrationHandler {
 					//TODO: I think that all flow mods need to be written to clone. The host migration process occurs later
 					//and we would not be able to tell which hosts are still attached to the switch this way anyway
 //					if (destinationSwitch.getActivePorts().get(((OFActionOutput) action).getPort()).getType().equals(PortType.EMPTY)){
+//						FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
+//						mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+//						FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
+//						mod_dl_dst.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 						System.out.println("Modifying flow: "+clonedMod);
 						int originalSize = clonedMod.getLengthU();		
 						//create vlan tag action
 //						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
 						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
 						addedVlanAction.setVirtualLanIdentifier(vlanNumber);
-						
+						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 						int tagSize = addedVlanAction.getLengthU();
 						//add vlan tag action to mod
-						clonedMod.getActions().add(i, addedVlanAction);
+						clonedMod.getActions().add(addedVlanAction);
+//						clonedMod.getActions().add(mod_dl_dst);
+//						clonedMod.getActions().add(mod_dl_src);
 						//recompute length?
 						//DOESN'T appear to work
 //						clonedMod.computeLength();
 						
 						//INSTEAD recomputer manually
 						System.out.println("Expected length: " + (originalSize + tagSize) +"\nCurrent length: "+flowMod.getLengthU());
-						clonedMod.setLengthU(originalSize + tagSize);
+//						clonedMod.setLengthU(originalSize + tagSize);
+						clonedMod.computeLength();
 						//set output action of the mod to output on the ghostport
 						((OFActionOutput) action).setPort(ghostPort);
 //						flowMod.setOriginalOutputPort(originalPort);
