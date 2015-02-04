@@ -38,7 +38,7 @@ public final class LimeMigrationHandler {
 	private boolean migrating;
 	private HashMap<DPID, List<FVFlowMod>> originalFlowMods;
 	private HashMap<DPID, List<FVFlowMod>> vlanHandlerMods;
-	private HashMap<DPID, DPID> localCloneToSwitchMap;
+	private HashMap<DPID, DPID> localOriginalToCloneSwitchMap;
 	private short vlanCounter;
 	private HashMap<Short, LimeVlanTranslationInfo> vlanTranslationMap;
 	private HashMap<DPID, HashMap<Short, String>> dpidToMacMap;
@@ -49,7 +49,7 @@ public final class LimeMigrationHandler {
 		migrating = false;
 		originalFlowMods = new HashMap<DPID, List<FVFlowMod>>();
 		vlanHandlerMods = new HashMap<DPID, List<FVFlowMod>>();
-		localCloneToSwitchMap = new HashMap<DPID, DPID>();
+		localOriginalToCloneSwitchMap = new HashMap<DPID, DPID>();
 		vlanTranslationMap = new HashMap<Short, LimeVlanTranslationInfo>();
 		dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
 	}
@@ -371,7 +371,7 @@ public final class LimeMigrationHandler {
 		long oSwID = LimeContainer.getActiveToOriginalSwitchMap().get(activeSwitch.getDPID());
 		LimeContainer.getActiveToOriginalSwitchMap().remove(activeSwitch.getDPID());
 		LimeContainer.getActiveToOriginalSwitchMap().put(cloneSwitch.getDPID(), oSwID);
-		localCloneToSwitchMap.put(new DPID(activeSwitch.getDPID()), new DPID(cloneSwitch.getDPID()));
+		localOriginalToCloneSwitchMap.put(new DPID(activeSwitch.getDPID()), new DPID(cloneSwitch.getDPID()));
 		
 		// remove ghost port
 		// this will happen automatically when OVX remove port
@@ -390,10 +390,10 @@ public final class LimeMigrationHandler {
 				}
 			}
 			//TODO: need to put correct flow tables into the new switches
-			for(DPID originalSwitch : localCloneToSwitchMap.keySet()){
+			for(DPID originalSwitch : localOriginalToCloneSwitchMap.keySet()){
 				List<FVFlowMod> originalFlows = originalFlowMods.get(originalSwitch);
 				for(FVFlowMod flowMod : originalFlows){
-					DPID currentCloneDPID = localCloneToSwitchMap.get(originalFlows);
+					DPID currentCloneDPID = localOriginalToCloneSwitchMap.get(originalSwitch);
 					WorkerSwitch currentClone = LimeContainer.getAllWorkingSwitches().get(currentCloneDPID.getDpidLong());
 					currentClone.handleFlowModAndSend(flowMod);
 				}
