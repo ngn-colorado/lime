@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.LimeFlowTable;
@@ -500,7 +499,8 @@ public final class LimeMigrationHandler {
 				match.setWildcards(wildcards);
 				
 				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				match.setDataLayerSource(convertMacToBytes(srcMac));
+//				match.setDataLayerSource(convertMacToBytes(srcMac));
+				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 				
 				//TODO: set the actions of this mod to be the actions of the original mod.
 				//For now, use the vlan tag # as the output port of this mod
@@ -570,10 +570,12 @@ public final class LimeMigrationHandler {
 						int originalSize = clonedMod.getLengthU();		
 						//create vlan tag action
 //						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						
 						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
 						addedVlanAction.setVirtualLanIdentifier(vlanNumber);
 						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
+//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
+						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 						int tagSize = addedVlanAction.getLengthU();
 						//add vlan tag action to mod
 						clonedMod.getActions().add(i, addedVlanAction);
