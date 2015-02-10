@@ -488,6 +488,8 @@ public final class LimeMigrationHandler {
 				wildcards &= ~FVMatch.OFPFW_DL_SRC;
 				wildcards &= ~FVMatch.OFPFW_DL_DST;
 				match.setDataLayerVirtualLan(vlanNumber);
+				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 				match.setInputPort(ghostPort);
@@ -572,16 +574,18 @@ public final class LimeMigrationHandler {
 						int originalSize = clonedMod.getLengthU();		
 						//create vlan tag action
 //						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
+						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
+						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 						OFMatch match = clonedMod.getMatch();
 						int wildcards = match.getWildcards();
 						wildcards &= ~FVMatch.OFPFW_DL_SRC;
 						wildcards &= ~FVMatch.OFPFW_DL_DST;
 						match.setWildcards(wildcards);
+						clonedMod.setMatch(match);
 						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
 						addedVlanAction.setVirtualLanIdentifier(vlanNumber);
-						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
-						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+						
 						int tagSize = addedVlanAction.getLengthU();
 						//add vlan tag action to mod
 						clonedMod.getActions().add(i, addedVlanAction);
