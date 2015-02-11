@@ -485,8 +485,8 @@ public final class LimeMigrationHandler {
 				//TODO: cannot support using input matching for ovs, ovx and gre tunnels
 				wildcards &= ~FVMatch.OFPFW_IN_PORT;
 				wildcards &= ~FVMatch.OFPFW_DL_VLAN;
-				wildcards &= ~FVMatch.OFPFW_DL_SRC;
-				wildcards &= ~FVMatch.OFPFW_DL_DST;
+//				wildcards &= ~FVMatch.OFPFW_DL_SRC;
+//				wildcards &= ~FVMatch.OFPFW_DL_DST;
 				match.setDataLayerVirtualLan(vlanNumber);
 				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
@@ -579,8 +579,8 @@ public final class LimeMigrationHandler {
 						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 						OFMatch match = clonedMod.getMatch();
 						int wildcards = match.getWildcards();
-						wildcards &= ~FVMatch.OFPFW_DL_SRC;
-						wildcards &= ~FVMatch.OFPFW_DL_DST;
+//						wildcards &= ~FVMatch.OFPFW_DL_SRC;
+//						wildcards &= ~FVMatch.OFPFW_DL_DST;
 						match.setWildcards(wildcards);
 						clonedMod.setMatch(match);
 						FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
