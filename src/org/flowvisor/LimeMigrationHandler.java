@@ -473,9 +473,11 @@ public final class LimeMigrationHandler {
 				FVFlowMod newMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 				
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
-				mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+//				mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+				mod_dl_src.setDataLayerAddress(convertMacToBytes(srcMac));
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
-				mod_dl_dst.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+//				mod_dl_dst.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+				mod_dl_dst.setDataLayerAddress(convertMacToBytes(destMac));
 				//create match to match packets coming in ghostPort for a particular vlan
 //				OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
 				OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
@@ -488,8 +490,10 @@ public final class LimeMigrationHandler {
 //				wildcards &= ~FVMatch.OFPFW_DL_SRC;
 //				wildcards &= ~FVMatch.OFPFW_DL_DST;
 				match.setDataLayerVirtualLan(vlanNumber);
-				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+//				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+				match.setDataLayerDestination(convertMacToBytes(destMac));
+//				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+				match.setDataLayerSource(convertMacToBytes(srcMac));
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 				match.setInputPort(ghostPort);
@@ -574,9 +578,10 @@ public final class LimeMigrationHandler {
 						int originalSize = clonedMod.getLengthU();		
 						//create vlan tag action
 //						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
-						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
-						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+//						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
+//						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
+						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes(destMac));
 						OFMatch match = clonedMod.getMatch();
 						int wildcards = match.getWildcards();
 //						wildcards &= ~FVMatch.OFPFW_DL_SRC;
