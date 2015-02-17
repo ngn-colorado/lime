@@ -41,6 +41,7 @@ public final class LimeMigrationHandler {
 	private short vlanCounter;
 	private HashMap<Short, LimeVlanTranslationInfo> vlanTranslationMap;
 	private HashMap<DPID, HashMap<Short, String>> dpidToMacMap;
+	private ArrayList<LimeHost> migratedHosts;
 	
 	private LimeMigrationHandler(){
 		cloneSwitchCounter = 0;
@@ -51,6 +52,7 @@ public final class LimeMigrationHandler {
 		localOriginalToCloneSwitchMap = new HashMap<DPID, DPID>();
 		vlanTranslationMap = new HashMap<Short, LimeVlanTranslationInfo>();
 		dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
+		migratedHosts = new ArrayList<LimeHost>();
 	}
 	
 	public static LimeMigrationHandler getInstance(){
@@ -328,7 +330,7 @@ public final class LimeMigrationHandler {
 				//delete all non-vlan tag mods from the original switch, bypassing the lime flow table object, assuming this method works
 				LimeUtils.deleteFlowMod(originalSwitch, flowMod);
 			}
-
+			migratedHosts.add(host);
 			return true;
 		}
 		return false;
@@ -350,9 +352,28 @@ public final class LimeMigrationHandler {
 
 	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods) {
 		for(FVFlowMod flowMod : matchingMods){
-			createVlanHandlers(flowMod, originalSwitch, cloneSwitch);			
+			if(outputPortMigrated(flowMod)){
+				WorkerSwitch cloneSwitchObj = LimeContainer.getAllWorkingSwitches().get(cloneSwitch.getDpidLong());
+				sendFlowMod(flowMod, cloneSwitchObj);
+			} else{
+				createVlanHandlers(flowMod, originalSwitch, cloneSwitch);
+			}
 		}
 		
+	}
+
+	private boolean outputPortMigrated(FVFlowMod flowMod) {
+		for(OFAction action : flowMod.getActions()){
+			if(action instanceof OFActionOutput){
+				short outPort =  ((OFActionOutput) action).getPort();
+				for(LimeHost host : migratedHosts){
+					if(host.getConnectedPort() == outPort){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public synchronized void switchDoneMigrating(DPID activeSwitchDpid){
