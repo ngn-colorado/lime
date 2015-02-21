@@ -39,6 +39,7 @@ public final class LimeMigrationHandler {
 	private HashMap<DPID, List<FVFlowMod>> vlanHandlerMods;
 	private HashMap<DPID, DPID> localOriginalToCloneSwitchMap;
 	private short vlanCounter;
+	//maps vlan tag numbers to migration flow mod information
 	private HashMap<Short, LimeVlanTranslationInfo> vlanTranslationMap;
 	private HashMap<DPID, HashMap<Short, String>> dpidToMacMap;
 	private ArrayList<LimeHost> migratedHosts;
@@ -290,7 +291,10 @@ public final class LimeMigrationHandler {
 		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
 		System.out.println("migrate vm function returned");
 		if(migrated){
+			//TODO: should recheck ALL flow mods to make sure that they point to VMs that are on the correct switches
 			//create reverse rule. need to have the connected port
+			fixExistingMigrationMods(host);
+			
 			WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(host.getOriginalDpid().getDpidLong());
 			WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(host.getCloneDpid().getDpidLong());
 			
@@ -316,7 +320,7 @@ public final class LimeMigrationHandler {
 			//inport == the attached host port, as we need to intercept the packets from the host,
 			//not redirect packets that are being sent
 				for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
-					if(hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
+					if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
 						matchingMods.add(flowMod);
 					}
 					
@@ -339,22 +343,61 @@ public final class LimeMigrationHandler {
 
 	
 
-	private boolean hasInputPortWithoutVlan(FVFlowMod flowMod, Short connectedPort) {
-		List<OFAction> actions = flowMod.getActions();
-		for(OFAction action : actions){
-			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
-				return false;
+	private void fixExistingMigrationMods(LimeHost host) {
+		//TODO: for now, we still assume that host are connected to the same ports in the original and source switches
+		short currentlyMigratingPort = host.getConnectedPort();
+		for(Short vlanTag : vlanTranslationMap.keySet()){
+			LimeVlanTranslationInfo info = vlanTranslationMap.get(vlanTag);
+			short currentReceiverOutputPort = LimeUtils.getFlowModOutputPort(info.getReceiverMod());
+			//if is a mod from clone to original and is  and the output of the mod points to the host currently being migrated
+			//and the receiver mod is on the same switch as the host was on
+			if(!info.isOriginalToClone() && currentReceiverOutputPort == currentlyMigratingPort && info.getReceiverSwitch().equals(host.getOriginalDpid())){
+				//change sending mod to instead output to the connected port on the clone(sending) switch and remove vlan action
+				FVFlowMod sendingMod = info.getSenderMod();
+				List<OFAction> actions = sendingMod.getActions();
+				List<OFAction> actionsToDelete = new ArrayList<OFAction>();
+				//find all vlan actions. there should only be one
+				//modify action output to output to the host's connected port, rather than the ghost port at the same time (should also be only one mod)
+				boolean foundOutput = false;
+				for(OFAction action : actions){
+					if(action instanceof OFActionVirtualLanIdentifier){
+						actionsToDelete.add(action);
+					}
+					if(!foundOutput && action instanceof OFActionOutput){
+						((OFActionOutput)action).setPort(currentlyMigratingPort);
+						foundOutput = true;
+					}
+				}
+				//remove all found vlan actions
+				actions.removeAll(actionsToDelete);
+				//re-write the mod to the clone switch
+				sendingMod.computeLength();
+				WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(info.getSenderSwitch().getDpidLong());
+				LimeUtils.sendFlowMod(sendingMod, cloneSwitch);
+				//also delete receiver mod on the original switch, but no neccessary
+				WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(info.getReceiverSwitch().getDpidLong());
+				LimeUtils.deleteFlowMod(originalSwitch, info.getReceiverMod());
+				//also change entry in translation table
+				LimeVlanTranslationInfo newInfo = LimeUtils.cloneTranslationInfoMigrated(info, true);
+				vlanTranslationMap.put(vlanTag, newInfo);
 			}
 		}
-		OFMatch match = flowMod.getMatch();
-		return (match.getInputPort() == connectedPort);
 	}
+
+	
 
 	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods) {
 		for(FVFlowMod flowMod : matchingMods){
-			if(outputPortMigrated(flowMod)){
+			if(LimeUtils.outputPortMigrated(flowMod, migratedHosts)){
 				WorkerSwitch cloneSwitchObj = LimeContainer.getAllWorkingSwitches().get(cloneSwitch.getDpidLong());
-				sendFlowMod(flowMod, cloneSwitchObj);
+				WorkerSwitch originalSwitchObj = LimeContainer.getAllWorkingSwitches().get(originalSwitch.getDpidLong());
+				LimeUtils.sendFlowMod(flowMod, cloneSwitchObj);
+				//TODO: create mod that matches the vlan assigned for this mod, if one exists (possibly, there is not a pair of mods)
+				//on original switch, replace mod that matches this vlan with one that sends back to the clone
+				//then, match on this vlan in the clone and perform the output action
+				short vlanTag = allocateVlanForMod(flowMod);
+				//TODO: need to manually construct flow mods here
+//				createAndSendVlanSenderMod(vlanTag, , flowMod, senderSwitchObject)
 			} else{
 				createVlanHandlers(flowMod, originalSwitch, cloneSwitch);
 			}
@@ -362,19 +405,7 @@ public final class LimeMigrationHandler {
 		
 	}
 
-	private boolean outputPortMigrated(FVFlowMod flowMod) {
-		for(OFAction action : flowMod.getActions()){
-			if(action instanceof OFActionOutput){
-				short outPort =  ((OFActionOutput) action).getPort();
-				for(LimeHost host : migratedHosts){
-					if(host.getConnectedPort() == outPort){
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+	
 
 	public synchronized void switchDoneMigrating(DPID activeSwitchDpid){
 		WorkerSwitch activeSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwitchDpid.getDpidLong());
@@ -454,24 +485,14 @@ public final class LimeMigrationHandler {
 		
 		FVFlowMod senderVlanMod = createAndSendVlanSenderMod(currentVlan, senderGhostPort, originalMod, senderSwitchObject);
 		FVFlowMod receiverVlanMod = createAndSendVlanReceiverMod(currentVlan, receiverGhostPort, originalMod, receiverSwitchObject);
-		LimeVlanTranslationInfo currentInfo = new LimeVlanTranslationInfo(receiverVlanMod, senderVlanMod, receiverSwitch, senderSwitch, true, originalMod, currentVlan);
+		LimeVlanTranslationInfo currentInfo = new LimeVlanTranslationInfo(receiverVlanMod, senderVlanMod, receiverSwitch, senderSwitch, true, originalMod, currentVlan, false);
 		vlanTranslationMap.put(currentVlan, currentInfo);
-		addToVlanMap(senderSwitch, senderVlanMod);
-		addToVlanMap(receiverSwitch, receiverVlanMod);
+		LimeUtils.addToVlanMap(senderSwitch, senderVlanMod, vlanHandlerMods);
+		LimeUtils.addToVlanMap(receiverSwitch, receiverVlanMod, vlanHandlerMods);
 		return currentInfo;
 	}
 
-	private void addToVlanMap(DPID senderSwitch, FVFlowMod senderVlanMod) {
-		if(vlanHandlerMods.containsKey(senderSwitch)){
-			List<FVFlowMod> flowMods = vlanHandlerMods.get(senderSwitch);
-			flowMods.add(senderVlanMod);
-		} else{
-			ArrayList<FVFlowMod> flowMods = new ArrayList<FVFlowMod>();
-			flowMods.add(senderVlanMod);
-			vlanHandlerMods.put(senderSwitch, flowMods);
-		}
-		
-	}
+	
 
 	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject) {
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
@@ -495,10 +516,10 @@ public final class LimeMigrationHandler {
 				
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
 //				mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				mod_dl_src.setDataLayerAddress(convertMacToBytes(srcMac));
+				mod_dl_src.setDataLayerAddress(LimeUtils.convertMacToBytes(srcMac));
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 //				mod_dl_dst.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				mod_dl_dst.setDataLayerAddress(convertMacToBytes(destMac));
+				mod_dl_dst.setDataLayerAddress(LimeUtils.convertMacToBytes(destMac));
 				//create match to match packets coming in ghostPort for a particular vlan
 //				OFActionStripVirtualLan stripVlan = new OFActionStripVirtualLan();
 				OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
@@ -512,9 +533,9 @@ public final class LimeMigrationHandler {
 //				wildcards &= ~FVMatch.OFPFW_DL_DST;
 				match.setDataLayerVirtualLan(vlanNumber);
 //				match.setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				match.setDataLayerDestination(convertMacToBytes(destMac));
+				match.setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
 //				match.setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-				match.setDataLayerSource(convertMacToBytes(srcMac));
+				match.setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
 //				match.setWildcards(~(FVMatch.OFPFW_DL_VLAN & -1));
 				//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 				match.setInputPort(ghostPort);
@@ -559,21 +580,11 @@ public final class LimeMigrationHandler {
 					System.out.println(action);
 				}
 //				handlerSwitch.handleFlowModAndSend(newMod, true);
-				sendFlowMod(newMod, receiverSwitchObject);
+				LimeUtils.sendFlowMod(newMod, receiverSwitchObject);
 				return newMod;
 	}
 
-	private byte[] convertMacToBytes(String macAddress) {
-		String[] macAddressParts = macAddress.split(":");
-
-		// convert hex string to byte values
-		byte[] macAddressBytes = new byte[6];
-		for(int i=0; i<6; i++){
-		    Integer hex = Integer.parseInt(macAddressParts[i], 16);
-		    macAddressBytes[i] = hex.byteValue();
-		}
-		return macAddressBytes;
-	}
+	
 
 	private FVFlowMod createAndSendVlanSenderMod(short vlanTagNumber, short ghostPort, FVFlowMod flowMod, WorkerSwitch senderSwitchObject) {
 		FVFlowMod clonedMod = (FVFlowMod) flowMod.clone();
@@ -600,9 +611,9 @@ public final class LimeMigrationHandler {
 						//create vlan tag action
 //						OFActionVirtualLanIdentifier addedVlanAction = new OFActionVirtualLanIdentifier(originalPort);
 //						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-						clonedMod.getMatch().setDataLayerSource(convertMacToBytes(srcMac));
+						clonedMod.getMatch().setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
 //						clonedMod.getMatch().setDataLayerSource(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-						clonedMod.getMatch().setDataLayerDestination(convertMacToBytes(destMac));
+						clonedMod.getMatch().setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
 						OFMatch match = clonedMod.getMatch();
 						int wildcards = match.getWildcards();
 //						wildcards &= ~FVMatch.OFPFW_DL_SRC;
@@ -637,7 +648,7 @@ public final class LimeMigrationHandler {
 //				}
 			}
 		}
-		sendFlowMod(clonedMod, senderSwitchObject);
+		LimeUtils.sendFlowMod(clonedMod, senderSwitchObject);
 		return clonedMod;
 	}
 
@@ -667,12 +678,6 @@ public final class LimeMigrationHandler {
 		}
 	}
 
-	private void sendFlowMod(FVFlowMod flowMod, WorkerSwitch modifiedSwitch) {
-		DPID switchDpid = new DPID(modifiedSwitch.getDPID());
-		System.out.println("\n\n\nSwitch "+switchDpid.getDpidString()+" is receiving flow mod: "+flowMod+"\n\n");
-		modifiedSwitch.handleFlowModAndSend(flowMod);
-		
-	}
 
 	/**
 	 * this method looks up an existing vlan tag number for a mod
@@ -698,28 +703,3 @@ public final class LimeMigrationHandler {
 		return vlanCounter;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

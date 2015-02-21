@@ -10,13 +10,29 @@ public final class LimeVlanTranslationInfo {
 	private final boolean originalToClone;
 	private final FVFlowMod originalMod;
 	private final int vlanNumber;
+	private final boolean receiverTargetMigrated;
+	public LimeVlanTranslationInfo(FVFlowMod receiverMod, FVFlowMod senderMod,
+			DPID receiverSwitch, DPID senderSwitch, boolean originalToClone,
+			FVFlowMod originalMod, int vlanNumber,
+			boolean receiverTargetMigrated) {
+		super();
+		this.receiverMod = receiverMod;
+		this.senderMod = senderMod;
+		this.receiverSwitch = receiverSwitch;
+		this.senderSwitch = senderSwitch;
+		this.originalToClone = originalToClone;
+		this.originalMod = originalMod;
+		this.vlanNumber = vlanNumber;
+		this.receiverTargetMigrated = receiverTargetMigrated;
+	}
 	@Override
 	public String toString() {
 		return "LimeVlanTranslationInfo [receiverMod=" + receiverMod
 				+ ", senderMod=" + senderMod + ", receiverSwitch="
 				+ receiverSwitch + ", senderSwitch=" + senderSwitch
 				+ ", originalToClone=" + originalToClone + ", originalMod="
-				+ originalMod + ", vlanNumber=" + vlanNumber + "]";
+				+ originalMod + ", vlanNumber=" + vlanNumber
+				+ ", receiverTargetMigrated=" + receiverTargetMigrated + "]";
 	}
 	public FVFlowMod getReceiverMod() {
 		return receiverMod;
@@ -39,17 +55,9 @@ public final class LimeVlanTranslationInfo {
 	public int getVlanNumber() {
 		return vlanNumber;
 	}
-	public LimeVlanTranslationInfo(FVFlowMod receiverMod, FVFlowMod senderMod,
-			DPID receiverSwitch, DPID senderSwitch, boolean originalToClone,
-			FVFlowMod originalMod, int vlanNumber) {
-		super();
-		this.receiverMod = receiverMod;
-		this.senderMod = senderMod;
-		this.receiverSwitch = receiverSwitch;
-		this.senderSwitch = senderSwitch;
-		this.originalToClone = originalToClone;
-		this.originalMod = originalMod;
-		this.vlanNumber = vlanNumber;
+	public boolean isReceiverTargetMigrated() {
+		return receiverTargetMigrated;
 	}
+	
 	
 }

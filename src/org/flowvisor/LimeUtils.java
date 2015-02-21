@@ -1,6 +1,9 @@
 package org.flowvisor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.WorkerSwitch;
@@ -12,6 +15,10 @@ import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFType;
+import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionOutput;
+import org.openflow.protocol.action.OFActionStripVirtualLan;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 
 public class LimeUtils {
 //	json format:
@@ -213,5 +220,83 @@ public class LimeUtils {
 		deleteMod.setOutPort(OFPort.OFPP_NONE);
 		deleteMod.setBufferId(0xffffffff); // buffer to NONE
 		destinationSwitch.sendMsg(deleteMod, destinationSwitch);
+	}
+	
+	
+	public static LimeVlanTranslationInfo cloneTranslationInfoMigrated(LimeVlanTranslationInfo originalInfo, boolean targetMigrated) {
+		return new LimeVlanTranslationInfo(originalInfo.getReceiverMod(), 
+										   originalInfo.getSenderMod(), 
+										   originalInfo.getReceiverSwitch(),
+										   originalInfo.getSenderSwitch(),
+										   originalInfo.isOriginalToClone(),
+										   originalInfo.getOriginalMod(), 
+										   originalInfo.getVlanNumber(),
+										   targetMigrated);
+	}
+
+	public static short getFlowModOutputPort(FVFlowMod receiverMod) {
+		for(OFAction action : receiverMod.getActions()){
+			if(action instanceof OFActionOutput){
+				//TODO: still only supporting one output port for now
+				return ((OFActionOutput) action).getPort();
+			}
+		}
+		return 0;
+	}
+	
+	public static boolean hasInputPortWithoutVlan(FVFlowMod flowMod, Short connectedPort) {
+		List<OFAction> actions = flowMod.getActions();
+		for(OFAction action : actions){
+			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
+				return false;
+			}
+		}
+		OFMatch match = flowMod.getMatch();
+		return (match.getInputPort() == connectedPort);
+	}
+	
+	public static boolean outputPortMigrated(FVFlowMod flowMod, List<LimeHost> migratedHosts) {
+		for(OFAction action : flowMod.getActions()){
+			if(action instanceof OFActionOutput){
+				short outPort =  ((OFActionOutput) action).getPort();
+				for(LimeHost host : migratedHosts){
+					if(host.getConnectedPort() == outPort){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static void addToVlanMap(DPID senderSwitch, FVFlowMod senderVlanMod, Map<DPID, List<FVFlowMod>> vlanHandlerMods) {
+		if(vlanHandlerMods.containsKey(senderSwitch)){
+			List<FVFlowMod> flowMods = vlanHandlerMods.get(senderSwitch);
+			flowMods.add(senderVlanMod);
+		} else{
+			ArrayList<FVFlowMod> flowMods = new ArrayList<FVFlowMod>();
+			flowMods.add(senderVlanMod);
+			vlanHandlerMods.put(senderSwitch, flowMods);
+		}
+		
+	}
+	
+	public static byte[] convertMacToBytes(String macAddress) {
+		String[] macAddressParts = macAddress.split(":");
+
+		// convert hex string to byte values
+		byte[] macAddressBytes = new byte[6];
+		for(int i=0; i<6; i++){
+		    Integer hex = Integer.parseInt(macAddressParts[i], 16);
+		    macAddressBytes[i] = hex.byteValue();
+		}
+		return macAddressBytes;
+	}
+	
+	public static void sendFlowMod(FVFlowMod flowMod, WorkerSwitch modifiedSwitch) {
+		DPID switchDpid = new DPID(modifiedSwitch.getDPID());
+		System.out.println("\n\n\nSwitch "+switchDpid.getDpidString()+" is receiving flow mod: "+flowMod+"\n\n");
+		modifiedSwitch.handleFlowModAndSend(flowMod);
+		
 	}
 }
