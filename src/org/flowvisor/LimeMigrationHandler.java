@@ -80,6 +80,7 @@ public final class LimeMigrationHandler {
 	 * @throws InterruptedException
 	 */
 	public void init() throws InterruptedException{ // TODO create LIME exception of missing ports or switches
+		//TODO: drop flows from internal data structure when a new flow comes in with the same match
 		//TODO: need to specify topology here based on what is received in the LimeServer
 		System.out.println("MURAD: LimeMigration, inititlizing migration process");
 		// this should be received from operator, for testing, we just assume that we have them
@@ -277,7 +278,7 @@ public final class LimeMigrationHandler {
 			//create vlan sending and receivng mods for each flos mod
 			//the receiving switch in this case is the original switch
 			//the sending switch is the clone switch;
-			createVlanHandlers(flowMod, cloneSwitchDpid, originalSwitchDpid);
+			createVlanHandlers(flowMod, cloneSwitchDpid, originalSwitchDpid, true);
 		}
 		
 	}
@@ -399,7 +400,7 @@ public final class LimeMigrationHandler {
 				//TODO: need to manually construct flow mods here
 //				createAndSendVlanSenderMod(vlanTag, , flowMod, senderSwitchObject)
 			} else{
-				createVlanHandlers(flowMod, originalSwitch, cloneSwitch);
+				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
 			}
 		}
 		
@@ -476,7 +477,7 @@ public final class LimeMigrationHandler {
 	 * @param originalMod
 	 * @return
 	 */
-	public LimeVlanTranslationInfo createVlanHandlers(FVFlowMod originalMod, DPID receiverSwitch, DPID senderSwitch){
+	public LimeVlanTranslationInfo createVlanHandlers(FVFlowMod originalMod, DPID receiverSwitch, DPID senderSwitch, boolean originalToClone){
 		WorkerSwitch senderSwitchObject = LimeContainer.getAllWorkingSwitches().get(senderSwitch.getDpidLong());
 		WorkerSwitch receiverSwitchObject = LimeContainer.getAllWorkingSwitches().get(receiverSwitch.getDpidLong());
 		short receiverGhostPort = receiverSwitchObject.getGhostPort();
@@ -485,7 +486,7 @@ public final class LimeMigrationHandler {
 		
 		FVFlowMod senderVlanMod = createAndSendVlanSenderMod(currentVlan, senderGhostPort, originalMod, senderSwitchObject);
 		FVFlowMod receiverVlanMod = createAndSendVlanReceiverMod(currentVlan, receiverGhostPort, originalMod, receiverSwitchObject);
-		LimeVlanTranslationInfo currentInfo = new LimeVlanTranslationInfo(receiverVlanMod, senderVlanMod, receiverSwitch, senderSwitch, true, originalMod, currentVlan, false);
+		LimeVlanTranslationInfo currentInfo = new LimeVlanTranslationInfo(receiverVlanMod, senderVlanMod, receiverSwitch, senderSwitch, originalToClone, originalMod, currentVlan, false);
 		vlanTranslationMap.put(currentVlan, currentInfo);
 		LimeUtils.addToVlanMap(senderSwitch, senderVlanMod, vlanHandlerMods);
 		LimeUtils.addToVlanMap(receiverSwitch, receiverVlanMod, vlanHandlerMods);
@@ -495,6 +496,7 @@ public final class LimeMigrationHandler {
 	
 
 	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject) {
+		//TODO: do not think matching on input port = ghost port is needed
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
 				String destMac = null;//getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
 				String srcMac = getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort());
