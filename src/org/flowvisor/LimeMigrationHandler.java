@@ -216,6 +216,9 @@ public final class LimeMigrationHandler {
 					//TODO: need to keep track of original rules, as they may be modified/removed by ovx and
 					//the current lime data structures might not work
 //					WorkerSwitch.insertFlowRuleTableAndSendModified(activeSwitch, cloneSwitch, activeSwitch.getFlowTable().getFlowTable(), vlanHandlerMods);  //FIXME we may need to clone this
+					//TODO: copy mac address mapping from originalSwitch entries to new cloneSwitch entries
+					HashMap<Short, String> originalMappings = LimeContainer.getDpidToMacMap().get(new DPID(activeSwitch.getDPID()));
+					LimeContainer.getDpidToMacMap().put(new DPID(cloneSwitch.getDPID()), originalMappings);
 					setupHandlerModsOriginalToClone(activeSwitch, cloneSwitch);
 					
 //					switchDoneMigrating(cloneSwitch, activeSwitch);
@@ -496,6 +499,7 @@ public final class LimeMigrationHandler {
 	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject) {
 		//TODO: do not think matching on input port = ghost port is needed
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
+		//TODO: need to support multiple output ports now
 				String destMac = null;//getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
 				String srcMac = LimeUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
 				short outPort = originalMod.getOutPort();
@@ -642,7 +646,7 @@ public final class LimeMigrationHandler {
 						System.out.println("Flow after modification: "+clonedMod);
 						
 						//TODO: add rule to remove tag on original switch- e.g. the ActiveSwitch object -  this will be done in another function call
-						
+						//TODO: need to support multiple output ports now
 						break; //Assuming that there is only one output port...	
 //					}
 //				}
