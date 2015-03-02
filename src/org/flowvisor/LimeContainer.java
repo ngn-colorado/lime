@@ -50,7 +50,9 @@ public class LimeContainer {
 	private static HashMap<Long, Long> activeToCloneSwitchMap = new HashMap<>();
 
 	// list of all slicers created
-	private static HashMap<Long, OriginalSwitch> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, OriginalSwitch> 
+	private static HashMap<Long, OriginalSwitch> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, OriginalSwitch>
+	
+	private static HashMap<DPID, HashMap<Short, String>> dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
 
 	public static HashMap<Long, WorkerSwitch> getAllWorkingSwitches(){
 		return allWorkingSwitches;
@@ -62,6 +64,10 @@ public class LimeContainer {
 	 */
 	public static HashMap<Long, LimeSwitch>  getOriginalSwitchContainer(){
 		return originalSwitchContainer;
+	}
+	
+	public static HashMap<DPID, HashMap<Short, String>> getDpidToMacMap(){
+		return dpidToMacMap;
 	}
 
 	static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){

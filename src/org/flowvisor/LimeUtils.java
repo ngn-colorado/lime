@@ -123,7 +123,7 @@ public class LimeUtils {
 		if(portsObj == null){
 			System.out.println("A switch should have ports defined");
 		}
-		HashMap<Short, PortInfo> portMap = processPorts(portsObj);
+		HashMap<Short, PortInfo> portMap = processPorts(portsObj, currentSwitch);
 		if(portMap.size() < 2){
 			System.out.println("A switch should have at least two ports");
 			return false;
@@ -175,12 +175,17 @@ public class LimeUtils {
 		return response;
 	}
 
-	private static HashMap<Short, PortInfo> processPorts(JSONObject portsObj) {
+	private static HashMap<Short, PortInfo> processPorts(JSONObject portsObj, DPID dpid) {
 		HashMap<Short, PortInfo> portMap = new HashMap<Short, PortInfo>();
 		for(Object portObj : portsObj.keySet()){
-			String typeString = (String) portsObj.get(portObj);
+			JSONObject portInfo = (JSONObject)portsObj.get(portObj);
+			String typeString = (String) portInfo.get("type");
 			Short port = Short.parseShort((String)portObj);
 			PortType type = PortType.valueOf(typeString);
+			if(type == PortType.H_CONNECTED){
+				String mac = (String)portInfo.get("mac");
+				LimeUtils.storeMacForDpid(dpid, port, mac, LimeContainer.getDpidToMacMap());
+			}
 			portMap.put(port, new PortInfo(type, null, null));
 		}
 		return portMap;
@@ -298,5 +303,31 @@ public class LimeUtils {
 		System.out.println("\n\n\nSwitch "+switchDpid.getDpidString()+" is receiving flow mod: "+flowMod+"\n\n");
 		modifiedSwitch.handleFlowModAndSend(flowMod);
 		
+	}
+	
+	public static void storeMacForDpid(DPID dpid, Short port, String mac, HashMap<DPID, HashMap<Short, String>> dpidToMacMap){
+		HashMap<Short, String> current;
+		boolean exists = dpidToMacMap.containsKey(dpid);
+		if(!exists){
+			current = new HashMap<Short, String>();
+		} else{
+			current= dpidToMacMap.get(dpid);
+		}
+		current.put(port, mac);
+		if(!exists){
+			dpidToMacMap.put(dpid, current);
+		}
+	}
+	
+	public static String getMacForPort(DPID dpid, short port, HashMap<DPID, HashMap<Short, String>> dpidToMacMap) {
+		//TODO: for now, ignore errors. may need to deal with them later
+		if(!dpidToMacMap.containsKey(dpid)){
+			throw new IllegalArgumentException("Invalid dpid: "+dpid);
+		}
+		HashMap<Short, String> current = dpidToMacMap.get(dpid);
+		if(!current.containsKey(port)){
+			throw new IllegalArgumentException("Invalid port: "+port);
+		}
+		return current.get(port);
 	}
 }

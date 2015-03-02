@@ -41,7 +41,6 @@ public final class LimeMigrationHandler {
 	private short vlanCounter;
 	//maps vlan tag numbers to migration flow mod information
 	private HashMap<Short, LimeVlanTranslationInfo> vlanTranslationMap;
-	private HashMap<DPID, HashMap<Short, String>> dpidToMacMap;
 	private ArrayList<LimeHost> migratedHosts;
 	
 	private LimeMigrationHandler(){
@@ -52,7 +51,6 @@ public final class LimeMigrationHandler {
 		vlanHandlerMods = new HashMap<DPID, List<FVFlowMod>>();
 		localOriginalToCloneSwitchMap = new HashMap<DPID, DPID>();
 		vlanTranslationMap = new HashMap<Short, LimeVlanTranslationInfo>();
-		dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
 		migratedHosts = new ArrayList<LimeHost>();
 	}
 	
@@ -137,11 +135,11 @@ public final class LimeMigrationHandler {
 //			return;
 //		}
 		//TODO: populate the mac map statically for now. later, parse from a provided config of some type
-		for(Long activeSwID : LimeContainer.getAllWorkingSwitches().keySet()){
-			DPID current = new DPID(activeSwID);
-			storeMacForDpid(current, (short)2, "52:54:00:aa:52:b8");
-			storeMacForDpid(current, (short)3, "52:54:00:49:a5:72");
-		}
+//		for(Long activeSwID : LimeContainer.getAllWorkingSwitches().keySet()){
+//			DPID current = new DPID(activeSwID);
+//			LimeUtils.storeMacForDpid(current, (short)2, "52:54:00:aa:52:b8", LimeContainer.getDpidToMacMap());
+//			LimeUtils.storeMacForDpid(current, (short)3, "52:54:00:49:a5:72", LimeContainer.getDpidToMacMap());
+//		}
 		//populate original flow table map with all the flows in all of the active switches
 		for(Long activeSwID : LimeContainer.getActiveToOriginalSwitchMap().keySet()){
 			WorkerSwitch currentSwitch = LimeContainer.getAllWorkingSwitches().get(activeSwID);
@@ -499,7 +497,7 @@ public final class LimeMigrationHandler {
 		//TODO: do not think matching on input port = ghost port is needed
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
 				String destMac = null;//getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
-				String srcMac = getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort());
+				String srcMac = LimeUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
 				short outPort = originalMod.getOutPort();
 				for(OFAction action : originalMod.getActions()){
 					if(action instanceof OFActionOutput){
@@ -507,7 +505,7 @@ public final class LimeMigrationHandler {
 							outPort = ((OFActionOutput) action).getPort();
 						}
 						if(destMac == null){
-							destMac = getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
+							destMac = LimeUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), ((OFActionOutput) action).getPort(), LimeContainer.getDpidToMacMap());
 						}
 					}
 				}
@@ -606,8 +604,8 @@ public final class LimeMigrationHandler {
 //						mod_dl_src.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
 //						FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 //						mod_dl_dst.setDataLayerAddress(convertMacToBytes("ff:ff:ff:ff:ff:ff"));
-						String destMac = getMacForPort(new DPID(senderSwitchObject.getDPID()), ((OFActionOutput) action).getPort());
-						String srcMac = getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort());
+						String destMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), ((OFActionOutput) action).getPort(), LimeContainer.getDpidToMacMap());
+						String srcMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
 						System.out.println("Modifying flow: "+clonedMod);
 						int originalSize = clonedMod.getLengthU();		
 						//create vlan tag action
@@ -653,33 +651,6 @@ public final class LimeMigrationHandler {
 		LimeUtils.sendFlowMod(clonedMod, senderSwitchObject);
 		return clonedMod;
 	}
-
-	private String getMacForPort(DPID dpid, short port) {
-		//TODO: for now, ignore errors. may need to deal with them later
-		if(!dpidToMacMap.containsKey(dpid)){
-			throw new IllegalArgumentException("Invalid dpid: "+dpid);
-		}
-		HashMap<Short, String> current = dpidToMacMap.get(dpid);
-		if(!current.containsKey(port)){
-			throw new IllegalArgumentException("Invalid port: "+port);
-		}
-		return current.get(port);
-	}
-	
-	private void storeMacForDpid(DPID dpid, Short port, String mac){
-		HashMap<Short, String> current;
-		boolean exists = dpidToMacMap.containsKey(dpid);
-		if(!exists){
-			current = new HashMap<Short, String>();
-		} else{
-			current= dpidToMacMap.get(dpid);
-		}
-		current.put(port, mac);
-		if(!exists){
-			dpidToMacMap.put(dpid, current);
-		}
-	}
-
 
 	/**
 	 * this method looks up an existing vlan tag number for a mod
