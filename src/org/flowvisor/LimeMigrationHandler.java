@@ -479,7 +479,7 @@ public final class LimeMigrationHandler {
 //		match.setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
 		//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 		//if wildcarding input port, try setting to -1?
-		match.setInputPort((short)-1);
+		match.setInputPort(originalMod.getMatch().getInputPort());
 //		match.setInputPort(ghostPort);
 		
 		//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
@@ -501,7 +501,7 @@ public final class LimeMigrationHandler {
 		for(OFAction action : originalActions){
 			if(action instanceof OFActionOutput){
 				short currentOutputPort = ((OFActionOutput) action).getPort();
-				clonedMod.getMatch().setInputPort(currentOutputPort);
+//				clonedMod.getMatch().setInputPort(currentOutputPort);
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 				String srcMac = null;
@@ -527,7 +527,7 @@ public final class LimeMigrationHandler {
 					}
 				} else{
 					WorkerSwitch cloneSwitch = receiverSwitchObject.getDuplicateSwitch();
-					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(cloneSwitch.getDPID())).get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(receiverSwitchObject.getDPID())).get(currentOutputPort).getType();
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS been migrated (as this switch is the original switch)
 					if(portType == PortType.H_CONNECTED && !LimeUtils.outputPortMigrated(new DPID(receiverSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts)){
