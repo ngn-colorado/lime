@@ -508,7 +508,7 @@ public final class LimeMigrationHandler {
 				
 				if(receivingFromOriginal){//am the clone switch
 					WorkerSwitch originalSwitch = receiverSwitchObject.getDuplicateSwitch();
-					PortType portType = originalSwitch.getActivePorts().get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS NOT been migrated (as this is the clone switch)
 					if(portType == PortType.H_CONNECTED && !LimeUtils.outputPortMigrated(new DPID(originalSwitch.getDPID()), originalMod, currentOutputPort, migratedHosts)){
@@ -526,7 +526,7 @@ public final class LimeMigrationHandler {
 					}
 				} else{
 					WorkerSwitch cloneSwitch = receiverSwitchObject.getDuplicateSwitch();
-					PortType portType = cloneSwitch.getActivePorts().get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(cloneSwitch.getDPID())).get(currentOutputPort).getType();
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS been migrated (as this switch is the original switch)
 					if(portType == PortType.H_CONNECTED && !LimeUtils.outputPortMigrated(new DPID(receiverSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts)){
@@ -582,11 +582,6 @@ public final class LimeMigrationHandler {
 		System.out.println("\nCurrent flowmod: "+flowMod+"\n");
 		short vlanNumber = vlanTagNumber;
 		
-		System.out.println("Modifying flow: "+clonedMod);
-		
-		//Loop through each action, however at this time we only support actions with one output port
-		//TODO: support multiple output ports in future
-		
 		boolean setMatchMacs = false;
 		ArrayList<OFActionOutput> localPortsActions = new ArrayList<OFActionOutput>();
 		ArrayList<OFActionOutput> remotePortsActions = new ArrayList<OFActionOutput>();
@@ -596,7 +591,6 @@ public final class LimeMigrationHandler {
 		int wildcards = match.getWildcards();
 		match.setWildcards(wildcards);
 		clonedMod.setMatch(match);
-		
 		
 		for(int i = 0; i<clonedMod.getActions().size(); i++ ){
 			OFAction action = clonedMod.getActions().get(i);
@@ -622,7 +616,7 @@ public final class LimeMigrationHandler {
 				//is connected locally, else send over ghost port
 				if(originalToClone){
 					//THIS logic works if are the original switch sending:
-					PortType portType = senderSwitchObject.getActivePorts().get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(senderSwitchObject.getDPID())).get(currentOutputPort).getType(); 
 					if(portType != PortType.H_CONNECTED || LimeUtils.outputPortMigrated(new DPID(senderSwitchObject.getDPID()), flowMod, currentOutputPort, migratedHosts)){ //if a host was connected here but has been migrated, or something other than a host is supposed to be here
 						remotePortsActions.add((OFActionOutput) action);
 					} else if(portType == PortType.H_CONNECTED){ //a host is supposed to be connected here and has not been migrated
@@ -634,7 +628,7 @@ public final class LimeMigrationHandler {
 					//the local ports are hosts that have already been migrated
 					//can get this object directly, as it set by init()
 					WorkerSwitch originalSwitch = senderSwitchObject.getDuplicateSwitch();
-					PortType portType = originalSwitch.getActivePorts().get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
 					if(LimeUtils.outputPortMigrated(new DPID(originalSwitch.getDPID()), flowMod, currentOutputPort, migratedHosts)){ //if a host was connected here but has been migrated
 						localPortsActions.add((OFActionOutput) action);
 					} else if(portType == PortType.H_CONNECTED){ //a host is supposed to connected here and has not been migrated
@@ -645,6 +639,9 @@ public final class LimeMigrationHandler {
 		}
 		
 		for(OFActionOutput migratedAction : remotePortsActions){
+			//need to make these actions last in the list for now, or else the mod will put vlan on all packets
+			clonedMod.getActions().remove(migratedAction);
+			clonedMod.getActions().add(migratedAction);
 			migratedAction.setPort(ghostPort);
 			//create vlan tag action
 			FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
