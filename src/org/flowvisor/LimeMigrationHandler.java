@@ -479,8 +479,9 @@ public final class LimeMigrationHandler {
 //		match.setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
 		//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
 		//if wildcarding input port, try setting to -1?
-		match.setInputPort(originalMod.getMatch().getInputPort());
-//		match.setInputPort(ghostPort);
+//		match.setInputPort(originalMod.getMatch().getInputPort());
+		//for now, too tedious to avoid this. could use a dummy port on each switch as the input port in future
+		match.setInputPort(ghostPort);
 		
 		//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
 		//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,
@@ -655,6 +656,8 @@ public final class LimeMigrationHandler {
 			//insert vlan action before the output action in the action list
 			int actionIndex = clonedMod.getActions().indexOf(migratedAction);
 			clonedMod.getActions().add(actionIndex, addedVlanAction);
+			//only need to output out ghost port once
+			break;
 		}
 		
 		clonedMod.computeLength();
