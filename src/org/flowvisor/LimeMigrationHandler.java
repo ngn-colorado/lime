@@ -501,6 +501,7 @@ public final class LimeMigrationHandler {
 		for(OFAction action : originalMod.getActions()){
 			if(action instanceof OFActionOutput){
 				short currentOutputPort = ((OFActionOutput) action).getPort();
+				clonedMod.getMatch().setInputPort(currentOutputPort);
 				FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
 				FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 				String srcMac = null;
