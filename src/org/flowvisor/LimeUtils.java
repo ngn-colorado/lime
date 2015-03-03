@@ -150,7 +150,8 @@ public class LimeUtils {
 			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as original switch to Lime with port map:\n"+printPortMap(portMap));
 			LimeContainer.addOriginalSwitch(currentSwitch.getDpidLong(), portMap);
 			LimeContainer.insertActiveToOriginalSwitchMap(currentSwitch.getDpidLong(), currentSwitch.getDpidLong());
-			LimeContainer.getDpidToPortInfoMap().put(currentSwitch, portMap);
+			//need a copy of the port map, not the same reference
+			LimeContainer.getDpidToPortInfoMap().put(currentSwitch, new HashMap<Short, PortInfo>(portMap));
 			return true;
 		} else if(isClone){
 			if(originalDpid == null){
@@ -159,7 +160,8 @@ public class LimeUtils {
 			}
 			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as clone switch to Lime with original switch: "+originalDpid.getDpidHexString() +" with port map:\n"+printPortMap(portMap));
 			LimeContainer.addCloneSwitch(currentSwitch.getDpidLong(), portMap);
-			LimeContainer.getDpidToPortInfoMap().put(currentSwitch, portMap);
+			//need a copy of the port map, not the same reference
+			LimeContainer.getDpidToPortInfoMap().put(currentSwitch, new HashMap<Short, PortInfo>(portMap));
 			LimeContainer.insertActiveToCloneSwitchMap(originalDpid.getDpidLong(), currentSwitch.getDpidLong());
 			return true;
 		} else{
