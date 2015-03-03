@@ -28,6 +28,14 @@ public class PortInfo {
 		
 	}
 	
+	public String getAttachmentMAC() {
+		return attachmentMAC;
+	}
+
+	public String getAttachmentIP() {
+		return attachmentIP;
+	}
+
 	public enum PortType {
 		SW_CONNECTED, // connected to another switch from its own active/clone group of switches)
 		H_CONNECTED, // connected to host
