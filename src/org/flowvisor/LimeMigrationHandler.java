@@ -355,7 +355,7 @@ public final class LimeMigrationHandler {
 	}
 	
 	/**
-	 * signale that a particular switch is done migrating
+	 * signal that a particular switch is done migrating
 	 * @param activeSwitchDpid
 	 */
 	public synchronized void switchDoneMigrating(DPID activeSwitchDpid){
@@ -469,7 +469,6 @@ public final class LimeMigrationHandler {
 		FVFlowMod clonedMod = (FVFlowMod) originalMod.clone();
 
 		//create match to match packets coming in ghostPort for a particular vlan
-		OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
 		FVMatch match = new FVMatch();
 		int wildcards = FVMatch.OFPFW_ALL;
 		//do not need to match on input port if matching on vlan
@@ -498,7 +497,8 @@ public final class LimeMigrationHandler {
 		//build a table of actionoutputs that are not needed
 		//also use this loop to update the flow mod to have the set_dl_dst and set_dl_src actions. the mod should then be ready to be written
 		ArrayList<OFActionOutput> unneededActions = new ArrayList<OFActionOutput>();
-		for(OFAction action : originalMod.getActions()){
+		ArrayList<OFAction> originalActions = new ArrayList<OFAction>(clonedMod.getActions());
+		for(OFAction action : originalActions){
 			if(action instanceof OFActionOutput){
 				short currentOutputPort = ((OFActionOutput) action).getPort();
 				clonedMod.getMatch().setInputPort(currentOutputPort);
@@ -547,7 +547,11 @@ public final class LimeMigrationHandler {
 				}
 				
 				if(srcMac != null && destMac != null){
+					clonedMod.getActions().remove(action);
+					clonedMod.getActions().add(action);
+					OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
 					int actionIndex = clonedMod.getActions().indexOf(action);
+					clonedMod.getActions().add(actionIndex, stripVlan);
 					clonedMod.getActions().add(actionIndex, mod_dl_src);
 					clonedMod.getActions().add(actionIndex, mod_dl_dst);
 				}
