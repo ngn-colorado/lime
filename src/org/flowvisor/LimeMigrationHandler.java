@@ -348,7 +348,7 @@ public final class LimeMigrationHandler {
 			}else{
 				//recreate the flow mods going in the other direction with the updated state
 //				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
-				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, true);
+				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
 			}
 		}
 		
