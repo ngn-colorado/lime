@@ -260,12 +260,16 @@ public class LimeUtils {
 		return (match.getInputPort() == connectedPort);
 	}
 	
-	public static boolean outputPortMigrated(FVFlowMod flowMod, List<LimeHost> migratedHosts) {
+	public static boolean outputPortMigrated(DPID switchDpid, FVFlowMod flowMod, short port, List<LimeHost> migratedHosts) {
 		for(OFAction action : flowMod.getActions()){
 			if(action instanceof OFActionOutput){
 				short outPort =  ((OFActionOutput) action).getPort();
 				for(LimeHost host : migratedHosts){
-					if(host.getConnectedPort() == outPort){
+					//if the current switch is the original switch of the host AND
+					//the port being checked is the current outputPort being examined AND
+					//the current outputPort is the original connected port of the host, THEN
+					//the host was migrated, as it is present in the migrated hosts list
+					if(host.getOriginalDpid().equals(switchDpid) && port == outPort && host.getConnectedPort() == outPort){
 						return true;
 					}
 				}
@@ -319,14 +323,14 @@ public class LimeUtils {
 		}
 	}
 	
-	public static String getMacForPort(DPID dpid, short port, HashMap<DPID, HashMap<Short, String>> dpidToMacMap) {
+	public static String getMacForPort(DPID dpid, short port, HashMap<DPID, HashMap<Short, String>> dpidToMacMap) throws MacLookupException {
 		//TODO: for now, ignore errors. may need to deal with them later
 		if(!dpidToMacMap.containsKey(dpid)){
-			throw new IllegalArgumentException("Invalid dpid: "+dpid);
+			throw new MacLookupException("Invalid dpid: "+dpid);
 		}
 		HashMap<Short, String> current = dpidToMacMap.get(dpid);
 		if(!current.containsKey(port)){
-			throw new IllegalArgumentException("Invalid port: "+port);
+			throw new MacLookupException("Invalid port: "+port);
 		}
 		return current.get(port);
 	}
