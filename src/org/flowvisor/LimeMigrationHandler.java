@@ -472,7 +472,7 @@ public final class LimeMigrationHandler {
 		FVMatch match = new FVMatch();
 		int wildcards = FVMatch.OFPFW_ALL;
 		//do not need to match on input port if matching on vlan
-//		wildcards &= ~FVMatch.OFPFW_IN_PORT;
+		wildcards &= ~FVMatch.OFPFW_IN_PORT;
 		wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 		match.setDataLayerVirtualLan(vlanNumber);
 //		match.setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
@@ -591,6 +591,7 @@ public final class LimeMigrationHandler {
 		boolean setMatchMacs = false;
 		ArrayList<OFActionOutput> localPortsActions = new ArrayList<OFActionOutput>();
 		ArrayList<OFActionOutput> remotePortsActions = new ArrayList<OFActionOutput>();
+		ArrayList<OFActionOutput> unneededMods = new ArrayList<OFActionOutput>();
 		
 		//set the wildcards of the new OF mod
 		OFMatch match = clonedMod.getMatch();
@@ -644,20 +645,22 @@ public final class LimeMigrationHandler {
 			}
 		}
 		
+		boolean ghostPortRuleWritten = false;
 		for(OFActionOutput migratedAction : remotePortsActions){
 			//need to make these actions last in the list for now, or else the mod will put vlan on all packets
 			clonedMod.getActions().remove(migratedAction);
-			clonedMod.getActions().add(migratedAction);
-			migratedAction.setPort(ghostPort);
-			//create vlan tag action
-			FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
-			addedVlanAction.setVirtualLanIdentifier(vlanNumber);
-			//add vlan tag action to mod
-			//insert vlan action before the output action in the action list
-			int actionIndex = clonedMod.getActions().indexOf(migratedAction);
-			clonedMod.getActions().add(actionIndex, addedVlanAction);
-			//only need to output out ghost port once
-			break;
+			if(!ghostPortRuleWritten){
+				clonedMod.getActions().add(migratedAction);
+				migratedAction.setPort(ghostPort);
+				//create vlan tag action
+				FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
+				addedVlanAction.setVirtualLanIdentifier(vlanNumber);
+				//add vlan tag action to mod
+				//insert vlan action before the output action in the action list
+				int actionIndex = clonedMod.getActions().indexOf(migratedAction);
+				clonedMod.getActions().add(actionIndex, addedVlanAction);
+				//only need to output out ghost port once
+			}
 		}
 		
 		clonedMod.computeLength();
