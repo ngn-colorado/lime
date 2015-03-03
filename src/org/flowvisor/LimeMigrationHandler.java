@@ -530,7 +530,7 @@ public final class LimeMigrationHandler {
 					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(receiverSwitchObject.getDPID())).get(currentOutputPort).getType();
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS been migrated (as this switch is the original switch)
-					if(portType == PortType.H_CONNECTED && !LimeUtils.outputPortMigrated(new DPID(receiverSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts)){
+					if(portType == PortType.H_CONNECTED && LimeUtils.outputPortMigrated(new DPID(receiverSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts)){
 						unneededActions.add((OFActionOutput) action);
 					}else if(portType == PortType.H_CONNECTED){
 						try {
