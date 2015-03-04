@@ -472,7 +472,7 @@ public final class LimeMigrationHandler {
 		FVMatch match = new FVMatch();
 		int wildcards = FVMatch.OFPFW_ALL;
 		//do not need to match on input port if matching on vlan
-		wildcards &= ~FVMatch.OFPFW_IN_PORT;
+//		wildcards &= ~FVMatch.OFPFW_IN_PORT;
 		wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 		match.setDataLayerVirtualLan(vlanNumber);
 //		match.setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
@@ -553,8 +553,8 @@ public final class LimeMigrationHandler {
 					OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
 					int actionIndex = clonedMod.getActions().indexOf(action);
 					clonedMod.getActions().add(actionIndex, stripVlan);
-//					clonedMod.getActions().add(actionIndex, mod_dl_src);
-//					clonedMod.getActions().add(actionIndex, mod_dl_dst);
+					clonedMod.getActions().add(actionIndex, mod_dl_src);
+					clonedMod.getActions().add(actionIndex, mod_dl_dst);
 				}
 			}
 		}
