@@ -482,7 +482,7 @@ public final class LimeMigrationHandler {
 //		match.setInputPort(originalMod.getMatch().getInputPort());
 		//for now, too tedious to avoid this. could use a dummy port on each switch as the input port in future
 //		match.setInputPort(ghostPort);
-		match.setInputPort((short)0);
+		match.setInputPort((short)7);
 		
 		//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
 		//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,
