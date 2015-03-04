@@ -238,12 +238,14 @@ public final class LimeMigrationHandler {
 				}
 			}
 			
-			for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
-				if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
-					matchingMods.add(flowMod);
-				}
-				
-			}
+			//need to update ALL mods using the current strategy, instead just matching mods
+//			for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
+//				if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
+//					matchingMods.add(flowMod);
+//				}
+//				
+//			}
+			matchingMods = (ArrayList<FVFlowMod>) originalFlowMods.get(host.getOriginalDpid());
 			
 			migratedHosts.add(host);
 			setupHandlerModsOriginalToClone(originalSwitch, cloneSwitch);
@@ -610,8 +612,8 @@ public final class LimeMigrationHandler {
 					try {
 						destMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), ((OFActionOutput) action).getPort(), LimeContainer.getDpidToMacMap());
 						String srcMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
-//						clonedMod.getMatch().setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
-//						clonedMod.getMatch().setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
+						clonedMod.getMatch().setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
+						clonedMod.getMatch().setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
 						setMatchMacs = true;
 					} catch (MacLookupException e) {
 						// TODO Auto-generated catch block
