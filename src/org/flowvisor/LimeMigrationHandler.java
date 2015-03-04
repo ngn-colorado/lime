@@ -553,8 +553,8 @@ public final class LimeMigrationHandler {
 					OFActionStripVirtualLan stripVlan = (OFActionStripVirtualLan) FlowVisor.getInstance().getFactory().getAction(OFActionType.STRIP_VLAN);
 					int actionIndex = clonedMod.getActions().indexOf(action);
 					clonedMod.getActions().add(actionIndex, stripVlan);
-					clonedMod.getActions().add(actionIndex, mod_dl_src);
-					clonedMod.getActions().add(actionIndex, mod_dl_dst);
+//					clonedMod.getActions().add(actionIndex, mod_dl_src);
+//					clonedMod.getActions().add(actionIndex, mod_dl_dst);
 				}
 			}
 		}
