@@ -609,8 +609,8 @@ public final class LimeMigrationHandler {
 					try {
 						destMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), ((OFActionOutput) action).getPort(), LimeContainer.getDpidToMacMap());
 						String srcMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
-						clonedMod.getMatch().setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
-						clonedMod.getMatch().setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
+//						clonedMod.getMatch().setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
+//						clonedMod.getMatch().setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
 						setMatchMacs = true;
 					} catch (MacLookupException e) {
 						// TODO Auto-generated catch block
