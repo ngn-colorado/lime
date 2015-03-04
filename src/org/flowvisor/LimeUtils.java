@@ -349,4 +349,33 @@ public class LimeUtils {
 		}
 		return current.get(port);
 	}
+
+	public static boolean inputPortMigrated(FVFlowMod flowMod, DPID originalDpid, List<LimeHost> migratedHosts) {
+		short inputPort = flowMod.getMatch().getInputPort();
+		if(inputPort <= 0 || 
+		   !LimeContainer.getDpidToPortInfoMap().get(originalDpid).containsKey(inputPort) || 
+		   LimeContainer.getDpidToPortInfoMap().get(originalDpid).get(inputPort).getType() != PortType.H_CONNECTED){
+			return false;
+		}
+		for(LimeHost host : migratedHosts){
+			if(inputPort == host.getConnectedPort()){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean hasOutputPortWithoutVlan(FVFlowMod flowMod,
+			Short connectedPort) {
+		boolean hasOutputPort = false;
+		for(OFAction action : flowMod.getActions()){
+			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
+				return false;
+			}
+			if(action instanceof OFActionOutput && ((OFActionOutput) action).getPort() == connectedPort){
+				hasOutputPort = true;
+			}
+		}
+		return hasOutputPort;
+	}
 }

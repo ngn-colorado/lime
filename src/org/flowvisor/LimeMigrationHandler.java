@@ -238,17 +238,22 @@ public final class LimeMigrationHandler {
 				}
 			}
 			
-			//need to update ALL mods using the current strategy, instead just matching mods
-//			for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
-//				if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
-//					matchingMods.add(flowMod);
-//				}
-//				
-//			}
-			matchingMods = (ArrayList<FVFlowMod>) originalFlowMods.get(host.getOriginalDpid());
+			//need to update ALL mods that have input port ==  host.connectedPort() or if a mod has an OUTPUT port == host.connectedPort()
+			//and the input port of that mod has been migrated
+			for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
+				if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
+					matchingMods.add(flowMod);
+				}
+				if(LimeUtils.inputPortMigrated(flowMod, host.getOriginalDpid(), migratedHosts) && LimeUtils.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
+					matchingMods.add(flowMod);
+				}
+				
+			}
 			
 			migratedHosts.add(host);
+			//recreates all mods on the original switch to take into account new state of hosts that have migrated
 			setupHandlerModsOriginalToClone(originalSwitch, cloneSwitch);
+			//redo all mods on the clone that have the input port of the migrated host, or have the output port of the migrated host AND the input port of that host had been migrated
 			createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods);
 			//instead of rechecking, just recreate all mods between the switches with the new state, as the
 			//functions now take this into account
