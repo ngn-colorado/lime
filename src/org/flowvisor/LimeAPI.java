@@ -52,6 +52,9 @@ public class LimeAPI {
 			return "\n Migration handler initiated migration";
 		} catch (InterruptedException e) {
 			return "\n Migration handler encountered an error";
+		} catch (LimeDummyPortNotFoundException e) {
+			String message = "\n Need to have a dummy port in order to work with OVX";
+			return message;
 		}
 		
 	}

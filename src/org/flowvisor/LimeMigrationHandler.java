@@ -76,8 +76,9 @@ public final class LimeMigrationHandler {
 	 * this method is called before vms are migrated
 	 * 
 	 * @throws InterruptedException
+	 * @throws LimeDummyPortNotFoundException 
 	 */
-	public void init() throws InterruptedException{ 
+	public void init() throws InterruptedException, LimeDummyPortNotFoundException{ 
 		// TODO create LIME exception of missing ports or switches
 		//TODO: drop flows from internal data structure when a new flow comes in with the same match
 		System.out.println("MURAD: LimeMigration, initializing migration process");
@@ -192,8 +193,9 @@ public final class LimeMigrationHandler {
 	 * this method uses the original flow mods object to determine the mods to write
 	 * @param activeSwitch
 	 * @param cloneSwitch
+	 * @throws LimeDummyPortNotFoundException 
 	 */
-	private void setupHandlerModsOriginalToClone(WorkerSwitch originalSwitch, WorkerSwitch cloneSwitch) {
+	private void setupHandlerModsOriginalToClone(WorkerSwitch originalSwitch, WorkerSwitch cloneSwitch) throws LimeDummyPortNotFoundException {
 		System.out.println("Starting flow mod migration of " + originalSwitch.getDPID() + " to "+cloneSwitch.getDPID());
 		
 		if(originalSwitch.getGhostPort() < 1){
@@ -219,8 +221,9 @@ public final class LimeMigrationHandler {
 	/**
 	 * This will use libvirt to migrate the vms. Will need to have access rights for libvirt
 	 * to the hosts, the ip address of the libvirt hosts/hypervisors, the destination libvirt host/hypervisor ip, and the libvirt names of the hosts
+	 * @throws LimeDummyPortNotFoundException 
 	 */
-	public boolean migrateVM(LimeHost host){
+	public boolean migrateVM(LimeHost host) throws LimeDummyPortNotFoundException{
 		System.out.println("In migrate vm function");
 		//before migration, modify mods so that any packet that is to be output to the host's connected port is also sent out the ghost port
 		//and then received and output on the connected port on the clone
@@ -255,7 +258,6 @@ public final class LimeMigrationHandler {
 		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods, true, host.getConnectedPort());
 		createPreMigrationSendingMods(host, matchingOutputPortMods);
 		
-		
 		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
 		System.out.println("migrate vm function returned");
 		if(migrated){
@@ -264,16 +266,8 @@ public final class LimeMigrationHandler {
 			WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(host.getOriginalDpid().getDpidLong());
 			WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(host.getCloneDpid().getDpidLong());
 			
-			
-			
-			
 			//recreates all mods on the original switch to take into account new state of hosts that have migrated
 			setupHandlerModsOriginalToClone(originalSwitch, cloneSwitch);
-			//redo all mods on the clone that have the input port of the migrated host, or have the output port of the migrated host AND the input port of that host had been migrated
-//			createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods);
-			//instead of rechecking, just recreate all mods between the switches with the new state, as the
-			//functions now take this into account
-//			fixExistingMigrationMods(host);
 			
 			//TODO: need to delete the incorrect rules from the physical switches, but keep the rules in the lime flow table object
 			for(FVFlowMod flowMod : matchingMods){
@@ -290,64 +284,13 @@ public final class LimeMigrationHandler {
 		return false;
 	}
 
-	private void createPreMigrationSendingMods(LimeHost host, List<FVFlowMod> matchingMods) {
+	private void createPreMigrationSendingMods(LimeHost host, List<FVFlowMod> matchingMods) throws LimeDummyPortNotFoundException {
 		DPID cloneSwitch = host.getCloneDpid();
 		DPID originalSwitch = host.getOriginalDpid();
 		for(FVFlowMod originalMatchingMod : matchingMods){
 			createVlanHandlers(originalMatchingMod, cloneSwitch, originalSwitch, true, true, host.getConnectedPort());
 		}
 		
-	}
-
-	/**
-	 * iterate through existing migration flow mods and modify those that output to a host that is being migrated
-	 * @param host
-	 */
-	private void fixExistingMigrationMods(LimeHost host) {
-		//TODO: for now, we still assume that host are connected to the same ports in the original and source switches
-		short currentlyMigratingPort = host.getConnectedPort();
-		for(Short vlanTag : vlanTranslationMap.keySet()){
-			LimeVlanTranslationInfo info = vlanTranslationMap.get(vlanTag);
-			short currentReceiverOutputPort = LimeUtils.getFlowModOutputPort(info.getReceiverMod());
-			
-			//if is a mod from clone to original and is  and the output of the mod points to the host currently being migrated
-			//and the receiver mod is on the same switch as the host was on
-			if(!info.isOriginalToClone() && currentReceiverOutputPort == currentlyMigratingPort && info.getReceiverSwitch().equals(host.getOriginalDpid())){
-				//change sending mod to instead output to the connected port on the clone(sending) switch and remove vlan action
-				FVFlowMod sendingMod = info.getSenderMod();
-				List<OFAction> actions = sendingMod.getActions();
-				List<OFAction> actionsToDelete = new ArrayList<OFAction>();
-				
-				//find all vlan actions. there should only be one
-				//modify action output to output to the host's connected port, rather than the ghost port at the same time (should also be only one mod)
-				boolean foundOutput = false;
-				for(OFAction action : actions){
-					if(action instanceof OFActionVirtualLanIdentifier){
-						actionsToDelete.add(action);
-					}
-					if(!foundOutput && action instanceof OFActionOutput){
-						((OFActionOutput)action).setPort(currentlyMigratingPort);
-						foundOutput = true;
-					}
-				}
-				
-				//remove all found vlan actions
-				actions.removeAll(actionsToDelete);
-				
-				//re-write the mod to the clone switch
-				sendingMod.computeLength();
-				WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(info.getSenderSwitch().getDpidLong());
-				LimeUtils.sendFlowMod(sendingMod, cloneSwitch);
-				
-				//also delete receiver mod on the original switch, but no neccessary
-				WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(info.getReceiverSwitch().getDpidLong());
-				LimeUtils.deleteFlowMod(originalSwitch, info.getReceiverMod());
-				
-				//also change entry in translation table
-				LimeVlanTranslationInfo newInfo = LimeUtils.cloneTranslationInfoMigrated(info, true);
-				vlanTranslationMap.put(vlanTag, newInfo);
-			}
-		}
 	}
 	
 	/**
@@ -356,8 +299,9 @@ public final class LimeMigrationHandler {
 	 * @param cloneSwitch
 	 * @param originalSwitch
 	 * @param matchingMods
+	 * @throws LimeDummyPortNotFoundException 
 	 */
-	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods, boolean preMigration, short preMigrationPort) {
+	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods, boolean preMigration, short preMigrationPort) throws LimeDummyPortNotFoundException {
 		for(FVFlowMod flowMod : matchingMods){
 			//need to iterate over each output port of the flow mod
 			boolean allMigrated = true;
@@ -453,7 +397,12 @@ public final class LimeMigrationHandler {
 		Runnable migrateVMTask = new Runnable(){
 			@Override
 			public void run() {
-				migrateVM(currentHost);
+				try {
+					migrateVM(currentHost);
+				} catch (LimeDummyPortNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		};
 		Thread migrateVMThread = new Thread(migrateVMTask);
@@ -474,8 +423,9 @@ public final class LimeMigrationHandler {
 	 * it also
 	 * @param originalMod
 	 * @return
+	 * @throws LimeDummyPortNotFoundException 
 	 */
-	public LimeVlanTranslationInfo createVlanHandlers(FVFlowMod originalMod, DPID receiverSwitch, DPID senderSwitch, boolean originalToClone, boolean preMigration, short preMigrationPort){
+	public LimeVlanTranslationInfo createVlanHandlers(FVFlowMod originalMod, DPID receiverSwitch, DPID senderSwitch, boolean originalToClone, boolean preMigration, short preMigrationPort) throws LimeDummyPortNotFoundException{
 		WorkerSwitch senderSwitchObject = LimeContainer.getAllWorkingSwitches().get(senderSwitch.getDpidLong());
 		WorkerSwitch receiverSwitchObject = LimeContainer.getAllWorkingSwitches().get(receiverSwitch.getDpidLong());
 		short receiverGhostPort = receiverSwitchObject.getGhostPort();
@@ -499,26 +449,20 @@ public final class LimeMigrationHandler {
 	 * @param originalMod
 	 * @param receiverSwitchObject
 	 * @return
+	 * @throws LimeDummyPortNotFoundException 
 	 */
-	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject, boolean receivingFromOriginal, boolean preMigration, short preMigrationPort) {
+	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject, boolean receivingFromOriginal, boolean preMigration, short preMigrationPort) throws LimeDummyPortNotFoundException {
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
 		FVFlowMod clonedMod = (FVFlowMod) originalMod.clone();
 
 		//create match to match packets coming in ghostPort for a particular vlan
 		FVMatch match = new FVMatch();
 		int wildcards = FVMatch.OFPFW_ALL;
-		//do not need to match on input port if matching on vlan
-//		wildcards &= ~FVMatch.OFPFW_IN_PORT;
 		wildcards &= ~FVMatch.OFPFW_DL_VLAN;
 		match.setDataLayerVirtualLan(vlanNumber);
-//		match.setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
-//		match.setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
 		//need to set input port or ovx has a nullpointerexception. is this part of openflow spec?
-		//if wildcarding input port, try setting to -1?
-//		match.setInputPort(originalMod.getMatch().getInputPort());
-		//for now, too tedious to avoid this. could use a dummy port on each switch as the input port in future
-//		match.setInputPort(ghostPort);
-		match.setInputPort((short)7);
+		//use a dummy port on each switch as the input port in future
+		match.setInputPort(LimeUtils.getDummyPort(new DPID(receiverSwitchObject.getDPID())));
 		
 		//NOTE: see openvirtex.messages.actions.OVXActionOutput.java line 171 else statement:
 		//if the input port is an edge, e.g. is a link to another switch, like the ghost ports are,

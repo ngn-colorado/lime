@@ -78,6 +78,10 @@ public class LimeUtils {
 		} catch (ParseException e) {
 			System.out.println("JSON parsing failed");
 			return null;
+		} catch (LimeDummyPortNotFoundException e) {
+			String message = "Need to have a dummy port in order to work with OVX";
+			System.out.println(message);
+			return message;
 		}
 	}
 
@@ -387,5 +391,15 @@ public class LimeUtils {
 			}
 		}
 		return hasOutputPort;
+	}
+
+	public static short getDummyPort(DPID currentSwitch) throws LimeDummyPortNotFoundException {
+		Map<Short, PortInfo> portInfo = LimeContainer.getDpidToPortInfoMap().get(currentSwitch);
+		for(short port : portInfo.keySet()){
+			if(portInfo.get(port).getType() == PortType.DUMMY){
+				return port;
+			}
+		}
+		throw new LimeDummyPortNotFoundException("Cannot use Lime on OVX without providing a dummy port. Each OVX switch needs to have a dummy port");
 	}
 }

@@ -41,6 +41,7 @@ public class PortInfo {
 		H_CONNECTED, // connected to host
 		EMPTY,  // not connected to a host
 		GHOST, // connected to its duplicate switch
+		DUMMY, //port needed for OVX hack for input port on migration mods
 		UKNOWN;
     
 	}
