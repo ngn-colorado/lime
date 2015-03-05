@@ -365,7 +365,7 @@ public final class LimeMigrationHandler {
 				if(action instanceof OFActionOutput){
 					short currentOutputPort = ((OFActionOutput) action).getPort();
 					//this if statement should only occur if ALL of the output ports have been migrated
-					if(!LimeUtils.outputPortMigrated(originalSwitch, flowMod, currentOutputPort, migratedHosts)){
+					if(!LimeUtils.outputPortMigrated(originalSwitch, flowMod, currentOutputPort, migratedHosts) || (preMigration && currentOutputPort == preMigrationPort)){
 						allMigrated = false;
 					}
 				}
