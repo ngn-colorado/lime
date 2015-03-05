@@ -210,7 +210,7 @@ public final class LimeMigrationHandler {
 		List<FVFlowMod> flowMods = originalFlowMods.get(originalSwitchDpid);
 		
 		for(FVFlowMod flowMod : flowMods){
-			//create vlan sending and receivng mods for each flos mod
+			//create vlan sending and receivng mods for each flow mod
 			//the receiving switch in this case is the original switch
 			//the sending switch is the clone switch;
 			createVlanHandlers(flowMod, cloneSwitchDpid, originalSwitchDpid, true, false, (short)-1);
@@ -317,17 +317,9 @@ public final class LimeMigrationHandler {
 			
 			if(allMigrated){
 				WorkerSwitch cloneSwitchObj = LimeContainer.getAllWorkingSwitches().get(cloneSwitch.getDpidLong());
-				WorkerSwitch originalSwitchObj = LimeContainer.getAllWorkingSwitches().get(originalSwitch.getDpidLong());
 				LimeUtils.sendFlowMod(flowMod, cloneSwitchObj);
-				//TODO: create mod that matches the vlan assigned for this mod, if one exists (possibly, there is not a pair of mods)
-//				//on original switch, replace mod that matches this vlan with one that sends back to the clone
-//				//then, match on this vlan in the clone and perform the output action
-//				short vlanTag = allocateVlanForMod(flowMod);
-//				//TODO: need to manually construct flow mods here
-//				createAndSendVlanSenderMod(vlanTag, , flowMod, senderSwitchObject)
 			}else{
 				//recreate the flow mods going in the other direction with the updated state
-//				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
 				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false, preMigration, preMigrationPort);
 			}
 		}
@@ -471,7 +463,6 @@ public final class LimeMigrationHandler {
 		match.setWildcards(wildcards);
 		clonedMod.setMatch(match);
 		
-		//TODO: need to support multiple output ports now
 		//if am receiving from original, need to output to only ports where a host has been migrated to
 		//if am receiving from clone, need to only output to ports that have a host still attached, e.g. have not been migrated
 		//	this works, as the sender mod will only send packets to the ghost port if the output port is on the remote switch
