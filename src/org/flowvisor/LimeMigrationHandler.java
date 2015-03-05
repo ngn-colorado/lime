@@ -689,7 +689,10 @@ public final class LimeMigrationHandler {
 		boolean ghostPortRuleWritten = false;
 		for(OFActionOutput migratedAction : remotePortsActions){
 			//need to make these actions last in the list for now, or else the mod will put vlan on all packets
-			clonedMod.getActions().remove(migratedAction);
+			if(!preMigration || migratedAction.getPort() != preMigrationPort){
+				clonedMod.getActions().remove(migratedAction);
+			} 
+			
 			if(!ghostPortRuleWritten){
 				clonedMod.getActions().add(migratedAction);
 				migratedAction.setPort(ghostPort);
