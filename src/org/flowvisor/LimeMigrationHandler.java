@@ -483,7 +483,7 @@ public final class LimeMigrationHandler {
 		short currentVlan = allocateVlanForMod(originalMod);
 		
 		FVFlowMod senderVlanMod = createAndSendVlanSenderMod(currentVlan, senderGhostPort, originalMod, senderSwitchObject, originalToClone, preMigration, preMigrationPort);
-		FVFlowMod receiverVlanMod = createAndSendVlanReceiverMod(currentVlan, receiverGhostPort, originalMod, receiverSwitchObject, originalToClone);
+		FVFlowMod receiverVlanMod = createAndSendVlanReceiverMod(currentVlan, receiverGhostPort, originalMod, receiverSwitchObject, originalToClone, preMigration, preMigrationPort);
 		LimeVlanTranslationInfo currentInfo = new LimeVlanTranslationInfo(receiverVlanMod, senderVlanMod, receiverSwitch, senderSwitch, originalToClone, originalMod, currentVlan, false);
 		vlanTranslationMap.put(currentVlan, currentInfo);
 		LimeUtils.addToVlanMap(senderSwitch, senderVlanMod, vlanHandlerMods);
@@ -500,7 +500,7 @@ public final class LimeMigrationHandler {
 	 * @param receiverSwitchObject
 	 * @return
 	 */
-	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject, boolean receivingFromOriginal) {
+	private FVFlowMod createAndSendVlanReceiverMod(short vlanNumber, short ghostPort, FVFlowMod originalMod, WorkerSwitch receiverSwitchObject, boolean receivingFromOriginal, boolean preMigration, short preMigrationPort) {
 		// based off of org.flowvisor.mesage.FVPacketIn.sendDropRule()
 		FVFlowMod clonedMod = (FVFlowMod) originalMod.clone();
 
@@ -568,7 +568,10 @@ public final class LimeMigrationHandler {
 					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(receiverSwitchObject.getDPID())).get(currentOutputPort).getType();
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS been migrated (as this switch is the original switch)
-					if(portType == PortType.H_CONNECTED && LimeUtils.outputPortMigrated(new DPID(receiverSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts)){
+					boolean unneeded = (portType == PortType.H_CONNECTED &&
+									   LimeUtils.outputPortMigrated(new DPID(receiverSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts) && 
+									   (!preMigration || currentOutputPort != preMigrationPort)); 
+					if(unneeded){
 						unneededActions.add((OFActionOutput) action);
 					}else if(portType == PortType.H_CONNECTED){
 						try {
