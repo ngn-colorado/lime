@@ -554,7 +554,8 @@ public final class LimeMigrationHandler {
 						unneededActions.add((OFActionOutput) action);
 					} else if(portType == PortType.H_CONNECTED){
 						try {
-							srcMac = LimeUtils.getMacForPort(new DPID(originalSwitch.getDPID()), originalMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
+//							srcMac = LimeUtils.getMacForPort(new DPID(originalSwitch.getDPID()), originalMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
+							srcMac = "ff:ff:ff:ff:ff:ff";
 							destMac = LimeUtils.getMacForPort(new DPID(originalSwitch.getDPID()), currentOutputPort, LimeContainer.getDpidToMacMap());
 							mod_dl_src.setDataLayerAddress(LimeUtils.convertMacToBytes(srcMac));
 							mod_dl_dst.setDataLayerAddress(LimeUtils.convertMacToBytes(destMac));
@@ -575,7 +576,8 @@ public final class LimeMigrationHandler {
 						unneededActions.add((OFActionOutput) action);
 					}else if(portType == PortType.H_CONNECTED){
 						try {
-							srcMac = LimeUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
+//							srcMac = LimeUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), originalMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
+							srcMac = "ff:ff:ff:ff:ff:ff";
 							destMac = LimeUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), currentOutputPort, LimeContainer.getDpidToMacMap());
 							mod_dl_src.setDataLayerAddress(LimeUtils.convertMacToBytes(srcMac));
 							mod_dl_dst.setDataLayerAddress(LimeUtils.convertMacToBytes(destMac));
@@ -648,7 +650,8 @@ public final class LimeMigrationHandler {
 					String destMac;
 					try {
 						destMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), ((OFActionOutput) action).getPort(), LimeContainer.getDpidToMacMap());
-						String srcMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
+//						String srcMac = LimeUtils.getMacForPort(new DPID(senderSwitchObject.getDPID()), flowMod.getMatch().getInputPort(), LimeContainer.getDpidToMacMap());
+						String srcMac = "ff:ff:ff:ff:ff:ff";
 						clonedMod.getMatch().setDataLayerSource(LimeUtils.convertMacToBytes(srcMac));
 						clonedMod.getMatch().setDataLayerDestination(LimeUtils.convertMacToBytes(destMac));
 						setMatchMacs = true;
