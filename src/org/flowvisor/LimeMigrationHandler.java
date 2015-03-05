@@ -709,6 +709,7 @@ public final class LimeMigrationHandler {
 				addedVlanAction.setVirtualLanIdentifier(vlanNumber);
 				//add vlan tag action to mod
 				//insert vlan action before the output action in the action list
+				actionIndex = clonedMod.getActions().indexOf(migratedAction);
 				clonedMod.getActions().add(actionIndex, addedVlanAction);
 				//only need to output out ghost port once
 				ghostPortRuleWritten = true;
