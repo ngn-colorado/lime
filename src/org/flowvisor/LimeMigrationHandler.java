@@ -294,7 +294,7 @@ public final class LimeMigrationHandler {
 		DPID cloneSwitch = host.getCloneDpid();
 		DPID originalSwitch = host.getOriginalDpid();
 		for(FVFlowMod originalMatchingMod : matchingMods){
-			createVlanHandlers(originalMatchingMod, cloneSwitch, originalSwitch, true, false, host.getConnectedPort());
+			createVlanHandlers(originalMatchingMod, cloneSwitch, originalSwitch, true, true, host.getConnectedPort());
 		}
 		
 	}
