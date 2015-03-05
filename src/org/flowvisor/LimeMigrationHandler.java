@@ -688,10 +688,15 @@ public final class LimeMigrationHandler {
 		
 		boolean ghostPortRuleWritten = false;
 		for(OFActionOutput migratedAction : remotePortsActions){
+			//if in premigration mode, need to clone the outputaction and place in the current spot
+			int actionIndex = clonedMod.getActions().indexOf(migratedAction);
+			if(preMigration && migratedAction.getPort() == preMigrationPort){
+				OFActionOutput clonedAction = new OFActionOutput();
+				clonedAction.setPort(migratedAction.getPort());
+				clonedMod.getActions().add(actionIndex, clonedAction);
+			}
 			//need to make these actions last in the list for now, or else the mod will put vlan on all packets
-			if(!preMigration || migratedAction.getPort() != preMigrationPort){
-				clonedMod.getActions().remove(migratedAction);
-			} 
+			clonedMod.getActions().remove(migratedAction);
 			
 			if(!ghostPortRuleWritten){
 				clonedMod.getActions().add(migratedAction);
@@ -701,7 +706,6 @@ public final class LimeMigrationHandler {
 				addedVlanAction.setVirtualLanIdentifier(vlanNumber);
 				//add vlan tag action to mod
 				//insert vlan action before the output action in the action list
-				int actionIndex = clonedMod.getActions().indexOf(migratedAction);
 				clonedMod.getActions().add(actionIndex, addedVlanAction);
 				//only need to output out ghost port once
 				ghostPortRuleWritten = true;
