@@ -211,7 +211,7 @@ public final class LimeMigrationHandler {
 			//create vlan sending and receivng mods for each flos mod
 			//the receiving switch in this case is the original switch
 			//the sending switch is the clone switch;
-			createVlanHandlers(flowMod, cloneSwitchDpid, originalSwitchDpid, true);
+			createVlanHandlers(flowMod, cloneSwitchDpid, originalSwitchDpid, true, false, (short)-1);
 		}
 		
 	}
@@ -222,6 +222,40 @@ public final class LimeMigrationHandler {
 	 */
 	public boolean migrateVM(LimeHost host){
 		System.out.println("In migrate vm function");
+		//before migration, modify mods so that any packet that is to be output to the host's connected port is also sent out the ghost port
+		//and then received and output on the connected port on the clone
+		//also need to have the mods to handle packets coming in from that port on the clone set up first, rather than after the migration
+		//set this here, as existing functionality can use this state
+		migratedHosts.add(host);
+		
+		ArrayList<FVFlowMod> matchingMods = new ArrayList<FVFlowMod>();
+		ArrayList<FVFlowMod> matchingOutputPortMods= new ArrayList<FVFlowMod>();
+		DPID originalDpid = null;
+		for(DPID dpid : originalFlowMods.keySet()){
+			if(dpid.getDpidLong().longValue() == host.getOriginalDpid().getDpidLong().longValue()){
+				originalDpid = dpid;
+			}
+		}
+		
+		//need to update ALL mods that have input port ==  host.connectedPort() or if a mod has an OUTPUT port == host.connectedPort()
+		//and the input port of that mod has been migrated
+		for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
+			if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
+				matchingMods.add(flowMod);
+			}
+			if(LimeUtils.inputPortMigrated(flowMod, host.getOriginalDpid(), migratedHosts) && LimeUtils.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
+				matchingMods.add(flowMod);
+			}
+			if(LimeUtils.outputPortMigrated(host.getOriginalDpid(), flowMod, host.getConnectedPort(), migratedHosts)){
+				matchingOutputPortMods.add(flowMod);
+			}
+			
+		}
+		
+//		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingOutputPortMods);
+		createPreMigrationSendingMods(host, matchingOutputPortMods);
+		
+		
 		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
 		System.out.println("migrate vm function returned");
 		if(migrated){
@@ -230,31 +264,13 @@ public final class LimeMigrationHandler {
 			WorkerSwitch originalSwitch = LimeContainer.getAllWorkingSwitches().get(host.getOriginalDpid().getDpidLong());
 			WorkerSwitch cloneSwitch = LimeContainer.getAllWorkingSwitches().get(host.getCloneDpid().getDpidLong());
 			
-			ArrayList<FVFlowMod> matchingMods = new ArrayList<FVFlowMod>();
-			DPID originalDpid = null;
-			for(DPID dpid : originalFlowMods.keySet()){
-				if(dpid.getDpidLong().longValue() == host.getOriginalDpid().getDpidLong().longValue()){
-					originalDpid = dpid;
-				}
-			}
 			
-			//need to update ALL mods that have input port ==  host.connectedPort() or if a mod has an OUTPUT port == host.connectedPort()
-			//and the input port of that mod has been migrated
-			for(FVFlowMod flowMod : originalFlowMods.get(host.getOriginalDpid())){
-				if(LimeUtils.hasInputPortWithoutVlan(flowMod, host.getConnectedPort())){
-					matchingMods.add(flowMod);
-				}
-				if(LimeUtils.inputPortMigrated(flowMod, host.getOriginalDpid(), migratedHosts) && LimeUtils.hasOutputPortWithoutVlan(flowMod, host.getConnectedPort())){
-					matchingMods.add(flowMod);
-				}
-				
-			}
 			
-			migratedHosts.add(host);
+			
 			//recreates all mods on the original switch to take into account new state of hosts that have migrated
 			setupHandlerModsOriginalToClone(originalSwitch, cloneSwitch);
 			//redo all mods on the clone that have the input port of the migrated host, or have the output port of the migrated host AND the input port of that host had been migrated
-			createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods);
+//			createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods);
 			//instead of rechecking, just recreate all mods between the switches with the new state, as the
 			//functions now take this into account
 //			fixExistingMigrationMods(host);
@@ -266,8 +282,21 @@ public final class LimeMigrationHandler {
 			}
 			
 			return true;
+		} else{
+			//remove the host from the migrated host data structure if this fails, but this should no happen
+			//Lime is not defined if a host migration fails, and will likely just result in this host being unreachable
+			migratedHosts.remove(host);
 		}
 		return false;
+	}
+
+	private void createPreMigrationSendingMods(LimeHost host, List<FVFlowMod> matchingMods) {
+		DPID cloneSwitch = host.getCloneDpid();
+		DPID originalSwitch = host.getOriginalDpid();
+		for(FVFlowMod originalMatchingMod : matchingMods){
+			createVlanHandlers(originalMatchingMod, cloneSwitch, originalSwitch, true, false, host.getConnectedPort());
+		}
+		
 	}
 
 	/**
@@ -355,7 +384,7 @@ public final class LimeMigrationHandler {
 			}else{
 				//recreate the flow mods going in the other direction with the updated state
 //				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
-				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
+				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false, false, (short)-1);
 			}
 		}
 		
@@ -446,14 +475,14 @@ public final class LimeMigrationHandler {
 	 * @param originalMod
 	 * @return
 	 */
-	public LimeVlanTranslationInfo createVlanHandlers(FVFlowMod originalMod, DPID receiverSwitch, DPID senderSwitch, boolean originalToClone){
+	public LimeVlanTranslationInfo createVlanHandlers(FVFlowMod originalMod, DPID receiverSwitch, DPID senderSwitch, boolean originalToClone, boolean preMigration, short preMigrationPort){
 		WorkerSwitch senderSwitchObject = LimeContainer.getAllWorkingSwitches().get(senderSwitch.getDpidLong());
 		WorkerSwitch receiverSwitchObject = LimeContainer.getAllWorkingSwitches().get(receiverSwitch.getDpidLong());
 		short receiverGhostPort = receiverSwitchObject.getGhostPort();
 		short senderGhostPort = senderSwitchObject.getGhostPort();
 		short currentVlan = allocateVlanForMod(originalMod);
 		
-		FVFlowMod senderVlanMod = createAndSendVlanSenderMod(currentVlan, senderGhostPort, originalMod, senderSwitchObject, originalToClone);
+		FVFlowMod senderVlanMod = createAndSendVlanSenderMod(currentVlan, senderGhostPort, originalMod, senderSwitchObject, originalToClone, preMigration, preMigrationPort);
 		FVFlowMod receiverVlanMod = createAndSendVlanReceiverMod(currentVlan, receiverGhostPort, originalMod, receiverSwitchObject, originalToClone);
 		LimeVlanTranslationInfo currentInfo = new LimeVlanTranslationInfo(receiverVlanMod, senderVlanMod, receiverSwitch, senderSwitch, originalToClone, originalMod, currentVlan, false);
 		vlanTranslationMap.put(currentVlan, currentInfo);
@@ -591,7 +620,7 @@ public final class LimeMigrationHandler {
 	 * @param senderSwitchObject
 	 * @return
 	 */
-	private FVFlowMod createAndSendVlanSenderMod(short vlanTagNumber, short ghostPort, FVFlowMod flowMod, WorkerSwitch senderSwitchObject, boolean originalToClone) {
+	private FVFlowMod createAndSendVlanSenderMod(short vlanTagNumber, short ghostPort, FVFlowMod flowMod, WorkerSwitch senderSwitchObject, boolean originalToClone, boolean preMigration, short preMigrationPort) {
 		FVFlowMod clonedMod = (FVFlowMod) flowMod.clone();
 		System.out.println("\nCurrent flowmod: "+flowMod+"\n");
 		short vlanNumber = vlanTagNumber;
@@ -631,10 +660,14 @@ public final class LimeMigrationHandler {
 				//is connected locally, else send over ghost port
 				if(originalToClone){
 					//THIS logic works if are the original switch sending:
-					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(senderSwitchObject.getDPID())).get(currentOutputPort).getType(); 
-					if(portType != PortType.H_CONNECTED || LimeUtils.outputPortMigrated(new DPID(senderSwitchObject.getDPID()), flowMod, currentOutputPort, migratedHosts)){ //if a host was connected here but has been migrated, or something other than a host is supposed to be here
+					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(senderSwitchObject.getDPID())).get(currentOutputPort).getType();
+					//if a host was connected here but has been migrated, or something other than a host is supposed to be here
+					boolean remoteAction = portType != PortType.H_CONNECTED || LimeUtils.outputPortMigrated(new DPID(senderSwitchObject.getDPID()), flowMod, currentOutputPort, migratedHosts);
+					boolean localAction = (portType == PortType.H_CONNECTED) && (!remoteAction || (preMigration && currentOutputPort == preMigrationPort));
+					if(remoteAction){ 
 						remotePortsActions.add((OFActionOutput) action);
-					} else if(portType == PortType.H_CONNECTED){ //a host is supposed to be connected here and has not been migrated
+					}
+					if(localAction){ //a host is supposed to be connected here and has not been migrated
 						localPortsActions.add((OFActionOutput) action);
 					}
 				} else{

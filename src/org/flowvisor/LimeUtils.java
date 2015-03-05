@@ -275,6 +275,16 @@ public class LimeUtils {
 		return (match.getInputPort() == connectedPort);
 	}
 	
+	/**
+	 * checks if an output port in an OFActionOuput action in the input flow mod has been migrated from the 
+	 * switch indicated by dpid. it determines this if a host with the connected port equal to the input port
+	 * is present in the list of migrated hosts that is another input
+	 * @param switchDpid
+	 * @param flowMod
+	 * @param port
+	 * @param migratedHosts
+	 * @return
+	 */
 	public static boolean outputPortMigrated(DPID switchDpid, FVFlowMod flowMod, short port, List<LimeHost> migratedHosts) {
 		for(OFAction action : flowMod.getActions()){
 			if(action instanceof OFActionOutput){
