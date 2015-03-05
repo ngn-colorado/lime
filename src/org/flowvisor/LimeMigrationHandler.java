@@ -682,6 +682,9 @@ public final class LimeMigrationHandler {
 					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
 					if(LimeUtils.outputPortMigrated(new DPID(originalSwitch.getDPID()), flowMod, currentOutputPort, migratedHosts)){ //if a host was connected here but has been migrated
 						localPortsActions.add((OFActionOutput) action);
+						if(preMigration && preMigrationPort == currentOutputPort){
+							remotePortsActions.add((OFActionOutput) action);
+						}
 					} else if(portType == PortType.H_CONNECTED){ //a host is supposed to connected here and has not been migrated
 						remotePortsActions.add((OFActionOutput) action);
 					}
