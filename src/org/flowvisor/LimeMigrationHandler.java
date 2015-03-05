@@ -252,7 +252,7 @@ public final class LimeMigrationHandler {
 			
 		}
 		
-		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods);
+		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods, true, host.getConnectedPort());
 		createPreMigrationSendingMods(host, matchingOutputPortMods);
 		
 		
@@ -357,7 +357,7 @@ public final class LimeMigrationHandler {
 	 * @param originalSwitch
 	 * @param matchingMods
 	 */
-	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods) {
+	private void createHandlerModsCloneToOriginal(DPID cloneSwitch, DPID originalSwitch, ArrayList<FVFlowMod> matchingMods, boolean preMigration, short preMigrationPort) {
 		for(FVFlowMod flowMod : matchingMods){
 			//need to iterate over each output port of the flow mod
 			boolean allMigrated = true;
@@ -384,7 +384,7 @@ public final class LimeMigrationHandler {
 			}else{
 				//recreate the flow mods going in the other direction with the updated state
 //				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false);
-				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false, false, (short)-1);
+				createVlanHandlers(flowMod, originalSwitch, cloneSwitch, false, preMigration, preMigrationPort);
 			}
 		}
 		
