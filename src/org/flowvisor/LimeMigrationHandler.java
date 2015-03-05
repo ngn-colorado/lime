@@ -252,7 +252,7 @@ public final class LimeMigrationHandler {
 			
 		}
 		
-//		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingOutputPortMods);
+		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingOutputPortMods);
 		createPreMigrationSendingMods(host, matchingOutputPortMods);
 		
 		
