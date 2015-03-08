@@ -410,4 +410,25 @@ public class LimeUtils {
 		}
 		throw new LimeDummyPortNotFoundException("Cannot use Lime on OVX without providing a dummy port. Each OVX switch needs to have a dummy port");
 	}
+	
+	/**
+	 * Checks if a flow has a valid output action and does not contain a stripvlanaction or virtuallanidentifier action
+	 * @param flowMod
+	 * @return
+	 */
+	public static boolean isValidFlowModWithoutVlan(FVFlowMod flowMod) {
+		OFMatch match = flowMod.getMatch();
+		if(flowMod.getOutPort() == -1 || match.getInputPort() == -1){
+			return false;
+		}
+		for(OFAction action : flowMod.getActions()){
+			if(action instanceof OFActionVirtualLanIdentifier || action instanceof OFActionStripVirtualLan){
+				return false;
+			}
+			if(action instanceof OFActionOutput && ((OFActionOutput) action).getPort() == -1){
+				return false;
+			}
+		}
+		return true;
+	}
 }
