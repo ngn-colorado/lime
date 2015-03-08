@@ -337,8 +337,8 @@ public class LimeMigrationUtils {
 	}
 
 	public static boolean isOriginalSwitch(DPID dpid) throws SwitchOriginalAndCloneException{
-		boolean amOriginalSwitch = LimeContainer.getActiveToOriginalSwitchMap().containsKey(dpid.getDpidLong());
-		boolean amCloneSwitch = LimeContainer.getActiveToCloneSwitchMap().containsKey(dpid.getDpidLong());
+		boolean amOriginalSwitch = LimeContainer.getOriginalSwitchContainer().containsKey(dpid.getDpidLong());
+		boolean amCloneSwitch = LimeContainer.getCloneSwitchContainer().containsKey(dpid.getDpidLong());
 		if(amOriginalSwitch && amCloneSwitch){
 			throw new SwitchOriginalAndCloneException("A switch cannot be an original and a clone switch");
 		}
