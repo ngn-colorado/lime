@@ -13,6 +13,12 @@ import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
 import edu.colorado.cs.ngn.lime.util.DPID;
 import edu.colorado.cs.ngn.lime.util.LimeAPIUtils;
 
+/**
+ * Class that implements the embedded http api
+ * 
+ * @author Michael Coughlin
+ *
+ */
 @Path("")
 public class LimeAPI {
 	@GET
