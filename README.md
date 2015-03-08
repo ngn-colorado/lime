@@ -5,7 +5,10 @@ LIME
 	"pre-alpha" state. There still are numerous bugs and missing features,
 	and little to no documentation or necessary error-checking and validation.
 	It can be used for testing, but please be aware that it is still in active
-	development. 
+	development.
+	
+	The Javadoc for Lime, and by extension, the forked version of FLowvisor that
+	we use is available at https://ngn-colorado.github.io/lime
 
 FlowVisor
 =========
