@@ -18,8 +18,10 @@ import org.openflow.protocol.action.OFActionStripVirtualLan;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 
 import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.exceptions.DPIDLookupException;
 import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
 import edu.colorado.cs.ngn.lime.exceptions.MacLookupException;
+import edu.colorado.cs.ngn.lime.exceptions.SwitchOriginalAndCloneException;
 import edu.colorado.cs.ngn.lime.migration.LimeHost;
 import edu.colorado.cs.ngn.lime.migration.LimeVlanTranslationInfo;
 import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
@@ -55,17 +57,13 @@ public class LimeMigrationUtils {
 	 * @param targetMigrated Whether the target of the flow mod pair has been migrated
 	 * @return The cloned LimeVlanTranslationInfo object
 	 * 
-	 * @deprecated This function is no longer relevant now that lime supports multiple output ports
 	 */
-	@Deprecated
 	public static LimeVlanTranslationInfo cloneTranslationInfoMigrated(LimeVlanTranslationInfo originalInfo, boolean targetMigrated) {
-		return new LimeVlanTranslationInfo(originalInfo.getReceiverMod(), 
-										   originalInfo.getSenderMod(), 
+		return new LimeVlanTranslationInfo(originalInfo.getMigrationModPairs(), 
 										   originalInfo.getReceiverSwitch(),
 										   originalInfo.getSenderSwitch(),
 										   originalInfo.isOriginalToClone(),
 										   originalInfo.getOriginalMod(), 
-										   originalInfo.getVlanNumber(),
 										   targetMigrated);
 	}
 
@@ -336,5 +334,69 @@ public class LimeMigrationUtils {
 			}
 		}
 		return true;
+	}
+
+	public static boolean isOriginalSwitch(DPID dpid) throws SwitchOriginalAndCloneException{
+		boolean amOriginalSwitch = LimeContainer.getActiveToOriginalSwitchMap().containsKey(dpid.getDpidLong());
+		boolean amCloneSwitch = LimeContainer.getActiveToCloneSwitchMap().containsKey(dpid.getDpidLong());
+		if(amOriginalSwitch && amCloneSwitch){
+			throw new SwitchOriginalAndCloneException("A switch cannot be an original and a clone switch");
+		}
+		return amOriginalSwitch;
+	}
+	
+	/**
+	 * Checks if a host is connected to a port on a dpid. This is done be checking if a host in the migrated host
+	 * list is connected to the switch dpid as its clone dpid and its connected port is the provided port. If not
+	 * 
+	 * @param dpid The switch to be checked 
+	 * @param currentConnectedPort The port to see if a host is connected to
+	 * @param migratedHosts The list of migrated hosts
+	 * @return True if a host is connected to this port, False otherwise
+	 * @throws DPIDLookupException Thrown when a dpid is not found in the dpid to port table map
+	 * @throws SwitchOriginalAndCloneException 
+	 */
+	public static boolean hostConnected(DPID dpid, short currentConnectedPort,	ArrayList<LimeHost> migratedHosts) throws DPIDLookupException, SwitchOriginalAndCloneException {
+		if(isOriginalSwitch(dpid)){
+			for(LimeHost host : migratedHosts){
+				//a migrated host was connected to this switch originally
+				if(host.getConnectedPort() == currentConnectedPort && host.getOriginalDpid() == dpid){
+					return false;
+				}
+			}
+			//if not migrated, return whether this port was originally an H_CONNECTED
+			return portIsOriginallyHostConnected(dpid, currentConnectedPort);
+		} else{
+			for(LimeHost host : migratedHosts){
+				//a migrated host is connected to this switch as the clone switch
+				if(host.getConnectedPort() == currentConnectedPort && host.getCloneDpid() == dpid){
+					return true;
+				}
+			}
+			//if am the clone switch and a migrated host is not connected to this port then a host is not connected
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * Checks if the port is H_CONNECTED in the original port table of the switch
+	 * 
+	 * @param dpid
+	 * @param currentConnectedPort
+	 * @return
+	 * @throws DPIDLookupException
+	 */
+	public static boolean portIsOriginallyHostConnected(DPID dpid, short currentConnectedPort) throws DPIDLookupException {
+		HashMap<Short, PortInfo> portTable = getPortTableForDPID(dpid);
+		return portTable.containsKey(currentConnectedPort) && portTable.get(currentConnectedPort).getType() == PortType.H_CONNECTED;
+	}
+
+	private static HashMap<Short, PortInfo> getPortTableForDPID(DPID dpid) throws DPIDLookupException {
+		HashMap<DPID, HashMap<Short, PortInfo>> dpidToPortTableMap = LimeContainer.getDpidToOriginalPortInfoMap();
+		if(!dpidToPortTableMap.containsKey(dpid)){
+			throw new DPIDLookupException("DPID not find in port table map");
+		}
+		return dpidToPortTableMap.get(dpid);
 	}
 }

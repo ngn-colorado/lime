@@ -7,7 +7,9 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.exceptions.DPIDLookupException;
 import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
+import edu.colorado.cs.ngn.lime.exceptions.SwitchOriginalAndCloneException;
 import edu.colorado.cs.ngn.lime.migration.LimeHost;
 import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
 import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
@@ -73,6 +75,14 @@ public class LimeAPIUtils {
 			return null;
 		} catch (LimeDummyPortNotFoundException e) {
 			String message = "Need to have a dummy port in order to work with OVX";
+			System.out.println(message);
+			return message;
+		} catch (SwitchOriginalAndCloneException e) {
+			String message = "Caught illegal state where a switch is both an original and clone switch";
+			System.out.println(message);
+			return message;
+		} catch (DPIDLookupException e) {
+			String message = "Tried to lookup a dpid that did not exist";
 			System.out.println(message);
 			return message;
 		}

@@ -1,5 +1,8 @@
 package edu.colorado.cs.ngn.lime.migration;
 
+import java.util.List;
+import java.util.Map;
+
 import org.flowvisor.message.FVFlowMod;
 
 import edu.colorado.cs.ngn.lime.util.DPID;
@@ -11,42 +14,26 @@ import edu.colorado.cs.ngn.lime.util.DPID;
  *
  */
 public final class LimeVlanTranslationInfo {
-	private final FVFlowMod receiverMod;
-	private final FVFlowMod senderMod;
+	private final Map<FVFlowMod, List<FVFlowMod>> migrationModPairs;
 	private final DPID receiverSwitch;
 	private final DPID senderSwitch;
 	private final boolean originalToClone;
 	private final FVFlowMod originalMod;
-	private final int vlanNumber;
 	private final boolean receiverTargetMigrated;
-	public LimeVlanTranslationInfo(FVFlowMod receiverMod, FVFlowMod senderMod,
+	public LimeVlanTranslationInfo(
+			Map<FVFlowMod, List<FVFlowMod>> migrationModPairs,
 			DPID receiverSwitch, DPID senderSwitch, boolean originalToClone,
-			FVFlowMod originalMod, int vlanNumber,
-			boolean receiverTargetMigrated) {
+			FVFlowMod originalMod, boolean receiverTargetMigrated) {
 		super();
-		this.receiverMod = receiverMod;
-		this.senderMod = senderMod;
+		this.migrationModPairs = migrationModPairs;
 		this.receiverSwitch = receiverSwitch;
 		this.senderSwitch = senderSwitch;
 		this.originalToClone = originalToClone;
 		this.originalMod = originalMod;
-		this.vlanNumber = vlanNumber;
 		this.receiverTargetMigrated = receiverTargetMigrated;
 	}
-	@Override
-	public String toString() {
-		return "LimeVlanTranslationInfo [receiverMod=" + receiverMod
-				+ ", senderMod=" + senderMod + ", receiverSwitch="
-				+ receiverSwitch + ", senderSwitch=" + senderSwitch
-				+ ", originalToClone=" + originalToClone + ", originalMod="
-				+ originalMod + ", vlanNumber=" + vlanNumber
-				+ ", receiverTargetMigrated=" + receiverTargetMigrated + "]";
-	}
-	public FVFlowMod getReceiverMod() {
-		return receiverMod;
-	}
-	public FVFlowMod getSenderMod() {
-		return senderMod;
+	public Map<FVFlowMod, List<FVFlowMod>> getMigrationModPairs() {
+		return migrationModPairs;
 	}
 	public DPID getReceiverSwitch() {
 		return receiverSwitch;
@@ -60,12 +47,17 @@ public final class LimeVlanTranslationInfo {
 	public FVFlowMod getOriginalMod() {
 		return originalMod;
 	}
-	public int getVlanNumber() {
-		return vlanNumber;
-	}
 	public boolean isReceiverTargetMigrated() {
 		return receiverTargetMigrated;
 	}
-	
+	@Override
+	public String toString() {
+		return "LimeVlanTranslationInfo [migrationModPairs="
+				+ migrationModPairs + ", receiverSwitch=" + receiverSwitch
+				+ ", senderSwitch=" + senderSwitch + ", originalToClone="
+				+ originalToClone + ", originalMod=" + originalMod
+				+ ", receiverTargetMigrated="
+				+ receiverTargetMigrated + "]";
+	}
 	
 }

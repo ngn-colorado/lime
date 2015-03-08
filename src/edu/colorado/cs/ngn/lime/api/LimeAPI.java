@@ -8,7 +8,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import edu.colorado.cs.ngn.lime.exceptions.DPIDLookupException;
 import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
+import edu.colorado.cs.ngn.lime.exceptions.SwitchOriginalAndCloneException;
 import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
 import edu.colorado.cs.ngn.lime.util.DPID;
 import edu.colorado.cs.ngn.lime.util.LimeAPIUtils;
@@ -65,6 +67,14 @@ public class LimeAPI {
 			return "\n Migration handler encountered an error";
 		} catch (LimeDummyPortNotFoundException e) {
 			String message = "\n Need to have a dummy port in order to work with OVX";
+			return message;
+		} catch (SwitchOriginalAndCloneException e) {
+			String message = "Caught illegal state where a switch is both an original and clone switch";
+			System.out.println(message);
+			return message;
+		} catch (DPIDLookupException e) {
+			String message = "Tried to lookup a dpid that did not exist";
+			System.out.println(message);
 			return message;
 		}
 		
