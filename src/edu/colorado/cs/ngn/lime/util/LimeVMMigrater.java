@@ -10,11 +10,11 @@ public class LimeVMMigrater {
 	//qemu+ssh://
 	private static final String URI_STRING = "qemu+ssh://";
 	public static boolean liveMigrateQemuVM(String sourceIP, String destIP, String vmDomain){
-		if(!LimeMigrationUtils.validIPAddress(sourceIP)){
+		if(!LimeAPIUtils.validIPAddress(sourceIP)){
 			System.out.println("Source IP address is invalid.");
 			return false;
 		}
-		if(!LimeMigrationUtils.validIPAddress(destIP)){
+		if(!LimeAPIUtils.validIPAddress(destIP)){
 			System.out.println("Destination IP address is invalid.");
 			return false;
 		}
@@ -91,7 +91,7 @@ public class LimeVMMigrater {
 	 * @return boolean true if the vm exists, false if not or an error is encountered
 	 */
 	public static boolean checkDomain(String hostIp, String domain){
-		if(!LimeMigrationUtils.validIPAddress(hostIp)){
+		if(!LimeAPIUtils.validIPAddress(hostIp)){
 			System.out.println("IP address is invalid");
 			return false;
 		}

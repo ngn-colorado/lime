@@ -26,32 +26,10 @@ import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
 public class LimeMigrationUtils {
 
-	public static boolean validIPAddress(String ip){
-		String[] tokens = ip.split("\\.");
-		if(tokens.length != 4){
-			return false;
-		}
-		for(String str : tokens){
-			try{
-				int i = Integer.parseInt(str);
-				if(i < 0 || i > 255){
-					return false;
-				}
-			} catch(NumberFormatException e){
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	public static void deleteFlowMod(WorkerSwitch destinationSwitch, FVFlowMod flowMod){
-//		FVFlowMod deleteMod = (FVFlowMod) flowMod.clone();
 		FVFlowMod deleteMod = (FVFlowMod) FlowVisor.getInstance().getFactory().getMessage(OFType.FLOW_MOD);
 		deleteMod.setMatch(flowMod.getMatch());
 		deleteMod.setCommand(OFFlowMod.OFPFC_DELETE);
-//		OFFlowMod fm = new OFFlowMod();
-//		fm.setMatch(match);
-//		fm.setCommand(OFFlowMod.OFPFC_DELETE);
 		deleteMod.setOutPort(OFPort.OFPP_NONE);
 		deleteMod.setBufferId(0xffffffff); // buffer to NONE
 		destinationSwitch.sendMsg(deleteMod, destinationSwitch);
@@ -178,8 +156,8 @@ public class LimeMigrationUtils {
 	public static boolean inputPortMigrated(FVFlowMod flowMod, DPID originalDpid, List<LimeHost> migratedHosts) {
 		short inputPort = flowMod.getMatch().getInputPort();
 		if(inputPort <= 0 || 
-		   !LimeContainer.getDpidToPortInfoMap().get(originalDpid).containsKey(inputPort) || 
-		   LimeContainer.getDpidToPortInfoMap().get(originalDpid).get(inputPort).getType() != PortType.H_CONNECTED){
+		   !LimeContainer.getDpidToOriginalPortInfoMap().get(originalDpid).containsKey(inputPort) || 
+		   LimeContainer.getDpidToOriginalPortInfoMap().get(originalDpid).get(inputPort).getType() != PortType.H_CONNECTED){
 			return false;
 		}
 		for(LimeHost host : migratedHosts){
@@ -205,7 +183,7 @@ public class LimeMigrationUtils {
 	}
 
 	public static short getDummyPort(DPID currentSwitch) throws LimeDummyPortNotFoundException {
-		Map<Short, PortInfo> portInfo = LimeContainer.getDpidToPortInfoMap().get(currentSwitch);
+		Map<Short, PortInfo> portInfo = LimeContainer.getDpidToOriginalPortInfoMap().get(currentSwitch);
 		for(short port : portInfo.keySet()){
 			if(portInfo.get(port).getType() == PortType.DUMMY){
 				return port;

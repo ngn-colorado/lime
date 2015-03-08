@@ -489,7 +489,7 @@ public final class LimeMigrationHandler {
 				
 				if(receivingFromOriginal){//am the clone switch
 					WorkerSwitch originalSwitch = receiverSwitchObject.getDuplicateSwitch();
-					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
+					PortType portType = LimeContainer.getDpidToOriginalPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS NOT been migrated (as this is the clone switch)
 					if(portType == PortType.H_CONNECTED && !LimeMigrationUtils.outputPortMigrated(new DPID(originalSwitch.getDPID()), originalMod, currentOutputPort, migratedHosts)){
@@ -508,7 +508,7 @@ public final class LimeMigrationHandler {
 					}
 				} else{
 					WorkerSwitch cloneSwitch = receiverSwitchObject.getDuplicateSwitch();
-					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(receiverSwitchObject.getDPID())).get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToOriginalPortInfoMap().get(new DPID(receiverSwitchObject.getDPID())).get(currentOutputPort).getType();
 					
 					//if are an unneeded output, you are an H_CONNECTED port that HAS been migrated (as this switch is the original switch)
 					boolean unneeded = (portType == PortType.H_CONNECTED &&
@@ -618,7 +618,7 @@ public final class LimeMigrationHandler {
 				//is connected locally, else send over ghost port
 				if(originalToClone){
 					//THIS logic works if are the original switch sending:
-					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(senderSwitchObject.getDPID())).get(currentOutputPort).getType();
+					PortType portType = LimeContainer.getDpidToOriginalPortInfoMap().get(new DPID(senderSwitchObject.getDPID())).get(currentOutputPort).getType();
 					//if a host was connected here but has been migrated, or something other than a host is supposed to be here
 					boolean remoteAction = portType != PortType.H_CONNECTED || LimeMigrationUtils.outputPortMigrated(new DPID(senderSwitchObject.getDPID()), originalMod, currentOutputPort, migratedHosts);
 					boolean localAction = (portType == PortType.H_CONNECTED) && (!remoteAction || (preMigration && currentOutputPort == preMigrationPort));
@@ -634,7 +634,7 @@ public final class LimeMigrationHandler {
 					//the local ports are hosts that have already been migrated
 					//can get this object directly, as it set by init()
 					WorkerSwitch originalSwitch = senderSwitchObject.getDuplicateSwitch();
-					PortType portType = LimeContainer.getDpidToPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
+					PortType portType = LimeContainer.getDpidToOriginalPortInfoMap().get(new DPID(originalSwitch.getDPID())).get(currentOutputPort).getType(); 
 					if(LimeMigrationUtils.outputPortMigrated(new DPID(originalSwitch.getDPID()), originalMod, currentOutputPort, migratedHosts)){ //if a host was connected here but has been migrated
 						localPortsActions.add((OFActionOutput) action);
 						if(preMigration && preMigrationPort == currentOutputPort){

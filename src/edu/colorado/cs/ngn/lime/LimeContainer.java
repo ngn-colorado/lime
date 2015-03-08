@@ -57,7 +57,7 @@ public class LimeContainer {
 	
 	private static HashMap<DPID, HashMap<Short, String>> dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
 	
-	private static HashMap<DPID, HashMap<Short, PortInfo>> dpidToPortInfoMap = new HashMap<DPID, HashMap<Short, PortInfo>>();
+	private static HashMap<DPID, HashMap<Short, PortInfo>> dpidToOriginalPortInfoMap = new HashMap<DPID, HashMap<Short, PortInfo>>();
 
 	public static HashMap<Long, WorkerSwitch> getAllWorkingSwitches(){
 		return allWorkingSwitches;
@@ -75,8 +75,8 @@ public class LimeContainer {
 		return dpidToMacMap;
 	}
 	
-	public static HashMap<DPID, HashMap<Short, PortInfo>> getDpidToPortInfoMap(){
-		return dpidToPortInfoMap;
+	public static HashMap<DPID, HashMap<Short, PortInfo>> getDpidToOriginalPortInfoMap(){
+		return dpidToOriginalPortInfoMap;
 	}
 
 	public static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){

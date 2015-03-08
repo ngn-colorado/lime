@@ -10,23 +10,31 @@ import edu.colorado.cs.ngn.lime.LimeContainer;
 import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
 import edu.colorado.cs.ngn.lime.migration.LimeHost;
 import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
-import edu.colorado.cs.ngn.lime.util.LimeAPIUtils.JsonFormat;
 import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
+/**
+ * Utility class to hold functions that implements the Lime API logic 
+ * 
+ * @author Michael Coughlin
+ *
+ */
 public class LimeAPIUtils {
 
 	public static enum JsonFormat{
 		SWITCH, HOST
 	}
 
-	/**
+	/** 
+	 * Function to parse a JSON config string received by the Lime API.
 	 * 
-	 * @param jsonConfig
-	 * @param type
-	 * @param handler
+	 * @param jsonConfig The JSON string containing the config parameters passed to the api
+	 * @param type The type of JSON config received. Set by the api function that is calling the parse function
 	 * @return null on failure, String to print on web page on success
 	 */
 	public static String parseJsonConfig(String jsonConfig, LimeAPIUtils.JsonFormat type){
+		//TODO: prevent config changes once migration has started
+		//TODO: add support for overwriting existing config for switches and hosts
+		//TODO: see if it is possible to modify the lime data structures after the OVX network has been booted
 		try {
 			Object obj = JSONValue.parseWithException(jsonConfig);
 			JSONObject json = (JSONObject)obj;
@@ -69,16 +77,24 @@ public class LimeAPIUtils {
 			return message;
 		}
 	}
-
-	static LimeHost parseVM(JSONObject jsonObj) {
+	
+	/**
+	 * Parses the config information of a VM and creates a corresponding LimeHost object
+	 * with the correct information
+	 * 
+	 * @param jsonObj The JSON string containing the host config
+	 * @return A LimeHost object with a config based off of the passed JSON string
+	 */
+	private static LimeHost parseVM(JSONObject jsonObj) {
+		//TODO: add error catching of invalid configs here, including invalid or already allocated ports
 		String originalHost = (String)jsonObj.get("originalHost");
-		if(!LimeMigrationUtils.validIPAddress(originalHost)){
+		if(!LimeAPIUtils.validIPAddress(originalHost)){
 			System.out.println("original host ip is invalid");
 			return null;
 		}
 		
 		String destinationHost = (String)jsonObj.get("destinationHost");
-		if(!LimeMigrationUtils.validIPAddress(destinationHost)){
+		if(!LimeAPIUtils.validIPAddress(destinationHost)){
 			System.out.println("destination host ip is invalid");
 			return null;
 		}
@@ -105,7 +121,18 @@ public class LimeAPIUtils {
 		} 
 	}
 
-	static boolean processSwitch(JSONObject switchObj, String dpid) {
+	/**
+	 * Parse and process a switch's config for a certain DPID. Updates the correct Liem data
+	 * structures as well.
+	 * 
+	 * NOTE: once the OVX network has been booted and switches have been added using this function,
+	 * further switch configs do not seem to be recognized
+	 * 
+	 * @param switchObj The JSON string of the current switch config
+	 * @param dpid The DPID of the current switch
+	 * @return True if a switch was successfully parsed, False otherwise
+	 */
+	private static boolean processSwitch(JSONObject switchObj, String dpid) {
 		DPID currentSwitch = new DPID(dpid);
 		JSONObject portsObj = (JSONObject)switchObj.get("ports");
 		String originalObj = (String)switchObj.get("original");
@@ -140,7 +167,7 @@ public class LimeAPIUtils {
 			LimeContainer.addOriginalSwitch(currentSwitch.getDpidLong(), portMap);
 			LimeContainer.insertActiveToOriginalSwitchMap(currentSwitch.getDpidLong(), currentSwitch.getDpidLong());
 			//need a copy of the port map, not the same reference
-			LimeContainer.getDpidToPortInfoMap().put(currentSwitch, LimeAPIUtils.clonePortTable(portMap));
+			LimeContainer.getDpidToOriginalPortInfoMap().put(currentSwitch, LimeAPIUtils.clonePortTable(portMap));
 			return true;
 		} else if(isClone){
 			if(originalDpid == null){
@@ -150,7 +177,7 @@ public class LimeAPIUtils {
 			System.out.println("Writing switch with DPID: "+currentSwitch.getDpidHexString()+" as clone switch to Lime with original switch: "+originalDpid.getDpidHexString() +" with port map:\n"+LimeAPIUtils.printPortMap(portMap));
 			LimeContainer.addCloneSwitch(currentSwitch.getDpidLong(), portMap);
 			//need a copy of the port map, not the same reference
-			LimeContainer.getDpidToPortInfoMap().put(currentSwitch, LimeAPIUtils.clonePortTable(portMap));
+			LimeContainer.getDpidToOriginalPortInfoMap().put(currentSwitch, LimeAPIUtils.clonePortTable(portMap));
 			LimeContainer.insertActiveToCloneSwitchMap(originalDpid.getDpidLong(), currentSwitch.getDpidLong());
 			return true;
 		} else{
@@ -159,7 +186,13 @@ public class LimeAPIUtils {
 		}
 	}
 
-	static HashMap<Short, PortInfo> clonePortTable(HashMap<Short, PortInfo> portMap) {
+	/**
+	 * Performs a deep clone of a Lime switch port map
+	 * 
+	 * @param portMap The port map to be cloned
+	 * @return The cloned port map
+	 */
+	private static HashMap<Short, PortInfo> clonePortTable(HashMap<Short, PortInfo> portMap) {
 		HashMap<Short, PortInfo> newTable = new HashMap<Short, PortInfo>();
 		for(Short port : portMap.keySet()){
 			Short newPort = new Short(port);
@@ -170,7 +203,13 @@ public class LimeAPIUtils {
 		return newTable;
 	}
 
-	static String printPortMap(HashMap<Short, PortInfo> portMap) {
+	/**
+	 * Creates a string representation of a Lime port map
+	 * 
+	 * @param portMap The port map to be printed
+	 * @return The string representation of the port map
+	 */
+	private static String printPortMap(HashMap<Short, PortInfo> portMap) {
 		String response = "";
 		for(Short port : portMap.keySet()){
 			PortInfo info = portMap.get(port);
@@ -179,7 +218,15 @@ public class LimeAPIUtils {
 		return response;
 	}
 
-	static HashMap<Short, PortInfo> processPorts(JSONObject portsObj, DPID dpid) {
+	/**
+	 * Process a set of switch ports for a specific JSON string config. Is received
+	 * as part of a switch's JSON config
+	 * 
+	 * @param portsObj The JSON config of the ports to be processed
+	 * @param dpid The DPID of the switch for this port
+	 * @return The port map for this switch extracted from the JSON config
+	 */
+	private static HashMap<Short, PortInfo> processPorts(JSONObject portsObj, DPID dpid) {
 		HashMap<Short, PortInfo> portMap = new HashMap<Short, PortInfo>();
 		for(Object portObj : portsObj.keySet()){
 			JSONObject portInfo = (JSONObject)portsObj.get(portObj);
@@ -193,6 +240,30 @@ public class LimeAPIUtils {
 			portMap.put(port, new PortInfo(type, null, null));
 		}
 		return portMap;
+	}
+
+	/**
+	 * Utility function to check if a string represents a valid IP address
+	 * 
+	 * @param ip The string to be validated
+	 * @return True if the string represents a valid IP address, False otherwise
+	 */
+	public static boolean validIPAddress(String ip){
+		String[] tokens = ip.split("\\.");
+		if(tokens.length != 4){
+			return false;
+		}
+		for(String str : tokens){
+			try{
+				int i = Integer.parseInt(str);
+				if(i < 0 || i > 255){
+					return false;
+				}
+			} catch(NumberFormatException e){
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
