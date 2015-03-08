@@ -1,7 +1,11 @@
 LIME
 ====
 	Implementing LIME as a proxy server between Openflow controller and switches 
-	to migrate live netwrks and VMs
+	to migrate live networks and VMs. LIME should be considered to be in a 
+	"pre-alpha" state. There still are numerous bugs and missing features,
+	and little to no documentation or necessary error-checking and validation.
+	It can be used for testing, but please be aware that it is still in active
+	development. 
 
 FlowVisor
 =========
