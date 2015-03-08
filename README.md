@@ -8,7 +8,7 @@ LIME
 	development.
 	
 	The Javadoc for Lime, and by extension, the forked version of FLowvisor that
-	we use is available at [Lime Javadocs](https://ngn-colorado.github.io/lime)
+	we use is available at [Lime Javadocs](ngn-colorado.github.io/lime)
 
 FlowVisor
 =========
