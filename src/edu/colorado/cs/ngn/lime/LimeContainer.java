@@ -55,8 +55,10 @@ public class LimeContainer {
 	// list of all slicers created
 	private static HashMap<Long, OriginalSwitch> allSlicers = new HashMap<>(); // <swId (last switch that switch that was using this slice, OriginalSwitch>
 	
+	// maps dpids of switches to maps of connected host ports to host mac addresses
 	private static HashMap<DPID, HashMap<Short, String>> dpidToMacMap = new HashMap<DPID, HashMap<Short, String>>();
 	
+	// maps dpids to the original port table for the switch
 	private static HashMap<DPID, HashMap<Short, PortInfo>> dpidToOriginalPortInfoMap = new HashMap<DPID, HashMap<Short, PortInfo>>();
 
 	public static HashMap<Long, WorkerSwitch> getAllWorkingSwitches(){
