@@ -1,8 +1,5 @@
 package org.flowvisor.message;
 
-import org.flowvisor.LimeContainer;
-import org.flowvisor.LimeSwitch;
-import org.flowvisor.PortInfo;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
@@ -10,6 +7,10 @@ import org.flowvisor.ofswitch.TopologyConnection;
 import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFPortStatus;
 import org.openflow.util.HexString;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.LimeSwitch;
+import edu.colorado.cs.ngn.lime.util.PortInfo;
 
 /**
  * Send the port status message to each slice that uses this port

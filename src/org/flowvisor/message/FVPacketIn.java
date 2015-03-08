@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.flowvisor.FlowVisor;
-import org.flowvisor.LimeContainer;
 import org.flowvisor.api.LinkAdvertisement;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.config.ConfigError;
@@ -28,6 +27,8 @@ import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.action.OFAction;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
 
 public class FVPacketIn extends OFPacketIn implements Classifiable, Slicable,
 TopologyControllable {

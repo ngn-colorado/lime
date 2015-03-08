@@ -2,8 +2,6 @@ package org.flowvisor.message;
 
 import java.util.Arrays;
 
-import org.flowvisor.LimeContainer;
-import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.log.FVLog;
 import org.flowvisor.log.LogLevel;
@@ -18,6 +16,9 @@ import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.protocol.action.OFActionType;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
 /**
  * Verify that this packet_out operation is allowed by slice definition, in

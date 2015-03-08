@@ -1,4 +1,4 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -7,6 +7,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
+import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
+import edu.colorado.cs.ngn.lime.util.DPID;
+import edu.colorado.cs.ngn.lime.util.LimeUtils;
 
 @Path("")
 public class LimeAPI {

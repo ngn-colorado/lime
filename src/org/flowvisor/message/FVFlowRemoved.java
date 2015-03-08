@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.flowvisor.LimeContainer;
 import org.flowvisor.classifier.CookiePair;
 import org.flowvisor.classifier.CookieTranslator;
 import org.flowvisor.classifier.WorkerSwitch;
@@ -19,6 +18,8 @@ import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
 
 public class FVFlowRemoved extends OFFlowRemoved implements Classifiable,
 		Slicable {

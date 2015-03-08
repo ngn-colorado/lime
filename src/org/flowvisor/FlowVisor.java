@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.xmlrpc.webserver.WebServer;
-import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.api.APIServer;
 import org.flowvisor.api.JettyServer;
-import org.flowvisor.api.LimeServer;
 import org.flowvisor.config.ConfDBHandler;
 import org.flowvisor.config.ConfigError;
 import org.flowvisor.config.FVConfig;
@@ -41,6 +39,9 @@ import org.openflow.example.cli.Options;
 import org.openflow.example.cli.ParseException;
 import org.openflow.example.cli.SimpleCLI;
 
+import edu.colorado.cs.ngn.lime.api.LimeHttpServer;
+import edu.colorado.cs.ngn.lime.api.LimeServer;
+import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 import sun.io.MalformedInputException;
 
 public class FlowVisor {

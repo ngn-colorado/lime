@@ -1,8 +1,9 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime;
 
 import java.util.HashMap;
 
-import org.flowvisor.PortInfo.PortType;
+import edu.colorado.cs.ngn.lime.util.PortInfo;
+import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
 public class LimeSwitch {
 

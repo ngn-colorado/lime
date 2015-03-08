@@ -1,5 +1,5 @@
 
-package org.flowvisor.classifier;
+package edu.colorado.cs.ngn.lime;
 
 /*******************************************************************************
  * Copyright 2014 Open Networking Laboratory
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.flowvisor.classifier.MACAddress;
 import org.flowvisor.message.FVFlowMod;
 import org.flowvisor.openflow.protocol.FVMatch;
 import org.openflow.protocol.OFMatch;

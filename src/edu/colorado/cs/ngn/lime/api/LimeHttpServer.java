@@ -1,4 +1,4 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime.api;
 
 import java.io.IOException;
 import java.net.URI;
@@ -56,7 +56,7 @@ public class LimeHttpServer implements Runnable{
 //		HttpServer server = new HttpServer();
 //		NetworkListener netListener = new NetworkListener("jaxws-listener", "0.0.0.0", BASE_LIME_PORT);
 		System.out.println("in create server method");
-		ResourceConfig config = new ResourceConfig(org.flowvisor.LimeAPI.class);
+		ResourceConfig config = new ResourceConfig(edu.colorado.cs.ngn.lime.api.LimeAPI.class);
 		System.out.println("in create server method 2");
 //		URI baseUri = UriBuilder.fromUri(BASE_LIME_URI_STRING).port(BASE_LIME_PORT).build();
 		URI baseUri = new URI(BASE_LIME_URI_STRING_WITH_PORT);

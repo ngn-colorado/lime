@@ -1,4 +1,4 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +9,9 @@ import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.slicer.OriginalSwitch;
 import org.flowvisor.slicer.LimeMsgData;
 import org.openflow.util.LRULinkedHashMap;
+
+import edu.colorado.cs.ngn.lime.util.DPID;
+import edu.colorado.cs.ngn.lime.util.PortInfo;
 
 /**
  * Keep track of created instances of switches and their info
@@ -76,7 +79,7 @@ public class LimeContainer {
 		return dpidToPortInfoMap;
 	}
 
-	static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){
+	public static void addOriginalSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		originalSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 
@@ -92,7 +95,7 @@ public class LimeContainer {
 		return cloneSwitchContainer;
 	}
 
-	static void addCloneSwitch(long swID, HashMap<Short, PortInfo> portTable){
+	public static void addCloneSwitch(long swID, HashMap<Short, PortInfo> portTable){
 		cloneSwitchContainer.put(swID, new LimeSwitch(portTable));
 	}
 
@@ -133,7 +136,7 @@ public class LimeContainer {
 
 	}
 
-	static synchronized void insertActiveToCloneSwitchMap(long swActive, long swClone){
+	public static synchronized void insertActiveToCloneSwitchMap(long swActive, long swClone){
 		if(!activeToOriginalSwitchMap.containsKey(swActive)){
 			System.out.println("MURAD: LimeContainer, ERROR!!!!!!!!!!!! Can't fine active Switch " + swActive);  // TODO through exception
 		}

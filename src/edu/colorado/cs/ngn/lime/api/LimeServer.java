@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.flowvisor.api;
+package edu.colorado.cs.ngn.lime.api;
 
 /**
  * @author Murad Kaplan
@@ -9,8 +9,6 @@ package org.flowvisor.api;
  */
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.flowvisor.LimeHttpServer;
 
 public class LimeServer implements Runnable {
 	private AtomicBoolean running;

@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.flowvisor.LimeContainer;
-import org.flowvisor.LimeSwitch;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.classifier.FVSendMsg;
@@ -62,6 +60,9 @@ import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFPortStatus.OFPortReason;
 import org.openflow.protocol.OFType;
 import org.openflow.util.LRULinkedHashMap;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.LimeSwitch;
 
 
 /**

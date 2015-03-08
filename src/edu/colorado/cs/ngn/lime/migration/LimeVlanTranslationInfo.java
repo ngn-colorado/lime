@@ -1,6 +1,8 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime.migration;
 
 import org.flowvisor.message.FVFlowMod;
+
+import edu.colorado.cs.ngn.lime.util.DPID;
 
 public final class LimeVlanTranslationInfo {
 	private final FVFlowMod receiverMod;

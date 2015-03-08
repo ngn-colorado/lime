@@ -1,4 +1,4 @@
-package org.flowvisor.classifier;
+package edu.colorado.cs.ngn.lime;
 
 /*******************************************************************************
  * Copyright 2014 Open Networking Laboratory
@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVFlowMod;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFFlowRemoved;

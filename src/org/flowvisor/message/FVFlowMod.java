@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.flowvisor.LimeContainer;
-import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.classifier.CookieTranslator;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.flows.FlowEntry;
@@ -22,6 +20,9 @@ import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionEnqueue;
 import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
 public class FVFlowMod extends org.openflow.protocol.OFFlowMod implements
 Classifiable, Slicable, Cloneable {

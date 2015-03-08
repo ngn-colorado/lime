@@ -1,4 +1,7 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime.migration;
+
+import edu.colorado.cs.ngn.lime.util.DPID;
+
 /**
  * Container class to hold information about hosts when they need to be migrated.
  * Will be populated by the api when a host migration needs to occur

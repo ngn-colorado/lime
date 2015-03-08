@@ -1,11 +1,11 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.flowvisor.PortInfo.PortType;
+import org.flowvisor.FlowVisor;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.message.FVFlowMod;
 import org.json.simple.JSONObject;
@@ -19,6 +19,14 @@ import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 import org.openflow.protocol.action.OFActionStripVirtualLan;
 import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
+import edu.colorado.cs.ngn.lime.exceptions.MacLookupException;
+import edu.colorado.cs.ngn.lime.migration.LimeHost;
+import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
+import edu.colorado.cs.ngn.lime.migration.LimeVlanTranslationInfo;
+import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
 public class LimeUtils {
 //	json format:

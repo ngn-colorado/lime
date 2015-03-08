@@ -17,12 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.flowvisor.DPID;
 import org.flowvisor.FlowVisor;
-import org.flowvisor.LimeContainer;
-import org.flowvisor.LimeSwitch;
-import org.flowvisor.PortInfo;
-import org.flowvisor.PortInfo.PortType;
 import org.flowvisor.api.FlowTableCallback;
 import org.flowvisor.api.TopologyCallback;
 import org.flowvisor.config.ConfigError;
@@ -96,6 +91,13 @@ import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.protocol.statistics.OFStatisticsType;
 import org.openflow.util.U16;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
+import edu.colorado.cs.ngn.lime.LimeFlowTable;
+import edu.colorado.cs.ngn.lime.LimeSwitch;
+import edu.colorado.cs.ngn.lime.util.DPID;
+import edu.colorado.cs.ngn.lime.util.PortInfo;
+import edu.colorado.cs.ngn.lime.util.PortInfo.PortType;
 
 /**
  * Taken from WorkerSwitch class

@@ -3,7 +3,6 @@ package org.flowvisor.message;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.flowvisor.LimeContainer;
 import org.flowvisor.classifier.WorkerSwitch;
 import org.flowvisor.flows.FlowSpaceUtil;
 import org.flowvisor.log.FVLog;
@@ -11,6 +10,8 @@ import org.flowvisor.log.LogLevel;
 import org.flowvisor.ofswitch.TopologyConnection;
 import org.flowvisor.slicer.OriginalSwitch;
 import org.openflow.protocol.OFPhysicalPort;
+
+import edu.colorado.cs.ngn.lime.LimeContainer;
 
 public class FVFeaturesReply extends org.openflow.protocol.OFFeaturesReply
 implements Classifiable, Slicable, TopologyControllable {

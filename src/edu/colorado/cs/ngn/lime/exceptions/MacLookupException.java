@@ -1,4 +1,4 @@
-package org.flowvisor;
+package edu.colorado.cs.ngn.lime.exceptions;
 
 public class MacLookupException extends Exception {
 
