@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import edu.colorado.cs.ngn.lime.exceptions.LimeDummyPortNotFoundException;
 import edu.colorado.cs.ngn.lime.migration.LimeMigrationHandler;
 import edu.colorado.cs.ngn.lime.util.DPID;
-import edu.colorado.cs.ngn.lime.util.LimeUtils;
+import edu.colorado.cs.ngn.lime.util.LimeAPIUtils;
 
 @Path("")
 public class LimeAPI {
@@ -82,7 +82,7 @@ public class LimeAPI {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String config(String data){
 		System.out.println("Received data:\n"+data);
-		String processedJsonResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.SWITCH);
+		String processedJsonResponse = LimeAPIUtils.parseJsonConfig(data, LimeAPIUtils.JsonFormat.SWITCH);
 		if(processedJsonResponse != null){
 			return processedJsonResponse;
 		} else{
@@ -95,7 +95,7 @@ public class LimeAPI {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public String migrateVM(String data){
-		String processedResponse = LimeUtils.parseJsonConfig(data, LimeUtils.JsonFormat.HOST);
+		String processedResponse = LimeAPIUtils.parseJsonConfig(data, LimeAPIUtils.JsonFormat.HOST);
 		if(processedResponse != null){
 			return processedResponse;
 		} else{
