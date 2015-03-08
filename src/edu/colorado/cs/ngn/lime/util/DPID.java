@@ -1,8 +1,13 @@
 package edu.colorado.cs.ngn.lime.util;
 
-import java.io.PrintStream;
 import java.math.BigInteger;
 
+/**
+ * Helper class to store and perform operations of OF Datapath IDs
+ * 
+ * @author Michael Coughlin
+ *
+ */
 public class DPID {
 	private String dpidString;
 	private String dpidHexString;

@@ -1,6 +1,17 @@
 package edu.colorado.cs.ngn.lime.exceptions;
 
+/**
+ * Exception thrown when a mac lookup fails
+ * 
+ * @author Michael Coughlin
+ *
+ */
 public class MacLookupException extends Exception {
+
+	/**
+	 * Default serial id
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public MacLookupException() {
 		// TODO Auto-generated constructor stub

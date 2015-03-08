@@ -8,7 +8,7 @@ import edu.colorado.cs.ngn.lime.util.DPID;
  * 
  * Hopefully is immutable
  * 
- * @author michael
+ * @author Michael Coughlin
  *
  */
 public final class LimeHost {

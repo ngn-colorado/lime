@@ -4,11 +4,30 @@ import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 
-//import org.libvirt.*;
-
+/**
+ * Class to interface with the libvirt Java api and perform live migrations
+ * 
+ * @author Michael Coughlin
+ *
+ */
 public class LimeVMMigrater {
-	//qemu+ssh://
 	private static final String URI_STRING = "qemu+ssh://";
+	
+	/**
+	 * Use the libvirt Java api to live miration a VM. Polls every second
+	 * until the migration is finished. Currently, only QEMU/KVM VMs are
+	 * supported and only connections over ssh are supported.
+	 * 
+	 * Note: the linux user that is running this class must have an ssh key shared
+	 * with the source and destination hypervisors and the keys of the hypervisors
+	 * must have been accepted by this user. This is so that this program can log
+	 * into the hypervisors without a password. 
+	 * 
+	 * @param sourceIP The source hypervisor ip address
+	 * @param destIP The destination hypervisor ip address
+	 * @param vmDomain The libvirt domain to migrate
+	 * @return True if the vm was successfully migrated, False otherwise
+	 */
 	public static boolean liveMigrateQemuVM(String sourceIP, String destIP, String vmDomain){
 		if(!LimeAPIUtils.validIPAddress(sourceIP)){
 			System.out.println("Source IP address is invalid.");
@@ -31,7 +50,6 @@ public class LimeVMMigrater {
 		} catch (LibvirtException e) {
 			System.out.println("Could not connect to: "+src_uri);
 			e.printStackTrace();
-//			System.exit(-1);
 			return false;
 		}
 		try {
@@ -41,11 +59,9 @@ public class LimeVMMigrater {
 		} catch (LibvirtException e) {
 			System.out.println("Could not connect to: "+dest_uri);
 			e.printStackTrace();
-//			System.exit(-1);
 			return false;
 		}
 		if(src == null || dst == null){
-//			throw new IllegalStateException("Cannot reach a state with two null connections");
 			System.out.println("Cannot reach a state with two null connections");
 			return false;
 		}
@@ -55,7 +71,6 @@ public class LimeVMMigrater {
 			System.out.println("Could not find domain "+vmDomain+" in domain");
 			e.printStackTrace();
 			return false;
-//			System.exit(-2);
 		}
 		try {
 			if(domain_to_migrate.isActive() == 1){
@@ -80,12 +95,12 @@ public class LimeVMMigrater {
 		} catch (LibvirtException | InterruptedException e) {
 			e.printStackTrace();
 			return false;
-//			System.exit(-3);
 		}
 	}
 	
 	/**
 	 * Check if a given libvirt domain exists on given libvirt hypervisor
+	 * 
 	 * @param hostIp String ip address of the libvirt hypervisor
 	 * @param domain String libvirt domain of the vm to be checked 
 	 * @return boolean true if the vm exists, false if not or an error is encountered
@@ -96,7 +111,6 @@ public class LimeVMMigrater {
 			return false;
 		}
 		try {
-			//TODO: this doesn't work- it throws an exception about missing certificate. try ssh?
 			Connect hypervisor = new Connect(URI_STRING+hostIp+"/system");
 			Domain dom = hypervisor.domainLookupByName(domain);
 			if(dom == null){
@@ -105,7 +119,6 @@ public class LimeVMMigrater {
 			}
 			return true;
 		} catch (LibvirtException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}

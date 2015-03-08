@@ -4,6 +4,12 @@ import org.flowvisor.message.FVFlowMod;
 
 import edu.colorado.cs.ngn.lime.util.DPID;
 
+/**
+ * Class to hold state of vlan migration OF mods
+ * 
+ * @author Michael Coughlin
+ *
+ */
 public final class LimeVlanTranslationInfo {
 	private final FVFlowMod receiverMod;
 	private final FVFlowMod senderMod;
