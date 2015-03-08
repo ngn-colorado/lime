@@ -560,6 +560,11 @@ public final class LimeMigrationHandler {
 		match.setWildcards(wildcards);
 		clonedMod.setMatch(match);
 		
+		//for now, assuming this will always be defined
+		short inputPort = match.getInputPort();
+		
+		boolean inputPortPreMigration = preMigration && (preMigrationPort == inputPort);
+		
 		DPID currentSwitch = new DPID(senderSwitchObject.getDPID());
 		
 		ArrayList<Short> remoteOutputPorts = new ArrayList<Short>();
@@ -589,7 +594,7 @@ public final class LimeMigrationHandler {
 					boolean outputToLocalPort = outputPortOriginallyIsHost && (hostConnected || portIsPremigationPort) || !outputPortOriginallyIsHost && !amOriginalSwitch;
 					//always output to remote port if the port is originally h_connected but the host is not connected here or is a premigration port
 					//or if am the orinal switch and the host was not originally connected
-					boolean outputToRemotePort = outputPortOriginallyIsHost && (!hostConnected || portIsPremigationPort) || !outputPortOriginallyIsHost && amOriginalSwitch;
+					boolean outputToRemotePort = outputPortOriginallyIsHost && (!hostConnected || portIsPremigationPort) || !outputPortOriginallyIsHost && amOriginalSwitch || inputPortPreMigration && !hostConnected;
 					if(outputToLocalPort){
 						localPortsActions.add((OFActionOutput) action);
 					}
