@@ -499,9 +499,12 @@ public final class LimeMigrationHandler {
 		actions.add(mod_dl_dst);
 		actions.add(stripVlan);
 		OFActionOutput vlanOutput = new OFActionOutput();
+		OFActionOutput dummyAction = new OFActionOutput();
+		dummyAction.setPort(LimeMigrationUtils.getDummyPort(new DPID(receiverSwitchObject.getDPID())));
 		//set output port to that of the vlan tag number
 		vlanOutput.setPort(vlanNumber);
 		actions.add(vlanOutput);
+		actions.add(dummyAction);
 		vlanReceiverMod.setActions(actions);
 		vlanReceiverMod.computeLength();
 		
