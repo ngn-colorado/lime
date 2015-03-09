@@ -288,8 +288,8 @@ public final class LimeMigrationHandler {
 			}
 			
 		}
-		
-		createPreMigrationSendingMods(host, matchingOutputPortMods, matchingMods);
+		//need to redo ALL mods, as some previous mods may no longer work
+		createPreMigrationSendingMods(host, originalFlowMods.get(host.getOriginalDpid()));
 		
 		boolean migrated = LimeVMMigrater.liveMigrateQemuVM(host.getOriginalHost(), host.getDestinationHost(), host.getLibvirtDomain());
 		System.out.println("migrate vm function returned");
@@ -330,11 +330,11 @@ public final class LimeMigrationHandler {
 	 * @throws DPIDLookupException 
 	 * @throws SwitchOriginalAndCloneException 
 	 */
-	private void createPreMigrationSendingMods(LimeHost host, List<FVFlowMod> matchingOutputMods, List<FVFlowMod> matchingMods) throws LimeDummyPortNotFoundException, SwitchOriginalAndCloneException, DPIDLookupException {
-		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), matchingMods, true, host.getConnectedPort());
+	private void createPreMigrationSendingMods(LimeHost host, List<FVFlowMod> originalMods) throws LimeDummyPortNotFoundException, SwitchOriginalAndCloneException, DPIDLookupException {
+		createHandlerModsCloneToOriginal(host.getCloneDpid(), host.getOriginalDpid(), originalMods, true, host.getConnectedPort());
 		DPID cloneSwitch = host.getCloneDpid();
 		DPID originalSwitch = host.getOriginalDpid();
-		for(FVFlowMod originalMatchingMod : matchingOutputMods){
+		for(FVFlowMod originalMatchingMod : originalMods){
 			createVlanHandlers(originalMatchingMod, cloneSwitch, originalSwitch, true, true, host.getConnectedPort());
 		}
 		
@@ -415,7 +415,7 @@ public final class LimeMigrationHandler {
 	 * This stores information about the current migration mod,
 	 * including the associated switches and ports and the direction.
 	 * 
-	 * @param originalMod The orginal flow mod
+	 * @param originalMod The original flow mod
 	 * @param receiverSwitch The switch that receives the recevier mod
 	 * @param senderSwitch The switch that receives the sender mod
 	 * @param originalToClone The direction of the migration mods. True if the receiver switch is a clone switch and the sender switch is an original switch, false otherwise
