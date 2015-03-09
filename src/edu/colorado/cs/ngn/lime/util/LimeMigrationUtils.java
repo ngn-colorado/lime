@@ -360,7 +360,7 @@ public class LimeMigrationUtils {
 		if(isOriginalSwitch(dpid)){
 			for(LimeHost host : migratedHosts){
 				//a migrated host was connected to this switch originally
-				if(host.getConnectedPort() == currentConnectedPort && host.getOriginalDpid() == dpid){
+				if(host.getConnectedPort() == currentConnectedPort && host.getOriginalDpid().equals(dpid)){
 					return false;
 				}
 			}
@@ -369,7 +369,7 @@ public class LimeMigrationUtils {
 		} else{
 			for(LimeHost host : migratedHosts){
 				//a migrated host is connected to this switch as the clone switch
-				if(host.getConnectedPort() == currentConnectedPort && host.getCloneDpid() == dpid){
+				if(host.getConnectedPort() == currentConnectedPort && host.getCloneDpid().equals(dpid)){
 					return true;
 				}
 			}
