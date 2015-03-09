@@ -113,25 +113,25 @@ public class LimeAPI {
 	 * 
 	 * Currently, this API call only handles switch configurations, but may be expanded to other options in the future.
 	 * To configure a switch, the JSON configuration must be of the form:
-	 *  
-	 *  { 
-	 *  	"<switch_dpid>": 							<-- Replace <switch_dpid> with the DPID of the switch to configure
-	 *  	{
-	 *  		"ports": 
-	 *  		{
-	 *  			"<port_number>" : 					<-- Replace <port_number> with the value of the switch port to configure
-	 *  			{
-	 *  				"type" : "<PortType>",	    	<--Must be one of the valid values in the enum {@link edu.colorado.cs.ngn.lime.util.PortType}. Replace <PortType> with this value
-	 *  				"mac" : "<MAC_address>"   		<--optional. Must be provided if the type == H_CONNECTED, otherwise is ignored
-	 *  			},
-	 *  			"<port_number>" : 
-	 *  			{
-	 *  				"type" : "DUMMY"				<--Note that a dummy port must always be provided
-	 *  			}
-	 *  		}
-	 *  		"original":"<original_switch_dpid>"		<--Optional. Used to identify the original switch of a clone switch. If this is provided, the switch <switch_dpid> is a clone. Otherwise is an original. Replace <original_switch_dpid> with the switch DPID.
-	 *  	}
-	 *  }
+	 *  <br />
+	 *  { <br />
+	 *  	"<switch_dpid>": 							<-- Replace <switch_dpid> with the DPID of the switch to configure<br />
+	 *  	{<br />
+	 *  		"ports": <br />
+	 *  		{<br />
+	 *  			"<port_number>" : 					<-- Replace <port_number> with the value of the switch port to configure<br />
+	 *  			{<br />
+	 *  				"type" : "<PortType>",	    	<--Must be one of the valid values in the enum {@link edu.colorado.cs.ngn.lime.util.PortType}. Replace <PortType> with this value<br />
+	 *  				"mac" : "<MAC_address>"   		<--optional. Must be provided if the type == H_CONNECTED, otherwise is ignored<br />
+	 *  			},<br />
+	 *  			"<port_number>" :<br /> 
+	 *  			{<br />
+	 *  				"type" : "DUMMY"				<--Note that a dummy port must always be provided<br />
+	 *  			}<br />
+	 *  		}<br />
+	 *  		"original":"<original_switch_dpid>"		<--Optional. Used to identify the original switch of a clone switch. If this is provided, the switch <switch_dpid> is a clone. Otherwise is an original. Replace <original_switch_dpid> with the switch DPID.<br />
+	 *  	}<br />
+	 *  }<br />
 	 * 
 	 * @param data The JSON configuration data
 	 * @return String to print to webpage
@@ -158,16 +158,16 @@ public class LimeAPI {
 	 * in an HTTP POST request.
 	 * 
 	 * The JSON string passed to migrate a VM must be of this form:
-	 * 
-	 * {
-	 * 		"originalHost" : "<original_hypervisor_ip_address>",			<-- replace <original_hypervisor_ip_address> with the IP address of the source libvirt hypervisor
-	 * 		"destinationHost" : "<destination_hypervisor_ip_address>",		<-- replace <destination_hypervisor_ip_address> with the IP address of the destination libvirt hypervisor
-	 * 		"domain" : "<libvirt_domain>",									<-- replace <libvirt_domain> with the name of the libvirt domain to be migrated 
-	 * 		"originalDpid" : "<original_switch_dpid>",						<-- replace <original_switch_dpid> with the DPID that the domain was originally connected to
-	 * 		"cloneDpid" : "<clone_switch_dpid>",							<-- replace <clone_switch_dpid> with the DPID that the domain will be connected to after migration
-	 * 		"connectedPort" : "<original_connected_port>",					<-- replace <original_connected_port> with the port that the domain was connected to on the original switch before migration
-	 * 		"clonePort" : "<clone_connected_port>"							<-- NOTE that this parameter is inconsistently used currently, but is needed for compatibility and will be used in future. replace <clone_connected_port> with the port the domain will be connected to on the clone switch after migration. please ensure that it is the same value as <connectedPort> for now
-	 * }
+	 * <br />
+	 * {<br />
+	 * 		"originalHost" : "<original_hypervisor_ip_address>",			<-- replace <original_hypervisor_ip_address> with the IP address of the source libvirt hypervisor<br />
+	 * 		"destinationHost" : "<destination_hypervisor_ip_address>",		<-- replace <destination_hypervisor_ip_address> with the IP address of the destination libvirt hypervisor<br />
+	 * 		"domain" : "<libvirt_domain>",									<-- replace <libvirt_domain> with the name of the libvirt domain to be migrated <br />
+	 * 		"originalDpid" : "<original_switch_dpid>",						<-- replace <original_switch_dpid> with the DPID that the domain was originally connected to<br />
+	 * 		"cloneDpid" : "<clone_switch_dpid>",							<-- replace <clone_switch_dpid> with the DPID that the domain will be connected to after migration<br />
+	 * 		"connectedPort" : "<original_connected_port>",					<-- replace <original_connected_port> with the port that the domain was connected to on the original switch before migration<br />
+	 * 		"clonePort" : "<clone_connected_port>"							<-- NOTE that this parameter is inconsistently used currently, but is needed for compatibility and will be used in future. replace <clone_connected_port> with the port the domain will be connected to on the clone switch after migration. please ensure that it is the same value as <connectedPort> for now<br />
+	 * }<br />
 	 * 
 	 * @param data The JSON configuration data
 	 * @return String to print to webpage
