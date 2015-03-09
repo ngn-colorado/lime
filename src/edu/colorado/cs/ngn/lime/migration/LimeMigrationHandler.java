@@ -489,6 +489,7 @@ public final class LimeMigrationHandler {
 		ArrayList<OFAction> actions = new ArrayList<OFAction>();
 		FVActionDataLayerSource mod_dl_src = new FVActionDataLayerSource();
 		FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
+		FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
 		String srcMac = "ff:ff:ff:ff:ff:ff";
 		String destMac;
 		try {
@@ -497,6 +498,7 @@ public final class LimeMigrationHandler {
 			mod_dl_dst.setDataLayerAddress(LimeMigrationUtils.convertMacToBytes(destMac));
 			actions.add(mod_dl_src);
 			actions.add(mod_dl_dst);
+			actions.add(stripVlan);
 			OFActionOutput vlanOutput = new OFActionOutput();
 			//set output port to that of the vlan tag number
 			vlanOutput.setPort(vlanNumber);
