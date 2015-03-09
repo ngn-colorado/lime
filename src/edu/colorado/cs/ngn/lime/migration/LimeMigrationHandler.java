@@ -628,13 +628,11 @@ public final class LimeMigrationHandler {
 			addedVlanAction.setVirtualLanIdentifier(migratedAction.getPort());
 			//have to move to the end of list, as OVX doesn't seem to support modifying them in-place
 			clonedMod.getActions().remove(migratedAction);
-			clonedMod.getActions().add(migratedAction);
-			migratedAction.setPort(ghostPort);
 			//add vlan tag action to mod
 			//insert vlan action before the output action in the action list
-			actionIndex = clonedMod.getActions().indexOf(migratedAction);
-			clonedMod.getActions().add(actionIndex, addedVlanAction);
-			actionIndex = clonedMod.getActions().indexOf(migratedAction);
+			clonedMod.getActions().add(addedVlanAction);
+			clonedMod.getActions().add(migratedAction);
+			migratedAction.setPort(ghostPort);
 		}
 		
 		clonedMod.computeLength();
