@@ -491,31 +491,27 @@ public final class LimeMigrationHandler {
 		FVActionDataLayerDestination mod_dl_dst = new FVActionDataLayerDestination();
 		FVActionStripVirtualLan stripVlan = new FVActionStripVirtualLan();
 		String srcMac = "ff:ff:ff:ff:ff:ff";
-		String destMac;
-		try {
-			destMac = LimeMigrationUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), vlanNumber, LimeContainer.getDpidToMacMap());
-			mod_dl_src.setDataLayerAddress(LimeMigrationUtils.convertMacToBytes(srcMac));
-			mod_dl_dst.setDataLayerAddress(LimeMigrationUtils.convertMacToBytes(destMac));
-			actions.add(mod_dl_src);
-			actions.add(mod_dl_dst);
-			actions.add(stripVlan);
-			OFActionOutput vlanOutput = new OFActionOutput();
-			//set output port to that of the vlan tag number
-			vlanOutput.setPort(vlanNumber);
-			actions.add(vlanOutput);
-			vlanReceiverMod.setActions(actions);
-			vlanReceiverMod.computeLength();
-			
-			System.out.println("Actions for this mod:");
-			for(OFAction action : vlanReceiverMod.getActions()){
-				System.out.println(action);
-			}
-			
-			LimeMigrationUtils.sendFlowMod(vlanReceiverMod, receiverSwitchObject);
-		} catch (MacLookupException e) {
-			//This shouldn't happen. If it does, we for sure do not want to write a mod
+		String destMac = "ff:ff:ff:ff:ff:ff";
+//			destMac = LimeMigrationUtils.getMacForPort(new DPID(receiverSwitchObject.getDPID()), vlanNumber, LimeContainer.getDpidToMacMap());
+		mod_dl_src.setDataLayerAddress(LimeMigrationUtils.convertMacToBytes(srcMac));
+		mod_dl_dst.setDataLayerAddress(LimeMigrationUtils.convertMacToBytes(destMac));
+		actions.add(mod_dl_src);
+		actions.add(mod_dl_dst);
+		actions.add(stripVlan);
+		OFActionOutput vlanOutput = new OFActionOutput();
+		//set output port to that of the vlan tag number
+		vlanOutput.setPort(vlanNumber);
+		actions.add(vlanOutput);
+		vlanReceiverMod.setActions(actions);
+		vlanReceiverMod.computeLength();
+		
+		System.out.println("Actions for this mod:");
+		for(OFAction action : vlanReceiverMod.getActions()){
+			System.out.println(action);
 		}
 		
+		LimeMigrationUtils.sendFlowMod(vlanReceiverMod, receiverSwitchObject);
+
 		return vlanReceiverMod;
 	}
 
