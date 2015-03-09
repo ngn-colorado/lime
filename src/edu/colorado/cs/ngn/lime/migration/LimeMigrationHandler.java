@@ -504,7 +504,6 @@ public final class LimeMigrationHandler {
 		//set output port to that of the vlan tag number
 		vlanOutput.setPort(vlanNumber);
 		actions.add(vlanOutput);
-		actions.add(dummyAction);
 		vlanReceiverMod.setActions(actions);
 		vlanReceiverMod.computeLength();
 		
