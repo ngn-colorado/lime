@@ -386,9 +386,15 @@ public class LimeMigrationUtils {
 	 * @param currentConnectedPort
 	 * @return
 	 * @throws DPIDLookupException
+	 * @throws SwitchOriginalAndCloneException 
 	 */
-	public static boolean portIsOriginallyHostConnected(DPID dpid, short currentConnectedPort) throws DPIDLookupException {
-		HashMap<Short, PortInfo> portTable = getPortTableForDPID(dpid);
+	public static boolean portIsOriginallyHostConnected(DPID dpid, short currentConnectedPort) throws DPIDLookupException, SwitchOriginalAndCloneException {
+		HashMap<Short, PortInfo> portTable;
+		if(isOriginalSwitch(dpid)){
+			portTable = getPortTableForDPID(dpid);
+		} else{
+			portTable = getPortTableForDPID(new DPID(LimeContainer.getAllWorkingSwitches().get(dpid.getDpidLong()).getDuplicateSwitch().getDPID()));
+		}
 		return portTable.containsKey(currentConnectedPort) && portTable.get(currentConnectedPort).getType() == PortType.H_CONNECTED;
 	}
 

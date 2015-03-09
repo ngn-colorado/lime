@@ -568,6 +568,7 @@ public final class LimeMigrationHandler {
 		boolean inputPortPreMigration = preMigration && (preMigrationPort == inputPort);
 		
 		DPID currentSwitch = new DPID(senderSwitchObject.getDPID());
+		DPID duplicateSwitch = new DPID(senderSwitchObject.getDuplicateSwitch().getDPID());
 		
 		ArrayList<Short> remoteOutputPorts = new ArrayList<Short>();
 		
@@ -577,7 +578,8 @@ public final class LimeMigrationHandler {
 				try {
 					boolean outputPortOriginallyIsHost = LimeMigrationUtils.portIsOriginallyHostConnected(currentSwitch, currentOutputPort);
 					//check if a host is connected to this port on the switch, whether am the clone or the original
-					boolean hostConnected = LimeMigrationUtils.hostConnected(currentSwitch, currentOutputPort, migratedHosts);
+					boolean hostConnectedLocally = LimeMigrationUtils.hostConnected(currentSwitch, currentOutputPort, migratedHosts);
+					boolean hostConnectedRemotely = LimeMigrationUtils.hostConnected(duplicateSwitch, currentOutputPort, migratedHosts);
 					//if a host was connected to this port originally, then we need to handle migration for it. else we just need to 
 					//send it to the clone switch to output on the correct port. at this point, we need to know if we are the clone
 					//switch or the original switch. if original, all original ports that are output actions but not H_CONNECTED,
@@ -590,13 +592,13 @@ public final class LimeMigrationHandler {
 					//or we are in premigation and the port is the premigration port. if the host has not be migrated then we output to
 					//the original switch with the correct vlan number equal to the output port or if the port is the premigration port
 					boolean amOriginalSwitch = originalToClone;
-					boolean portIsPremigationPort = preMigration && (preMigration && currentOutputPort == preMigrationPort);
+					boolean portIsPremigrationPort = preMigration && (preMigration && currentOutputPort == preMigrationPort);
 					//always output to the port if a host is locally connected or is a premigration port
 					//or if am the clone switch and the port is not an H_CONNECTED port
-					boolean outputToLocalPort = outputPortOriginallyIsHost && (hostConnected || portIsPremigationPort) || !outputPortOriginallyIsHost && !amOriginalSwitch;
+					boolean outputToLocalPort = hostConnectedLocally || portIsPremigrationPort || (!amOriginalSwitch && !outputPortOriginallyIsHost);
 					//always output to remote port if the port is originally h_connected but the host is not connected here or is a premigration port
 					//or if am the orinal switch and the host was not originally connected
-					boolean outputToRemotePort = outputPortOriginallyIsHost && (!hostConnected || portIsPremigationPort) || !outputPortOriginallyIsHost && amOriginalSwitch || inputPortPreMigration && !hostConnected;
+					boolean outputToRemotePort = hostConnectedRemotely || portIsPremigrationPort || (amOriginalSwitch && !outputPortOriginallyIsHost);
 					if(outputToLocalPort){
 						localPortsActions.add((OFActionOutput) action);
 					}
@@ -646,8 +648,8 @@ public final class LimeMigrationHandler {
 		ArrayList<FVFlowMod> receiverMods = new ArrayList<FVFlowMod>();
 		//create the receiver mods here directly and return a map of the sender mod to the recevier mods
 		for(Short remotePort : remoteOutputPorts){
-			WorkerSwitch duplicateSwitch = senderSwitchObject.getDuplicateSwitch();
-			FVFlowMod receiverMod = createAndSendVlanReceiverMod(remotePort, ghostPort, originalMod, duplicateSwitch, originalToClone, preMigration, preMigrationPort);
+			WorkerSwitch duplicateSwitchObj = senderSwitchObject.getDuplicateSwitch();
+			FVFlowMod receiverMod = createAndSendVlanReceiverMod(remotePort, ghostPort, originalMod, duplicateSwitchObj, originalToClone, preMigration, preMigrationPort);
 			receiverMods.add(receiverMod);
 		}
 		modMap.put(clonedMod, receiverMods);
