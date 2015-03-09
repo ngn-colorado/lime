@@ -623,18 +623,18 @@ public final class LimeMigrationHandler {
 				clonedAction.setPort(migratedAction.getPort());
 				clonedMod.getActions().add(actionIndex, clonedAction);
 			}
+			//have to move to the end of list, as OVX doesn't seem to support modifying them in-place
+			clonedMod.getActions().remove(migratedAction);
+			clonedMod.getActions().add(migratedAction);
 			migratedAction.setPort(ghostPort);
 			//create vlan tag action
 			FVActionVirtualLanIdentifier addedVlanAction = new FVActionVirtualLanIdentifier();
-			FVActionStripVirtualLan addedStripVlanAction = new FVActionStripVirtualLan();
 			addedVlanAction.setVirtualLanIdentifier(migratedAction.getPort());
 			//add vlan tag action to mod
 			//insert vlan action before the output action in the action list
 			actionIndex = clonedMod.getActions().indexOf(migratedAction);
 			clonedMod.getActions().add(actionIndex, addedVlanAction);
 			actionIndex = clonedMod.getActions().indexOf(migratedAction);
-			//insert the strip vlan action after the output action
-			clonedMod.getActions().add(actionIndex + 1, addedStripVlanAction);
 		}
 		
 		clonedMod.computeLength();
