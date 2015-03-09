@@ -13,6 +13,9 @@ LIME
 		
 	Some example scripts that can be used to set up experiments are available at:
 		https://github.com/mcoughli/lime-scripts
+		
+	The details of the HTTP API for Lime can currently be found in the Javadocs for
+	edu.colorado.cs.ngn.lime.api.LimeAPI class at the Javadocs URL. 
 
 FlowVisor
 =========

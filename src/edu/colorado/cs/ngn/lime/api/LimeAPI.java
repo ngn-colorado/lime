@@ -41,6 +41,7 @@ public class LimeAPI {
 		return "\n Welcome to the Lime API Http Server";
 	}
 	
+	
 	/**
 	 * HTTP GET request
 	 * http://localhost:9000/viewTopology
@@ -76,6 +77,7 @@ public class LimeAPI {
 			migrationHandler.init();
 			return "\n Migration handler initiated migration";
 		} catch (InterruptedException e) {
+			
 			return "\n Migration handler encountered an error";
 		} catch (LimeDummyPortNotFoundException e) {
 			String message = "\n Need to have a dummy port in order to work with OVX";
@@ -120,6 +122,7 @@ public class LimeAPI {
 	 *  	{<br />
 	 *  		"ports" : <br />
 	 *  		{<br />
+	 *  
 	 *  			"port_number" : 					<-- Replace port_number with the value of the switch port to configure<br />
 	 *  			{<br />
 	 *  				"type" : "PortType",	    	<--Must be one of the valid values in the enum {@link edu.colorado.cs.ngn.lime.util.PortType}. Replace PortType with this value<br />
