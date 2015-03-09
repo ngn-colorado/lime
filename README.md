@@ -10,6 +10,9 @@ LIME
 	The Javadoc for Lime, and by extension, the forked version of FLowvisor that
 	we use is available at:
 		https://ngn-colorado.github.io/lime
+		
+	Some example scripts that can be used to set up experiments are available at:
+		https://github.com/mcoughli/lime-scripts
 
 FlowVisor
 =========
